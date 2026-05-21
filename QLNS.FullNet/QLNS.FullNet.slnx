@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="QLNS.FullNet.Data/QLNS.FullNet.Data.csproj" />
+  <Project Path="QLNS.FullNet.Web/QLNS.FullNet.Web.csproj" />
+</Solution>
