@@ -1,8 +1,230 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="dashboard">
+
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1 class="dashboard-title">Tổng quan hệ thống</h1>
+            <p class="dashboard-subtitle">
+                Quản lý nhân sự và chấm công — @DateTime.Now.ToString("dddd, dd/MM/yyyy")
+            </p>
+        </div>
+        <div class="dashboard-actions">
+            <span class="badge-shift">
+                <i class="bi bi-sun"></i> Ca sáng đang diễn ra
+            </span>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="bi bi-people"></i></div>
+            <div class="stat-label">Tổng nhân viên</div>
+            <div class="stat-value">48</div>
+            <div class="stat-note">4 phòng ban</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="bi bi-patch-check"></i></div>
+            <div class="stat-label">Đã chấm công hôm nay</div>
+            <div class="stat-value">41</div>
+            <div class="stat-note text-success">85.4% có mặt</div>
+        </div>
+        <div class="stat-card stat-card--warn">
+            <div class="stat-icon icon-yellow"><i class="bi bi-person-x"></i></div>
+            <div class="stat-label">Vắng mặt / Chưa chấm</div>
+            <div class="stat-value">7</div>
+            <div class="stat-note text-warning">3 có phép, 4 chưa rõ</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-purple"><i class="bi bi-hourglass-split"></i></div>
+            <div class="stat-label">Tăng ca tháng này</div>
+            <div class="stat-value">124h</div>
+            <div class="stat-note">Trên toàn bộ nhân viên</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-teal"><i class="bi bi-calendar-check"></i></div>
+            <div class="stat-label">Đơn nghỉ phép chờ duyệt</div>
+            <div class="stat-value">5</div>
+            <div class="stat-note text-warning">Cần xử lý hôm nay</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="bi bi-cash-coin"></i></div>
+            <div class="stat-label">Lương đã tính tháng này</div>
+            <div class="stat-value">32</div>
+            <div class="stat-note">/ 48 nhân viên</div>
+        </div>
+        <div class="stat-card stat-card--warn">
+            <div class="stat-icon icon-yellow"><i class="bi bi-file-earmark-x"></i></div>
+            <div class="stat-label">Hợp đồng sắp hết hạn</div>
+            <div class="stat-value">3</div>
+            <div class="stat-note text-warning">Trong vòng 30 ngày</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="bi bi-diagram-3"></i></div>
+            <div class="stat-label">Tổng phòng ban</div>
+            <div class="stat-value">4</div>
+            <div class="stat-note">IT, KD, HC, KT</div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="chart-grid">
+        <div class="chart-card chart-card--wide">
+            <h2 class="chart-title">Tình hình chấm công 7 ngày gần nhất</h2>
+            <p class="chart-sub">Số lượt có mặt, vắng có phép và vắng không phép theo ngày.</p>
+            <canvas id="attendanceChart" height="110"></canvas>
+        </div>
+        <div class="chart-card">
+            <h2 class="chart-title">Nhân sự theo phòng ban</h2>
+            <p class="chart-sub">Tỷ trọng headcount hiện tại.</p>
+            <canvas id="deptChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="chart-grid">
+        <div class="chart-card chart-card--wide">
+            <h2 class="chart-title">Tổng lương chi trả theo tháng (6 tháng gần nhất)</h2>
+            <p class="chart-sub">Đơn vị: triệu đồng.</p>
+            <canvas id="salaryChart" height="110"></canvas>
+        </div>
+        <div class="chart-card">
+            <h2 class="chart-title">Trạng thái nhân viên</h2>
+            <p class="chart-sub">Đang làm việc, thử việc, nghỉ việc.</p>
+            <canvas id="statusChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <!-- Table: Nhân viên vắng hôm nay -->
+    <div class="chart-card mt-3">
+        <h2 class="chart-title">Nhân viên chưa chấm công hôm nay</h2>
+        <p class="chart-sub">Danh sách cần xác nhận trạng thái.</p>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Mã NV</th>
+                    <th>Họ tên</th>
+                    <th>Phòng ban</th>
+                    <th>Ca làm</th>
+                    <th>Trạng thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>NV005</td><td>Nguyễn Văn An</td><td>Kinh doanh</td>
+                    <td>Ca sáng</td>
+                    <td><span class="badge-status badge-leave">Nghỉ có phép</span></td>
+                </tr>
+                <tr>
+                    <td>NV012</td><td>Trần Thị Bình</td><td>Kế toán</td>
+                    <td>Ca sáng</td>
+                    <td><span class="badge-status badge-leave">Nghỉ có phép</span></td>
+                </tr>
+                <tr>
+                    <td>NV019</td><td>Lê Hoàng Nam</td><td>IT</td>
+                    <td>Ca sáng</td>
+                    <td><span class="badge-status badge-absent">Chưa rõ lý do</span></td>
+                </tr>
+                <tr>
+                    <td>NV027</td><td>Phạm Thị Lan</td><td>Hành chính</td>
+                    <td>Ca sáng</td>
+                    <td><span class="badge-status badge-absent">Chưa rõ lý do</span></td>
+                </tr>
+                <tr>
+                    <td>NV033</td><td>Võ Minh Tuấn</td><td>Kinh doanh</td>
+                    <td>Ca sáng</td>
+                    <td><span class="badge-status badge-leave">Nghỉ có phép</span></td>
+                </tr>
+                <tr>
+                    <td>NV040</td><td>Đỗ Thị Hoa</td><td>IT</td>
+                    <td>Ca chiều</td>
+                    <td><span class="badge-status badge-absent">Chưa rõ lý do</span></td>
+                </tr>
+                <tr>
+                    <td>NV045</td><td>Bùi Quốc Hùng</td><td>Kế toán</td>
+                    <td>Ca chiều</td>
+                    <td><span class="badge-status badge-absent">Chưa rõ lý do</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
 </div>
+
+@section Scripts {
+<script>
+const g = { dark:'#1D6A4A', mid:'#2D9F6F', light:'#6CC49A', pale:'#B8E4CF', lighter:'#E1F5EE' };
+const days = ['T2 23/6','T3 24/6','T4 25/6','T5 26/6','T6 27/6','T7 28/6','CN 29/6'];
+
+// Chấm công 7 ngày
+new Chart(document.getElementById('attendanceChart'), {
+    type: 'bar',
+    data: {
+        labels: days,
+        datasets: [
+            { label: 'Có mặt', data: [44,43,45,42,41,30,28],
+              backgroundColor: g.mid, borderRadius: 4 },
+            { label: 'Nghỉ có phép', data: [2,3,2,4,3,5,4],
+              backgroundColor: g.light, borderRadius: 4 },
+            { label: 'Vắng không phép', data: [2,2,1,2,4,1,2],
+              backgroundColor: '#f0a04b', borderRadius: 4 }
+        ]
+    },
+    options: {
+        plugins: { legend: { position: 'top' } },
+        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+    }
+});
+
+// Phòng ban donut
+new Chart(document.getElementById('deptChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['IT','Kinh doanh','Hành chính','Kế toán'],
+        datasets: [{
+            data: [14,18,8,8],
+            backgroundColor: [g.dark, g.mid, g.light, g.pale],
+            borderWidth: 2, borderColor: '#fff'
+        }]
+    },
+    options: { cutout:'60%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{size:11} } } } }
+});
+
+// Lương theo tháng
+new Chart(document.getElementById('salaryChart'), {
+    type: 'line',
+    data: {
+        labels: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6'],
+        datasets: [{
+            label: 'Tổng lương (triệu đồng)',
+            data: [285, 270, 292, 305, 298, 312],
+            borderColor: g.dark,
+            backgroundColor: g.pale + '55',
+            pointBackgroundColor: g.dark,
+            pointRadius: 5,
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: { plugins:{ legend:{ position:'top' } }, scales:{ y:{ beginAtZero:false } } }
+});
+
+// Trạng thái nhân viên
+new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Đang làm việc','Thử việc','Đã nghỉ việc'],
+        datasets: [{
+            data: [38, 7, 3],
+            backgroundColor: [g.dark, g.light, '#d9534f'],
+            borderWidth: 2, borderColor: '#fff'
+        }]
+    },
+    options: { cutout:'60%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{size:11} } } } }
+});
+</script>
+}
