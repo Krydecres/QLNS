@@ -10,7 +10,7 @@ obj/
 
 # Node/Angular
 node_modules/
-dist/
+qlns-frontend/dist/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
