@@ -14,109 +14,133 @@
         <span class="sidebar-title">QLNS</span>
     </div>
 
-    <div class="sidebar-section-label">TỔNG QUAN</div>
-    <ul class="sidebar-nav">
-        <li>
-            <a href="@Url.Action("Index", "Home")" class="sidebar-link @IsActive("Home")">
-                <i class="bi bi-grid-1x2-fill"></i>
-                <span>Dashboard</span>
-            </a>
-        </li>
-    </ul>
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <div class="sidebar-section-label">TÀI KHOẢN</div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="@Url.Action("Login", "Auth")" class="sidebar-link @IsActive("Auth", "Login")">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Đăng nhập</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Register", "Auth")" class="sidebar-link @IsActive("Auth", "Register")">
+                    <i class="bi bi-person-plus"></i>
+                    <span>Đăng ký</span>
+                </a>
+            </li>
+        </ul>
+    }
+    else if (User.IsInRole("Admin"))
+    {
+        <div class="sidebar-section-label">TỔNG QUAN</div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="@Url.Action("Index", "Home")" class="sidebar-link @IsActive("Home")">
+                    <i class="bi bi-grid-1x2-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+        </ul>
 
-    <div class="sidebar-section-label">NHÂN SỰ</div>
-    <ul class="sidebar-nav">
-        <li>
-            <a href="@Url.Action("Index", "NhanVien")" class="sidebar-link @IsActive("NhanVien")">
-                <i class="bi bi-person-badge"></i>
-                <span>Quản lý nhân viên</span>
-            </a>
-        </li>
-        <li>
-            <a href="@Url.Action("Index", "PhongBan")" class="sidebar-link @IsActive("PhongBan")">
-                <i class="bi bi-diagram-3"></i>
-                <span>Phòng ban</span>
-            </a>
-        </li>
-        <li>
-            <a href="@Url.Action("Index", "ChucVu")" class="sidebar-link @IsActive("ChucVu")">
-                <i class="bi bi-award"></i>
-                <span>Chức vụ</span>
-            </a>
-        </li>
-        <li>
-            <a href="@Url.Action("Index", "HopDong")" class="sidebar-link @IsActive("HopDong")">
-                <i class="bi bi-file-earmark-text"></i>
-                <span>Hợp đồng</span>
-            </a>
-        </li>
-    </ul>
+        <div class="sidebar-section-label">QUẢN TRỊ NHÂN SỰ</div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="@Url.Action("Index", "Employee")" class="sidebar-link @IsActive("Employee")">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Quản lý nhân viên</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "Department")" class="sidebar-link @IsActive("Department")">
+                    <i class="bi bi-diagram-3"></i>
+                    <span>Phòng ban</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "Position")" class="sidebar-link @IsActive("Position")">
+                    <i class="bi bi-award"></i>
+                    <span>Chức vụ</span>
+                </a>
+            </li>
+        </ul>
 
-    <div class="sidebar-section-label">CHẤM CÔNG</div>
-    <ul class="sidebar-nav">
-        <li>
-            <a href="@Url.Action("Index", "ChamCong")" class="sidebar-link @IsActive("ChamCong")">
-                <i class="bi bi-clock-history"></i>
-                <span>Chấm công theo ca</span>
-            </a>
-        </li>
-        <li>
-            <a href="@Url.Action("Index", "Ca")" class="sidebar-link @IsActive("Ca")">
-                <i class="bi bi-calendar2-week"></i>
-                <span>Quản lý ca làm</span>
-            </a>
-        </li>
-        <li>
-            <a href="@Url.Action("Index", "NghiPhep")" class="sidebar-link @IsActive("NghiPhep")">
-                <i class="bi bi-calendar-x"></i>
-                <span>Nghỉ phép</span>
-            </a>
-        </li>
-        <li>
-            <a href="@Url.Action("Index", "TangCa")" class="sidebar-link @IsActive("TangCa")">
-                <i class="bi bi-hourglass-split"></i>
-                <span>Tăng ca</span>
-            </a>
-        </li>
-    </ul>
+        <div class="sidebar-section-label">CHẤM CÔNG & CA LÀM</div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="@Url.Action("Index", "Timekeeping")" class="sidebar-link @IsActive("Timekeeping")">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Dữ liệu chấm công</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Index", "Shift")" class="sidebar-link @IsActive("Shift")">
+                    <i class="bi bi-calendar2-week"></i>
+                    <span>Quản lý ca làm</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("Approval", "LeaveRequest")" class="sidebar-link @IsActive("LeaveRequest", "Approval")">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Duyệt nghỉ phép</span>
+                </a>
+            </li>
+        </ul>
 
-    <div class="sidebar-section-label">LƯƠNG & BÁO CÁO</div>
-    <ul class="sidebar-nav">
-        <li>
-            <a href="@Url.Action("Index", "TinhLuong")" class="sidebar-link @IsActive("TinhLuong")">
-                <i class="bi bi-cash-coin"></i>
-                <span>Tính lương</span>
-            </a>
-        </li>
-        <li>
-            <a href="@Url.Action("Index", "BangLuong")" class="sidebar-link @IsActive("BangLuong")">
-                <i class="bi bi-table"></i>
-                <span>Bảng lương</span>
-            </a>
-        </li>
-        <li>
-            <a href="@Url.Action("Index", "BaoCao")" class="sidebar-link @IsActive("BaoCao")">
-                <i class="bi bi-bar-chart-line"></i>
-                <span>Báo cáo tháng</span>
-            </a>
-        </li>
-    </ul>
+        <div class="sidebar-section-label">LƯƠNG THƯỞNG</div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="@Url.Action("Index", "Salary")" class="sidebar-link @IsActive("Salary")">
+                    <i class="bi bi-table"></i>
+                    <span>Bảng lương</span>
+                </a>
+            </li>
+        </ul>
+    }
+    else if (User.IsInRole("Employee"))
+    {
+        <div class="sidebar-section-label">CÁ NHÂN</div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="@Url.Action("MyProfile", "Employee")" class="sidebar-link @IsActive("Employee", "MyProfile")">
+                    <i class="bi bi-person"></i>
+                    <span>Thông tin cá nhân</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("MyAttendance", "Timekeeping")" class="sidebar-link @IsActive("Timekeeping", "MyAttendance")">
+                    <i class="bi bi-clock"></i>
+                    <span>Chấm công của tôi</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("MyLeaves", "LeaveRequest")" class="sidebar-link @IsActive("LeaveRequest", "MyLeaves")">
+                    <i class="bi bi-calendar-minus"></i>
+                    <span>Nghỉ phép của tôi</span>
+                </a>
+            </li>
+        </ul>
+    }
 
-    <div class="sidebar-section-label">HỆ THỐNG</div>
-    <ul class="sidebar-nav">
-        <li>
-            <a href="@Url.Action("Index", "CaiDat")" class="sidebar-link @IsActive("CaiDat")">
-                <i class="bi bi-gear"></i>
-                <span>Cài đặt</span>
-            </a>
-        </li>
-    </ul>
-
-    <div class="sidebar-footer">
-        <div class="today-card">
-            <div class="today-label">Hôm nay — @DateTime.Now.ToString("dd/MM/yyyy")</div>
-            <div class="today-schedule">Chấm công đang mở</div>
-            <div class="today-sub">Ca sáng: 07:30 – 11:30</div>
-        </div>
+    <div class="sidebar-footer mt-auto">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <form method="post" action="@Url.Action("Logout", "Auth")" class="m-0 p-3">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-danger w-100 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Đăng xuất
+                </button>
+            </form>
+        }
+        else
+        {
+            <div class="today-card">
+                <div class="today-label">Hôm nay — @DateTime.Now.ToString("dd/MM/yyyy")</div>
+                <div class="today-schedule">Vui lòng đăng nhập</div>
+                <div class="today-sub">để sử dụng hệ thống</div>
+            </div>
+        }
     </div>
 </nav>
