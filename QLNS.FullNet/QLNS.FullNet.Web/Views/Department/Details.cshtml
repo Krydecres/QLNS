@@ -1,0 +1,55 @@
+@model IEnumerable<QLNS.FullNet.Data.Entities.Employee>
+@{
+    ViewData["Title"] = $"Nhân viên phòng ban {ViewData["DepartmentName"]}";
+}
+
+<div class="dashboard">
+    <div class="dashboard-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="dashboard-title">Phòng ban: @ViewData["DepartmentName"]</h1>
+            <p class="dashboard-subtitle">Danh sách các nhân viên thuộc phòng ban này.</p>
+        </div>
+        <div class="dashboard-actions">
+            <a asp-action="Index" class="btn btn-light border">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+    </div>
+
+    <div class="chart-card mt-3">
+        <table class="data-table table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th width="10%">Mã NV</th>
+                    <th>Họ và tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Chức vụ</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>NV-@item.Id</td>
+                            <td class="fw-bold text-primary">@item.FullName</td>
+                            <td>@item.Email</td>
+                            <td>@item.PhoneNumber</td>
+                            <td>
+                                <span class="badge bg-info text-dark">@(item.Position?.Name ?? "Chưa có")</span>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">Phòng ban này chưa có nhân viên.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

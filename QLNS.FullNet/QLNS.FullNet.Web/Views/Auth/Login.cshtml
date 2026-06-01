@@ -3,47 +3,55 @@
     ViewData["Title"] = "Đăng nhập";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-6 col-lg-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h3 class="card-title text-center mb-4">Đăng nhập</h3>
+<div class="d-flex justify-content-center align-items-center mt-5">
+    <div class="card shadow border-0 rounded-4" style="max-width: 450px; width: 100%;">
+        <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+            <h3 class="mb-0 fw-bold"><i class="bi bi-box-arrow-in-right me-2"></i> Đăng nhập</h3>
+        </div>
+        <div class="card-body p-4 p-md-5">
 
                 @if (TempData["SuccessMessage"] != null)
                 {
-                    <div class="alert alert-success">
-                        @TempData["SuccessMessage"]
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="bi bi-check-circle-fill me-2"></i>@TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 }
 
                 <form asp-action="Login" method="post" asp-route-returnurl="@ViewData["ReturnUrl"]">
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
 
-                    <div class="mb-3">
-                        <label asp-for="Username" class="form-label"></label>
-                        <input asp-for="Username" class="form-control" />
-                        <span asp-validation-for="Username" class="text-danger"></span>
+                    <div class="form-floating mb-3">
+                        <input asp-for="Username" class="form-control rounded-3" placeholder="Tài khoản" />
+                        <label asp-for="Username"><i class="bi bi-person me-1"></i> Tài khoản</label>
+                        <span asp-validation-for="Username" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Password" class="form-label"></label>
-                        <input asp-for="Password" class="form-control" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
+                    <div class="form-floating mb-3">
+                        <input asp-for="Password" class="form-control rounded-3" placeholder="Mật khẩu" />
+                        <label asp-for="Password"><i class="bi bi-lock me-1"></i> Mật khẩu</label>
+                        <span asp-validation-for="Password" class="text-danger small"></span>
                     </div>
 
-                    <div class="mb-3 form-check">
-                        <input asp-for="RememberMe" class="form-check-input" />
-                        <label asp-for="RememberMe" class="form-check-label"></label>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input asp-for="RememberMe" class="form-check-input" id="rememberMe" />
+                            <label asp-for="RememberMe" class="form-check-label" for="rememberMe"></label>
+                        </div>
+                        <a href="#" class="text-decoration-none small">Quên mật khẩu?</a>
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                        <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-bold shadow-sm">
+                            Đăng nhập
+                        </button>
                     </div>
                 </form>
-                <div class="mt-3 text-center">
-                    <span>Chưa có tài khoản? <a asp-action="Register">Đăng ký ngay</a></span>
+                
+                <div class="mt-4 text-center">
+                    <span class="text-muted">Chưa có tài khoản?</span> 
+                    <a asp-action="Register" class="text-decoration-none fw-semibold">Đăng ký ngay</a>
                 </div>
-            </div>
         </div>
     </div>
 </div>

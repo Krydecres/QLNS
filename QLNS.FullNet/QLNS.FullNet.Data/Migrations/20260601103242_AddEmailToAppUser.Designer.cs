@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QLNS.FullNet.Data;
 
@@ -11,9 +12,11 @@ using QLNS.FullNet.Data;
 namespace QLNS.FullNet.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260601103242_AddEmailToAppUser")]
+    partial class AddEmailToAppUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -165,37 +168,6 @@ namespace QLNS.FullNet.Data.Migrations
                     b.ToTable("Positions");
                 });
 
-            modelBuilder.Entity("QLNS.FullNet.Data.Entities.ProfileUpdateRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("EmployeeId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("NewDateOfBirth")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("NewPhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeId");
-
-                    b.ToTable("ProfileUpdateRequests");
-                });
-
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.Salary", b =>
                 {
                     b.Property<int>("Id")
@@ -235,17 +207,6 @@ namespace QLNS.FullNet.Data.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("Position");
-                });
-
-            modelBuilder.Entity("QLNS.FullNet.Data.Entities.ProfileUpdateRequest", b =>
-                {
-                    b.HasOne("QLNS.FullNet.Data.Entities.Employee", "Employee")
-                        .WithMany()
-                        .HasForeignKey("EmployeeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Employee");
                 });
 #pragma warning restore 612, 618
         }

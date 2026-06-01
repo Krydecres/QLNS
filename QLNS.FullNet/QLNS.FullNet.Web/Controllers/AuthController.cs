@@ -47,11 +47,24 @@ public class AuthController : Controller
             {
                 Username = model.Username,
                 FullName = model.FullName,
+                Email = model.Email,
                 Role = model.Role
             };
             user.PasswordHash = passwordHasher.HashPassword(user, model.Password);
 
             _context.AppUsers.Add(user);
+
+            // Tự động tạo hồ sơ nhân viên trong bảng Employees khi đăng ký tài khoản
+            if (model.Role == "Employee")
+            {
+                var employee = new Employee
+                {
+                    FullName = model.FullName,
+                    Email = model.Email
+                };
+                _context.Employees.Add(employee);
+            }
+
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Đăng ký thành công. Vui lòng đăng nhập.";
@@ -92,6 +105,7 @@ public class AuthController : Controller
                     {
                         new Claim(ClaimTypes.Name, user.Username),
                         new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
                         new Claim("FullName", user.FullName),
                         new Claim(ClaimTypes.Role, user.Role)
                     };

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿﻿using System.ComponentModel.DataAnnotations;
 
 namespace QLNS.FullNet.Web.Models.Auth;
 
@@ -11,6 +11,11 @@ public class RegisterViewModel
     [Required(ErrorMessage = "Họ và tên không được để trống")]
     [Display(Name = "Họ và tên")]
     public string FullName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Email không được để trống")]
+    [EmailAddress(ErrorMessage = "Định dạng Email không hợp lệ")]
+    [Display(Name = "Email")]
+    public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Mật khẩu không được để trống")]
     [DataType(DataType.Password)]

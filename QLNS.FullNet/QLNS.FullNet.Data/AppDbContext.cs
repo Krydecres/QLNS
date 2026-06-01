@@ -18,6 +18,7 @@ public class AppDbContext : DbContext
     public DbSet<Position> Positions { get; set; }
     public DbSet<Salary> Salaries { get; set; }
     public DbSet<Timekeeping> Timekeepings { get; set; }
+    public DbSet<ProfileUpdateRequest> ProfileUpdateRequests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,5 +33,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Position>().HasKey(e => e.Id);
         modelBuilder.Entity<Salary>().HasKey(e => e.Id);
         modelBuilder.Entity<Timekeeping>().HasKey(e => e.Id);
+        modelBuilder.Entity<ProfileUpdateRequest>().HasKey(e => e.Id);
     }
 }

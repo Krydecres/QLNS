@@ -1,0 +1,38 @@
+@model QLNS.FullNet.Data.Entities.Employee
+@{
+    ViewData["Title"] = "Cập nhật hồ sơ";
+}
+
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Cập nhật hồ sơ cá nhân</h1>
+        <p class="dashboard-subtitle">Gửi yêu cầu thay đổi thông tin đến Quản trị viên</p>
+    </div>
+
+    <div class="card shadow-sm mt-3" style="max-width: 600px;">
+        <div class="card-body p-4">
+            <form asp-action="EditMyProfile" method="post">
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Họ và tên</label>
+                    <input type="text" class="form-control" value="@Model.FullName" disabled />
+                    <small class="text-muted">Vui lòng liên hệ Admin/HR nếu bạn muốn đổi tên.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Số điện thoại mới</label>
+                    <input type="text" name="phoneNumber" class="form-control" value="@Model.PhoneNumber" />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Ngày sinh mới</label>
+                    <input type="date" name="dateOfBirth" class="form-control" value="@(Model.DateOfBirth?.ToString("yyyy-MM-dd"))" />
+                </div>
+
+                <button type="submit" class="btn btn-primary"><i class="bi bi-send me-1"></i> Gửi yêu cầu cập nhật</button>
+                <a asp-action="MyProfile" class="btn btn-outline-secondary ms-2">Hủy</a>
+            </form>
+        </div>
+    </div>
+</div>
