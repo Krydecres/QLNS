@@ -47,6 +47,12 @@
         <div class="sidebar-section-label">QUẢN TRỊ NHÂN SỰ</div>
         <ul class="sidebar-nav">
             <li>
+                 <a href="@Url.Action("Index", "User")" class="sidebar-link @IsActive("User")">
+                    <i class="bi bi-person-gear"></i>
+                    <span>Người dùng & phân quyền</span>
+                </a>
+            </li>
+            <li>
                 <a href="@Url.Action("Index", "Employee")" class="sidebar-link @IsActive("Employee")">
                     <i class="bi bi-person-badge"></i>
                     <span>Quản lý nhân viên</span>
