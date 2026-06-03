@@ -1,4 +1,4 @@
-﻿@model QLNS.FullNet.Data.Entities.Holiday
+@model QLNS.FullNet.Data.Entities.Holiday
 
 @{
     ViewData["Title"] = "Cập nhật Ngày nghỉ lễ";
@@ -8,8 +8,13 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800">Cập nhật Ngày nghỉ lễ</h1>
         <a asp-action="Index" class="btn btn-secondary">
-            <i class="fas fa-arrow-left fa-sm text-white-50"></i> Quay lại
+            <i class="bi bi-arrow-left"></i> Quay lại
         </a>
+    </div>
+
+    <div class="alert alert-info d-flex align-items-center gap-2">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Ngày nghỉ lễ theo <strong>ngày/tháng</strong> sẽ <strong>tự động lặp lại mỗi năm</strong>.</span>
     </div>
 
     <div class="card shadow mb-4">
@@ -17,27 +22,55 @@
             <form asp-action="Edit" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <input type="hidden" asp-for="Id" />
-                
-                <div class="mb-3">
-                    <label asp-for="Date" class="form-label"></label>
-                    <input asp-for="Date" class="form-control" type="date" />
-                    <span asp-validation-for="Date" class="text-danger"></span>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label asp-for="Day" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar-day"></i></span>
+                            <input asp-for="Day" class="form-control" type="number" min="1" max="31" />
+                        </div>
+                        <span asp-validation-for="Day" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-3">
+                        <label asp-for="Month" class="form-label fw-semibold"></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar-month"></i></span>
+                            <select asp-for="Month" class="form-select">
+                                <option value="1">Tháng 1</option>
+                                <option value="2">Tháng 2</option>
+                                <option value="3">Tháng 3</option>
+                                <option value="4">Tháng 4</option>
+                                <option value="5">Tháng 5</option>
+                                <option value="6">Tháng 6</option>
+                                <option value="7">Tháng 7</option>
+                                <option value="8">Tháng 8</option>
+                                <option value="9">Tháng 9</option>
+                                <option value="10">Tháng 10</option>
+                                <option value="11">Tháng 11</option>
+                                <option value="12">Tháng 12</option>
+                            </select>
+                        </div>
+                        <span asp-validation-for="Month" class="text-danger small"></span>
+                    </div>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Name" class="form-label"></label>
+                    <label asp-for="Name" class="form-label fw-semibold"></label>
                     <input asp-for="Name" class="form-control" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
+                    <span asp-validation-for="Name" class="text-danger small"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Description" class="form-label"></label>
+                    <label asp-for="Description" class="form-label fw-semibold"></label>
                     <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
                 </div>
 
                 <div class="mt-4">
-                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Lưu thay đổi
+                    </button>
                     <a asp-action="Index" class="btn btn-secondary">Hủy</a>
                 </div>
             </form>

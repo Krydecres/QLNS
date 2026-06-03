@@ -1,0 +1,190 @@
+@model QLNS.FullNet.Web.Models.MyDaysOffViewModel
+
+@{
+    ViewData["Title"] = "Ngày nghỉ của tôi";
+    int selectedYear = ViewBag.SelectedYear;
+    int currentYear = DateTime.Now.Year;
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="bi bi-calendar2-heart text-danger"></i> Ngày nghỉ của tôi
+            </h1>
+            <p class="text-muted mb-0">Bao gồm ngày nghỉ lễ và đơn xin nghỉ đã được duyệt</p>
+        </div>
+        <form method="get" class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0 fw-semibold">Năm:</label>
+            <select name="year" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto;">
+                @for (int y = currentYear + 1; y >= currentYear - 3; y--)
+                {
+                    <option value="@y" selected="@(y == selectedYear)">@y</option>
+                }
+            </select>
+        </form>
+    </div>
+
+    @* Thống kê tổng quan *@
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body p-2">
+                    <div class="fs-2 fw-bold text-danger">@Model.Holidays.Count</div>
+                    <div class="text-muted small">Ngày nghỉ lễ</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body p-2">
+                    <div class="fs-2 fw-bold text-success">@Model.LeaveRequests.Count</div>
+                    <div class="text-muted small">Lần nghỉ phép</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body p-2">
+                    <div class="fs-2 fw-bold text-primary">@Model.UpcomingDays.Count</div>
+                    <div class="text-muted small">Sắp tới</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body p-2">
+                    <div class="fs-2 fw-bold text-secondary">@Model.PastDays.Count</div>
+                    <div class="text-muted small">Đã qua</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* Ngày nghỉ sắp tới *@
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex align-items-center gap-2 bg-primary text-white py-3">
+            <i class="bi bi-calendar-event-fill fs-5"></i>
+            <h5 class="mb-0">Sắp tới — Năm @selectedYear</h5>
+            <span class="badge bg-light text-primary ms-auto">@Model.UpcomingDays.Count ngày</span>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.UpcomingDays.Any())
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var item in Model.UpcomingDays)
+                    {
+                        var daysLeft = (item.Date - DateTime.Today).Days;
+                        <div class="list-group-item list-group-item-action d-flex align-items-start gap-3 py-3">
+                            <div class="text-center" style="min-width: 64px;">
+                                <div class="fw-bold fs-4 lh-1 @(item.Type == "Holiday" ? "text-danger" : "text-success")">
+                                    @item.Date.Day
+                                </div>
+                                <div class="text-muted small text-uppercase">
+                                    Th @item.Date.Month
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="badge @item.BadgeClass">
+                                        <i class="bi @item.Icon"></i>
+                                        @(item.Type == "Holiday" ? "Ngày lễ" : "Nghỉ phép")
+                                    </span>
+                                    <span class="fw-semibold">@item.Title</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(item.Description))
+                                {
+                                    <div class="text-muted small">@item.Description</div>
+                                }
+                                @if (item.Type == "Leave" && item.EndDate.HasValue)
+                                {
+                                    <div class="text-muted small">
+                                        <i class="bi bi-arrow-right"></i>
+                                        Đến @item.EndDate.Value.ToString("dd/MM/yyyy")
+                                        (@((int)(item.EndDate.Value - item.Date).TotalDays + 1) ngày)
+                                    </div>
+                                }
+                            </div>
+                            <div class="text-end">
+                                @if (daysLeft == 0)
+                                {
+                                    <span class="badge bg-warning text-dark">Hôm nay</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-light text-muted border">@daysLeft ngày nữa</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+                    Không có ngày nghỉ sắp tới trong năm @selectedYear
+                </div>
+            }
+        </div>
+    </div>
+
+    @* Ngày nghỉ đã qua *@
+    @if (Model.PastDays.Any())
+    {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex align-items-center gap-2 py-3">
+                <i class="bi bi-clock-history text-muted fs-5"></i>
+                <h5 class="mb-0 text-muted">Đã qua — Năm @selectedYear</h5>
+                <span class="badge bg-secondary ms-auto">@Model.PastDays.Count ngày</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    @foreach (var item in Model.PastDays)
+                    {
+                        <div class="list-group-item d-flex align-items-start gap-3 py-3 opacity-75">
+                            <div class="text-center" style="min-width: 64px;">
+                                <div class="fw-bold fs-4 lh-1 text-muted">
+                                    @item.Date.Day
+                                </div>
+                                <div class="text-muted small text-uppercase">
+                                    Th @item.Date.Month
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="badge @item.BadgeClass opacity-75">
+                                        <i class="bi @item.Icon"></i>
+                                        @(item.Type == "Holiday" ? "Ngày lễ" : "Nghỉ phép")
+                                    </span>
+                                    <span class="text-muted">@item.Title</span>
+                                </div>
+                                @if (!string.IsNullOrEmpty(item.Description))
+                                {
+                                    <div class="text-muted small">@item.Description</div>
+                                }
+                                @if (item.Type == "Leave" && item.EndDate.HasValue)
+                                {
+                                    <div class="text-muted small">
+                                        <i class="bi bi-arrow-right"></i>
+                                        Đến @item.EndDate.Value.ToString("dd/MM/yyyy")
+                                    </div>
+                                }
+                            </div>
+                            <div>
+                                <i class="bi bi-check2-circle text-muted"></i>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    @* Link xin nghỉ phép *@
+    <div class="d-flex justify-content-center">
+        <a asp-controller="LeaveRequest" asp-action="Create" class="btn btn-outline-success">
+            <i class="bi bi-plus-circle"></i> Xin nghỉ phép mới
+        </a>
+    </div>
+</div>

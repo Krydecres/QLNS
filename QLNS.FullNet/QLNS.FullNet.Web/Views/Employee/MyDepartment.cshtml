@@ -1,0 +1,110 @@
+@model IEnumerable<QLNS.FullNet.Data.Entities.Employee>
+
+@{
+    ViewData["Title"] = "Phòng ban của tôi";
+    var department = ViewBag.Department as QLNS.FullNet.Data.Entities.Department;
+    int currentId = ViewBag.CurrentEmployeeId ?? 0;
+    bool noDept = ViewBag.NoDepartment == true;
+}
+
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="bi bi-people-fill text-primary"></i> Phòng ban của tôi
+            </h1>
+            @if (department != null)
+            {
+                <p class="text-muted mb-0">
+                    <i class="bi bi-diagram-3 me-1"></i>
+                    <strong class="text-primary">@department.Name</strong>
+                    &mdash; @Model.Count() thành viên
+                </p>
+            }
+        </div>
+    </div>
+
+    @if (noDept)
+    {
+        <div class="alert alert-warning d-flex align-items-center gap-2">
+            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            <span>Bạn chưa được xếp vào phòng ban nào. Vui lòng liên hệ Admin để cập nhật.</span>
+        </div>
+    }
+    else
+    {
+        @* Banner phòng ban *@
+        <div class="card border-0 mb-4 text-white shadow" style="background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); border-radius: 16px;">
+            <div class="card-body d-flex align-items-center gap-4 py-4">
+                <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center shadow-sm"
+                     style="width: 80px; height: 80px; flex-shrink: 0;">
+                    <i class="bi bi-building fs-2 text-white"></i>
+                </div>
+                <div>
+                    <h2 class="mb-1 fw-bold">@department?.Name</h2>
+                    <div class="d-flex gap-3 mt-2">
+                        <span class="badge bg-white bg-opacity-25 py-2 px-3">
+                            <i class="bi bi-people me-1"></i> @Model.Count() thành viên
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @* Danh sách thành viên dạng card *@
+        <div class="row g-3">
+            @foreach (var member in Model)
+            {
+                bool isMe = member.Id == currentId;
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <div class="card border-0 shadow-sm h-100 @(isMe ? "border-primary border-2" : "")"
+                         style="border-radius: 12px; @(isMe ? "border: 2px solid #1a73e8 !important;" : "")">
+                        <div class="card-body d-flex align-items-start gap-3 py-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white fw-bold fs-5 shadow-sm"
+                                 style="width: 52px; height: 52px; background: @(isMe ? "#1a73e8" : "#6c757d");">
+                                @member.FullName.Substring(0, 1).ToUpper()
+                            </div>
+                            <div class="flex-grow-1 min-width-0">
+                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                    <span class="fw-bold text-truncate">@member.FullName</span>
+                                    @if (isMe)
+                                    {
+                                        <span class="badge bg-primary" style="font-size: 0.7rem;">Bạn</span>
+                                    }
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <i class="bi bi-briefcase me-1"></i>
+                                    @(member.Position?.Name ?? "Chưa có chức vụ")
+                                </div>
+                                <div class="text-muted small text-truncate">
+                                    <i class="bi bi-envelope me-1"></i>
+                                    @member.Email
+                                </div>
+                                @if (!string.IsNullOrEmpty(member.PhoneNumber))
+                                {
+                                    <div class="text-muted small">
+                                        <i class="bi bi-telephone me-1"></i>
+                                        @member.PhoneNumber
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0 pt-0 pb-2 px-3 text-end">
+                            <small class="text-muted">
+                                <i class="bi bi-person-badge me-1"></i>NV-@member.Id
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-people fs-1 d-block mb-3"></i>
+                Phòng ban chưa có thành viên nào
+            </div>
+        }
+    }
+</div>

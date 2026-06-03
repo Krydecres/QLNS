@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QLNS.FullNet.Data;
 using QLNS.FullNet.Data.Entities;
+using QLNS.FullNet.Web.Models;
 using System.Security.Claims;
-using System.Linq;
 using System.Threading.Tasks;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace QLNS.FullNet.Web.Controllers
 {
@@ -36,6 +38,90 @@ namespace QLNS.FullNet.Web.Controllers
                 .ToListAsync();
 
             return View(leaves);
+        }
+
+        // --- NGÀY NGHỈ CỦA TÔI ---
+
+        [Authorize(Roles = "Employee")]
+        public async Task<IActionResult> MyDaysOff(int? year)
+        {
+            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == userEmail);
+
+            if (employee == null) return NotFound("Hồ sơ nhân viên không tồn tại.");
+
+            int selectedYear = year ?? DateTime.Now.Year;
+            var today = DateTime.Today;
+
+            // Lấy tất cả ngày nghỉ lễ hợp lệ (Month/Day != 0)
+            var holidays = await _context.Holidays
+                .Where(h => h.Month >= 1 && h.Month <= 12 && h.Day >= 1 && h.Day <= 31)
+                .OrderBy(h => h.Month).ThenBy(h => h.Day)
+                .ToListAsync();
+
+            // Lấy đơn xin nghỉ đã duyệt của nhân viên trong năm
+            var leaveRequests = await _context.LeaveRequests
+                .Where(l => l.EmployeeId == employee.Id
+                    && l.Status == LeaveRequestStatus.Approved
+                    && (l.StartDate.Year == selectedYear || l.EndDate.Year == selectedYear))
+                .OrderBy(l => l.StartDate)
+                .ToListAsync();
+
+            // Tạo danh sách gộp
+            var allDays = new List<DayOffItem>();
+
+            // Thêm ngày nghỉ lễ của năm được chọn
+            foreach (var h in holidays)
+            {
+                var d = h.GetDateForYear(selectedYear);
+                allDays.Add(new DayOffItem
+                {
+                    Type = "Holiday",
+                    Date = d,
+                    Title = h.Name,
+                    Description = h.Description,
+                    BadgeClass = "bg-danger",
+                    Icon = "bi-star-fill"
+                });
+            }
+
+            // Thêm đơn xin nghỉ đã duyệt
+            foreach (var lr in leaveRequests)
+            {
+                allDays.Add(new DayOffItem
+                {
+                    Type = "Leave",
+                    Date = lr.StartDate,
+                    EndDate = lr.EndDate,
+                    Title = "Nghỉ phép: " + lr.Reason,
+                    Description = lr.ApprovalNote,
+                    BadgeClass = "bg-success",
+                    Icon = "bi-calendar-check"
+                });
+            }
+
+            // Phân loại sắp tới / đã qua
+            var upcoming = allDays
+                .Where(d => d.Date >= today)
+                .OrderBy(d => d.Date)
+                .ToList();
+
+            var past = allDays
+                .Where(d => d.Date < today)
+                .OrderByDescending(d => d.Date)
+                .ToList();
+
+            var vm = new MyDaysOffViewModel
+            {
+                UpcomingDays = upcoming,
+                PastDays = past,
+                Holidays = holidays,
+                LeaveRequests = leaveRequests,
+                CurrentYear = selectedYear
+            };
+
+            ViewBag.SelectedYear = selectedYear;
+            return View(vm);
         }
 
         [Authorize(Roles = "Employee")]

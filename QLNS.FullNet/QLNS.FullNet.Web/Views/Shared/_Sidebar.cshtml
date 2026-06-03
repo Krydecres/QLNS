@@ -121,6 +121,12 @@
                 </a>
             </li>
             <li>
+                <a href="@Url.Action("MyDepartment", "Employee")" class="sidebar-link @IsActive("Employee", "MyDepartment")">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Phòng ban của tôi</span>
+                </a>
+            </li>
+            <li>
                 <a href="@Url.Action("MyAttendance", "Timekeeping")" class="sidebar-link @IsActive("Timekeeping", "MyAttendance")">
                     <i class="bi bi-clock"></i>
                     <span>Chấm công của tôi</span>
@@ -130,6 +136,12 @@
                 <a href="@Url.Action("MyLeaves", "LeaveRequest")" class="sidebar-link @IsActive("LeaveRequest", "MyLeaves")">
                     <i class="bi bi-calendar-minus"></i>
                     <span>Nghỉ phép của tôi</span>
+                </a>
+            </li>
+            <li>
+                <a href="@Url.Action("MyDaysOff", "LeaveRequest")" class="sidebar-link @IsActive("LeaveRequest", "MyDaysOff")">
+                    <i class="bi bi-calendar2-heart"></i>
+                    <span>Ngày nghỉ của tôi</span>
                 </a>
             </li>
         </ul>

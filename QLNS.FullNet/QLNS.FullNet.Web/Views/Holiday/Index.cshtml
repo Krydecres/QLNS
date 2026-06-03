@@ -1,14 +1,15 @@
-﻿@model IEnumerable<QLNS.FullNet.Data.Entities.Holiday>
+@model IEnumerable<QLNS.FullNet.Data.Entities.Holiday>
 
 @{
     ViewData["Title"] = "Quản lý Ngày nghỉ lễ";
+    var currentYear = DateTime.Now.Year;
 }
 
 <div class="container-fluid px-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800">Quản lý Ngày nghỉ lễ</h1>
         <a asp-action="Create" class="btn btn-primary">
-            <i class="fas fa-plus fa-sm text-white-50"></i> Thêm ngày nghỉ lễ
+            <i class="bi bi-plus-circle"></i> Thêm ngày nghỉ lễ
         </a>
     </div>
 
@@ -21,15 +22,17 @@
     }
 
     <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Danh sách ngày nghỉ lễ</h6>
+        <div class="card-header py-3 d-flex align-items-center gap-2">
+            <i class="bi bi-calendar-event text-primary"></i>
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách ngày nghỉ lễ (lặp lại hàng năm)</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                    <thead>
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="table-light">
                         <tr>
-                            <th>Ngày nghỉ</th>
+                            <th width="130">Ngày/Tháng</th>
+                            <th width="200">Năm nay (@currentYear)</th>
                             <th>Tên ngày nghỉ lễ</th>
                             <th>Mô tả</th>
                             <th width="150">Thao tác</th>
@@ -38,17 +41,32 @@
                     <tbody>
                         @foreach (var item in Model)
                         {
-                            <tr>
-                                <td>@item.Date.ToString("dd/MM/yyyy")</td>
+                            var dateThisYear = item.GetDateForYear(currentYear);
+                            var isPast = dateThisYear < DateTime.Today;
+                            var isToday = dateThisYear == DateTime.Today;
+                            <tr class="@(isToday ? "table-success" : "")">
+                                <td class="fw-bold text-center fs-5">
+                                    <i class="bi bi-calendar2 text-danger"></i>
+                                    @item.DateDisplay
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge @(isToday ? "bg-success" : isPast ? "bg-secondary" : "bg-primary") py-2 px-3">
+                                        @dateThisYear.ToString("dd/MM/yyyy")
+                                        @if (isToday)
+                                        {
+                                            <span class="ms-1">🎉</span>
+                                        }
+                                    </span>
+                                </td>
                                 <td>@item.Name</td>
-                                <td>@item.Description</td>
+                                <td class="text-muted">@item.Description</td>
                                 <td>
                                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm" title="Sửa">
-                                        <i class="fas fa-edit"></i> Sửa
+                                        <i class="bi bi-pencil"></i> Sửa
                                     </a>
                                     <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa ngày nghỉ lễ này?');">
                                         <button type="submit" class="btn btn-danger btn-sm" title="Xóa">
-                                            <i class="fas fa-trash"></i> Xóa
+                                            <i class="bi bi-trash"></i> Xóa
                                         </button>
                                     </form>
                                 </td>
@@ -57,7 +75,10 @@
                         @if (!Model.Any())
                         {
                             <tr>
-                                <td colspan="4" class="text-center">Chưa có dữ liệu</td>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
+                                    Chưa có dữ liệu ngày nghỉ lễ
+                                </td>
                             </tr>
                         }
                     </tbody>

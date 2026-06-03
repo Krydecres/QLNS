@@ -142,6 +142,41 @@ namespace QLNS.FullNet.Web.Controllers
             return View(employee);
         }
 
+        // 7b. DANH SÁCH THÀNH VIÊN PHÒNG BAN (Dành cho Role Employee)
+        [Authorize(Roles = "Employee")]
+        public async Task<IActionResult> MyDepartment()
+        {
+            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+
+            if (string.IsNullOrEmpty(userEmail))
+                return RedirectToAction("Login", "Auth");
+
+            var me = await _context.Employees
+                .Include(e => e.Department)
+                .Include(e => e.Position)
+                .FirstOrDefaultAsync(e => e.Email == userEmail);
+
+            if (me == null)
+                return NotFound($"Không tìm thấy hồ sơ nhân sự cho tài khoản: {userEmail}.");
+
+            if (me.DepartmentId == null)
+            {
+                ViewBag.NoDepartment = true;
+                return View(new List<Employee>());
+            }
+
+            // Lấy tất cả thành viên cùng phòng ban (kể cả bản thân)
+            var members = await _context.Employees
+                .Include(e => e.Position)
+                .Where(e => e.DepartmentId == me.DepartmentId)
+                .OrderBy(e => e.FullName)
+                .ToListAsync();
+
+            ViewBag.Department = me.Department;
+            ViewBag.CurrentEmployeeId = me.Id;
+            return View(members);
+        }
+
         // 8. FORM TỰ CHỈNH SỬA HỒ SƠ (Dành cho Nhân viên)
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> EditMyProfile()

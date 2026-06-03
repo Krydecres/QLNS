@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QLNS.FullNet.Data;
@@ -21,7 +21,10 @@ public class HolidayController : Controller
     // GET: Holiday
     public async Task<IActionResult> Index()
     {
-        var holidays = await _context.Holidays.OrderByDescending(h => h.Date).ToListAsync();
+        var holidays = await _context.Holidays
+            .OrderBy(h => h.Month)
+            .ThenBy(h => h.Day)
+            .ToListAsync();
         return View(holidays);
     }
 
@@ -34,10 +37,27 @@ public class HolidayController : Controller
     // POST: Holiday/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create([Bind("Id,Name,Date,Description")] Holiday holiday)
+    public async Task<IActionResult> Create([Bind("Id,Name,Month,Day,Description")] Holiday holiday)
     {
         if (ModelState.IsValid)
         {
+            // Kiểm tra tính hợp lệ của ngày/tháng
+            try
+            {
+                DateTime.DaysInMonth(2024, holiday.Month); // kiểm tra tháng hợp lệ
+                int maxDay = DateTime.DaysInMonth(2024, holiday.Month);
+                if (holiday.Day > maxDay)
+                {
+                    ModelState.AddModelError("Day", $"Tháng {holiday.Month} chỉ có tối đa {maxDay} ngày.");
+                    return View(holiday);
+                }
+            }
+            catch
+            {
+                ModelState.AddModelError("Month", "Tháng không hợp lệ.");
+                return View(holiday);
+            }
+
             _context.Add(holiday);
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Thêm ngày nghỉ lễ thành công.";
@@ -65,7 +85,7 @@ public class HolidayController : Controller
     // POST: Holiday/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Date,Description")] Holiday holiday)
+    public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Month,Day,Description")] Holiday holiday)
     {
         if (id != holiday.Id)
         {
@@ -74,6 +94,22 @@ public class HolidayController : Controller
 
         if (ModelState.IsValid)
         {
+            // Kiểm tra tính hợp lệ của ngày/tháng
+            try
+            {
+                int maxDay = DateTime.DaysInMonth(2024, holiday.Month);
+                if (holiday.Day > maxDay)
+                {
+                    ModelState.AddModelError("Day", $"Tháng {holiday.Month} chỉ có tối đa {maxDay} ngày.");
+                    return View(holiday);
+                }
+            }
+            catch
+            {
+                ModelState.AddModelError("Month", "Tháng không hợp lệ.");
+                return View(holiday);
+            }
+
             try
             {
                 _context.Update(holiday);
