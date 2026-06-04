@@ -1,39 +1,17 @@
-@using QLNS.FullNet.Data
-@using System.Security.Claims
-@inject AppDbContext _context
+@model QLNS.FullNet.Web.Models.EmployeeDashboardViewModel
 @{
     ViewData["Title"] = "Dashboard Cá nhân";
+    var now = DateTime.Now;
+    var employee = Model.Employee;
 
-    var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
-    var employee = _context.Employees.FirstOrDefault(e => e.Email == userEmail);
-
-    var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-    
-    var timekeepingsThisMonth = new List<QLNS.FullNet.Data.Entities.Timekeeping>();
-    var recentTimekeepings = new List<QLNS.FullNet.Data.Entities.Timekeeping>();
-    var profileRequests = new List<QLNS.FullNet.Data.Entities.ProfileUpdateRequest>();
-
-    if (employee != null)
+    // So sánh lương tháng này vs tháng trước
+    decimal salaryDiff = 0;
+    bool salaryUp = false;
+    if (Model.CurrentSalary != null && Model.PreviousSalary != null && Model.PreviousSalary.TotalSalary > 0)
     {
-        timekeepingsThisMonth = _context.Timekeepings
-            .Where(t => t.EmployeeId == employee.Id && t.Date >= firstDayOfMonth)
-            .ToList();
-            
-        recentTimekeepings = _context.Timekeepings
-            .Where(t => t.EmployeeId == employee.Id)
-            .OrderByDescending(t => t.Date)
-            .Take(3)
-            .ToList();
-            
-        profileRequests = _context.ProfileUpdateRequests
-            .Where(r => r.EmployeeId == employee.Id)
-            .OrderByDescending(r => r.CreatedAt)
-            .Take(3)
-            .ToList();
+        salaryDiff = Model.CurrentSalary.TotalSalary - Model.PreviousSalary.TotalSalary;
+        salaryUp = salaryDiff >= 0;
     }
-
-    var daysWorked = timekeepingsThisMonth.Count(t => t.Status == "Có mặt");
-    var workingDaysInMonth = 22; // Giả định số ngày công chuẩn
 }
 
 <div class="dashboard">
@@ -42,45 +20,86 @@
         <div>
             <h1 class="dashboard-title">Xin chào, @(employee?.FullName ?? User.Identity?.Name ?? "Nhân viên")!</h1>
             <p class="dashboard-subtitle">
-                Tổng quan thông tin cá nhân và công việc của bạn — @DateTime.Now.ToString("dddd, dd/MM/yyyy")
+                Tổng quan thông tin cá nhân và công việc của bạn — @now.ToString("dddd, dd/MM/yyyy")
             </p>
         </div>
         <div class="dashboard-actions">
             <span class="badge-shift">
-                <i class="bi bi-briefcase"></i> Trạng thái: Đang làm việc
+                <i class="bi bi-briefcase"></i> @(employee?.Position?.Name ?? "Đang làm việc")
             </span>
         </div>
     </div>
 
     <!-- Stat Cards -->
     <div class="stat-grid mt-3">
+        <!-- Ngày công -->
         <div class="stat-card">
             <div class="stat-icon icon-blue"><i class="bi bi-calendar-check"></i></div>
             <div class="stat-label">Ngày công tháng này</div>
-            <div class="stat-value">@daysWorked/@workingDaysInMonth</div>
-            <div class="stat-note text-success">Cập nhật lúc @DateTime.Now.ToString("HH:mm")</div>
+            <div class="stat-value">@Model.DaysWorked/@Model.WorkingDaysInMonth</div>
+            <div class="stat-note text-success">Cập nhật lúc @now.ToString("HH:mm")</div>
         </div>
-        <div class="stat-card stat-card--warn">
-            <div class="stat-icon icon-yellow"><i class="bi bi-hourglass-split"></i></div>
-            <div class="stat-label">Số giờ tăng ca</div>
-            <div class="stat-value">0h</div>
-            <div class="stat-note">Chưa có dữ liệu</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon icon-teal"><i class="bi bi-airplane"></i></div>
-            <div class="stat-label">Ngày phép còn lại</div>
-            <div class="stat-value">12 ngày</div>
-            <div class="stat-note text-muted">Trong tổng số 12 ngày</div>
-        </div>
-        <div class="stat-card">
+
+        <!-- Lương tháng này -->
+        <div class="stat-card @(Model.CurrentSalary != null ? "" : "stat-card--warn")">
             <div class="stat-icon icon-green"><i class="bi bi-cash-coin"></i></div>
-            <div class="stat-label">Trạng thái lương</div>
-            <div class="stat-value">Chờ chốt</div>
-            <div class="stat-note text-muted">Kỳ lương tháng này</div>
+            <div class="stat-label">Lương tháng @now.Month/@now.Year</div>
+            @if (Model.CurrentSalary != null)
+            {
+                <div class="stat-value" style="font-size: 1.3rem;">@Model.CurrentSalary.TotalSalary.ToString("N0") đ</div>
+                @if (Model.PreviousSalary != null)
+                {
+                    <div class="stat-note @(salaryUp ? "text-success" : "text-danger")">
+                        <i class="bi bi-arrow-@(salaryUp ? "up" : "down")"></i>
+                        @(salaryUp ? "+" : "")@salaryDiff.ToString("N0") đ so với T@(now.Month == 1 ? 12 : now.Month - 1)
+                    </div>
+                }
+                else
+                {
+                    <div class="stat-note text-muted">Chưa có dữ liệu tháng trước</div>
+                }
+            }
+            else
+            {
+                <div class="stat-value">Chờ chốt</div>
+                <div class="stat-note text-muted">Chưa có dữ liệu tháng này</div>
+            }
+        </div>
+
+        <!-- Lương ước tính đến hôm nay -->
+        <div class="stat-card">
+            <div class="stat-icon icon-teal"><i class="bi bi-graph-up-arrow"></i></div>
+            <div class="stat-label">Ước tính đến hôm nay</div>
+            @if (Model.CurrentSalary != null)
+            {
+                <div class="stat-value" style="font-size: 1.2rem;">@Model.EstimatedSalaryToDate.ToString("N0") đ</div>
+                <div class="stat-note text-muted">Dựa trên @Model.DaysWorked ngày công</div>
+            }
+            else
+            {
+                <div class="stat-value">—</div>
+                <div class="stat-note text-muted">Chưa có dữ liệu lương</div>
+            }
+        </div>
+
+        <!-- Lương tháng trước -->
+        <div class="stat-card">
+            <div class="stat-icon icon-yellow"><i class="bi bi-clock-history"></i></div>
+            <div class="stat-label">Lương tháng trước</div>
+            @if (Model.PreviousSalary != null)
+            {
+                <div class="stat-value" style="font-size: 1.2rem;">@Model.PreviousSalary.TotalSalary.ToString("N0") đ</div>
+                <div class="stat-note text-muted">Tháng @Model.PreviousSalary.Month/@Model.PreviousSalary.Year</div>
+            }
+            else
+            {
+                <div class="stat-value">—</div>
+                <div class="stat-note text-muted">Chưa có dữ liệu</div>
+            }
         </div>
     </div>
 
-    <!-- 2 Columns Layout -->
+    <!-- Main Content Row -->
     <div class="row mt-4">
         <!-- Chấm công gần đây -->
         <div class="col-md-6 mb-4">
@@ -98,17 +117,20 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (recentTimekeepings.Any())
+                        @if (Model.RecentTimekeepings.Any())
                         {
-                            foreach (var item in recentTimekeepings)
+                            foreach (var item in Model.RecentTimekeepings)
                             {
                                 <tr>
                                     <td>@item.Date.ToString("dd/MM/yyyy")</td>
                                     <td>@item.Date.ToString("HH:mm")</td>
                                     <td>
-                                        @if (item.Status == "Có mặt") {
+                                        @if (item.Status == "Có mặt")
+                                        {
                                             <span class="badge bg-success">@item.Status</span>
-                                        } else {
+                                        }
+                                        else
+                                        {
                                             <span class="badge bg-danger">@item.Status</span>
                                         }
                                     </td>
@@ -126,7 +148,99 @@
             </div>
         </div>
 
-        <!-- Thông báo & Đơn từ -->
+        <!-- Chi tiết lương tháng này -->
+        <div class="col-md-6 mb-4">
+            <div class="chart-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="chart-title mb-0">Chi tiết lương tháng @now.Month/@now.Year</h2>
+                    <a asp-controller="Salaries" asp-action="Index" class="btn btn-sm btn-outline-success">Xem bảng lương</a>
+                </div>
+                @if (Model.CurrentSalary != null)
+                {
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th class="text-muted"><i class="bi bi-currency-dollar me-2"></i>Lương cơ bản</th>
+                                <td class="fw-bold text-end">@Model.CurrentSalary.BaseSalary.ToString("N0") đ</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted"><i class="bi bi-plus-circle me-2 text-success"></i>Phụ cấp</th>
+                                <td class="fw-bold text-success text-end">+ @Model.CurrentSalary.Allowance.ToString("N0") đ</td>
+                            </tr>
+                            <tr>
+                                <th class="text-muted"><i class="bi bi-dash-circle me-2 text-danger"></i>Khấu trừ</th>
+                                <td class="fw-bold text-danger text-end">- @Model.CurrentSalary.Deduction.ToString("N0") đ</td>
+                            </tr>
+                            <tr class="border-top">
+                                <th><i class="bi bi-wallet2 me-2 text-primary"></i>Tổng lương nhận</th>
+                                <td class="text-end">
+                                    <span class="badge bg-success fs-6">@Model.CurrentSalary.TotalSalary.ToString("N0") đ</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-receipt" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p class="mt-2">Chưa có dữ liệu lương tháng @now.Month/@now.Year</p>
+                        <small>Vui lòng liên hệ Admin để tính lương.</small>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Lịch sử lương + Đơn từ -->
+    <div class="row">
+        <!-- Lịch sử 6 tháng -->
+        <div class="col-md-6 mb-4">
+            <div class="chart-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="chart-title mb-0">Lịch sử lương</h2>
+                    <span class="text-muted small">6 tháng gần nhất</span>
+                </div>
+                @if (Model.SalaryHistory.Any())
+                {
+                    <table class="data-table table align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Kỳ lương</th>
+                                <th class="text-end">Lương cơ bản</th>
+                                <th class="text-end">Tổng nhận</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var s in Model.SalaryHistory)
+                            {
+                                var isCurrentMonth = (s.Month == now.Month && s.Year == now.Year);
+                                <tr class="@(isCurrentMonth ? "table-success" : "")">
+                                    <td>
+                                        Tháng @s.Month/@s.Year
+                                        @if (isCurrentMonth)
+                                        {
+                                            <span class="badge bg-success ms-1">Hiện tại</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">@s.BaseSalary.ToString("N0") đ</td>
+                                    <td class="text-end fw-bold">@s.TotalSalary.ToString("N0") đ</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-bar-chart-line" style="font-size: 3rem; opacity: 0.3;"></i>
+                        <p class="mt-2">Chưa có lịch sử lương.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Đơn từ & Yêu cầu -->
         <div class="col-md-6 mb-4">
             <div class="chart-card h-100">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -134,9 +248,9 @@
                     <a asp-controller="LeaveRequest" asp-action="MyLeaves" class="btn btn-sm btn-outline-primary">Tạo đơn</a>
                 </div>
                 <ul class="list-group list-group-flush">
-                    @if (profileRequests.Any())
+                    @if (Model.ProfileRequests.Any())
                     {
-                        foreach (var req in profileRequests)
+                        foreach (var req in Model.ProfileRequests)
                         {
                             <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
                                 <div>
@@ -161,7 +275,8 @@
                     else
                     {
                         <li class="list-group-item px-0 py-3 text-center text-muted">
-                            Chưa có đơn từ hay yêu cầu nào.
+                            <i class="bi bi-inbox" style="font-size: 2rem; opacity: 0.3;"></i>
+                            <p class="mt-2">Chưa có đơn từ hay yêu cầu nào.</p>
                         </li>
                     }
                 </ul>

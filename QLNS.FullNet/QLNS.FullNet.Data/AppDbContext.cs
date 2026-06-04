@@ -32,6 +32,14 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<LeaveRequest>().HasKey(e => e.Id);
         modelBuilder.Entity<Position>().HasKey(e => e.Id);
         modelBuilder.Entity<Salary>().HasKey(e => e.Id);
+        modelBuilder.Entity<Salary>().Property(e => e.BaseSalary).HasPrecision(18, 2);
+        modelBuilder.Entity<Salary>().Property(e => e.Allowance).HasPrecision(18, 2);
+        modelBuilder.Entity<Salary>().Property(e => e.Deduction).HasPrecision(18, 2);
+        modelBuilder.Entity<Salary>().Property(e => e.TotalSalary).HasPrecision(18, 2);
+
+        modelBuilder.Entity<Employee>().Property(e => e.BaseSalary).HasPrecision(18, 2);
+        modelBuilder.Entity<Employee>().Property(e => e.Allowance).HasPrecision(18, 2);
+
         modelBuilder.Entity<Timekeeping>().HasKey(e => e.Id);
         modelBuilder.Entity<ProfileUpdateRequest>().HasKey(e => e.Id);
     }
