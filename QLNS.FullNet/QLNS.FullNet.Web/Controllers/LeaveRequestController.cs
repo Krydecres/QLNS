@@ -159,7 +159,7 @@ namespace QLNS.FullNet.Web.Controllers
 
                 _context.LeaveRequests.Add(model);
                 await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = "Gửi đơn xin nghỉ phép thàng!";
+                TempData["SuccessMessage"] = "Gửi đơn xin nghỉ phép thành công!";
                 return RedirectToAction(nameof(MyLeaves));
             }
 
