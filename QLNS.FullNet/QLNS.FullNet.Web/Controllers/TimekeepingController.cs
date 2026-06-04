@@ -123,7 +123,7 @@ namespace QLNS.FullNet.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CheckIn(int? employeeId)
         {
-            Employee employee = null;
+            Employee? employee = null;
 
             if (employeeId.HasValue && User.IsInRole("Admin"))
             {

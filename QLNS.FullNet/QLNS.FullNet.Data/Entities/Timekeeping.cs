@@ -2,35 +2,6 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-<<<<<<< HEAD
-namespace QLNS.FullNet.Data.Entities;
-
-public class Timekeeping
-{
-    public int Id { get; set; }
-
-    [Required]
-    [Display(Name = "Nhân viên")]
-    public int EmployeeId { get; set; }
-
-    [ForeignKey("EmployeeId")]
-    public Employee? Employee { get; set; }
-
-    [Required]
-    [DataType(DataType.Date)]
-    [Display(Name = "Ngày")]
-    public DateTime Date { get; set; }
-
-    [Display(Name = "Gi៝ vào (Check-in)")]
-    public TimeSpan? CheckInTime { get; set; }
-
-    [Display(Name = "Giờ ra (Check-out)")]
-    public TimeSpan? CheckOutTime { get; set; }
-
-    [Display(Name = "Ghi chú")]
-    [MaxLength(500)]
-    public string? Note { get; set; }
-=======
 namespace QLNS.FullNet.Data.Entities
 {
     public class Timekeeping
@@ -40,7 +11,7 @@ namespace QLNS.FullNet.Data.Entities
         [Required]
         [Display(Name = "Nhân viên")]
         public int EmployeeId { get; set; }
-        
+
         [ForeignKey("EmployeeId")]
         public Employee? Employee { get; set; }
 
@@ -57,11 +28,10 @@ namespace QLNS.FullNet.Data.Entities
 
         [Display(Name = "Trạng thái")]
         [MaxLength(50)]
-        public string Status { get; set; } = "Present"; // Present, Absent, Late, HalfDay
+        public string Status { get; set; } = "Có mặt";
 
         [Display(Name = "Ghi chú")]
         [MaxLength(250)]
         public string? Note { get; set; }
     }
->>>>>>> origin/Dashboard-nv
 }
