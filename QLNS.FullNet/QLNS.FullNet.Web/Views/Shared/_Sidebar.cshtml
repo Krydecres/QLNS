@@ -93,6 +93,12 @@
                 </a>
             </li>
             <li>
+                <a href="@Url.Action("Index", "EmployeeShift")" class="sidebar-link @IsActive("EmployeeShift")">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Phân ca nhân viên</span>
+                </a>
+            </li>
+            <li>
                 <a href="@Url.Action("Approval", "LeaveRequest")" class="sidebar-link @IsActive("LeaveRequest", "Approval")">
                     <i class="bi bi-calendar-check"></i>
                     <span>Duyệt nghỉ phép</span>
