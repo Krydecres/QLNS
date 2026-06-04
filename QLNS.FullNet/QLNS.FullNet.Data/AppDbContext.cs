@@ -10,6 +10,8 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<AppUser> AppUsers { get; set; }
+    public DbSet<Shift> Shifts { get; set; }
+    public DbSet<EmployeeShift> EmployeeShifts { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<Department> Departments { get; set; }
     public DbSet<Employee> Employees { get; set; }
@@ -23,6 +25,21 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<EmployeeShift>().HasKey(e => e.Id);
+
+        modelBuilder.Entity<EmployeeShift>()
+            .HasOne(e => e.Employee)
+            .WithMany()
+            .HasForeignKey(e => e.EmployeeId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<EmployeeShift>()
+            .HasOne(e => e.Shift)
+            .WithMany()
+            .HasForeignKey(e => e.ShiftId)
+            .OnDelete(DeleteBehavior.Restrict);
+            
+        modelBuilder.Entity<Shift>().HasKey(e => e.Id);
 
         modelBuilder.Entity<AppUser>().HasKey(e => e.Id);
         modelBuilder.Entity<AuditLog>().HasKey(e => e.Id);

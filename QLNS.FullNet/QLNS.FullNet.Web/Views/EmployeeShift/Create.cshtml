@@ -1,0 +1,68 @@
+@model QLNS.FullNet.Data.Entities.EmployeeShift
+
+@{
+    ViewData["Title"] = "Gán ca mới";
+}
+
+<div class="container-fluid py-4">
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white">
+            <h4 class="mb-0">Gán ca mới cho nhân viên</h4>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="EmployeeId" class="form-label">Nhân viên</label>
+                    <select asp-for="EmployeeId" class="form-select" asp-items="ViewBag.Employees">
+                        <option value="">-- Chọn nhân viên --</option>
+                    </select>
+                    <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="ShiftId" class="form-label">Ca làm</label>
+                    <select asp-for="ShiftId" class="form-select" asp-items="ViewBag.Shifts">
+                        <option value="">-- Chọn ca làm --</option>
+                    </select>
+                    <span asp-validation-for="ShiftId" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="WorkDate" class="form-label">Ngày làm việc</label>
+                    <input asp-for="WorkDate" type="date" class="form-control" />
+                    <span asp-validation-for="WorkDate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Note" class="form-label">Ghi chú</label>
+                    <textarea asp-for="Note" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Note" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label asp-for="IsActive" class="form-check-label">Đang áp dụng</label>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save"></i> Lưu
+                    </button>
+
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        Quay lại
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

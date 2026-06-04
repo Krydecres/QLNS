@@ -1,0 +1,115 @@
+@model List<QLNS.FullNet.Data.Entities.Shift>
+
+@{
+    ViewData["Title"] = "Quản lý ca làm việc";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Quản lý ca làm việc</h2>
+            <p class="text-muted mb-0">Khởi tạo danh mục và quy định thời gian các ca làm việc.</p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Thêm ca làm
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <form method="get" asp-action="Index" class="row g-2 mb-3">
+        <div class="col-md-4">
+            <input type="text"
+                   name="search"
+                   value="@ViewBag.Search"
+                   class="form-control"
+                   placeholder="Tìm theo tên ca hoặc mô tả..." />
+        </div>
+
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-search"></i> Tìm kiếm
+            </button>
+
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                Làm mới
+            </a>
+        </div>
+    </form>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Tên ca</th>
+                        <th>Giờ bắt đầu</th>
+                        <th>Giờ kết thúc</th>
+                        <th>Nghỉ giữa ca</th>
+                        <th>Trạng thái</th>
+                        <th>Mô tả</th>
+                        <th class="text-end" style="width: 180px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var shift in Model)
+                        {
+                            <tr>
+                                <td>@shift.Name</td>
+                                <td>@shift.StartTime.ToString(@"hh\:mm")</td>
+                                <td>@shift.EndTime.ToString(@"hh\:mm")</td>
+                                <td>@shift.BreakMinutes phút</td>
+                                <td>
+                                    @if (shift.IsActive)
+                                    {
+                                        <span class="badge bg-success">Đang sử dụng</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Ngừng sử dụng</span>
+                                    }
+                                </td>
+                                <td>@shift.Description</td>
+                                <td class="text-end">
+                                    <a asp-action="Edit"
+                                       asp-route-id="@shift.Id"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil-square"></i> Sửa
+                                    </a>
+
+                                    <form asp-action="Delete"
+                                          asp-route-id="@shift.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Bạn có chắc muốn xóa ca làm này không?');">
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                Chưa có ca làm việc nào.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

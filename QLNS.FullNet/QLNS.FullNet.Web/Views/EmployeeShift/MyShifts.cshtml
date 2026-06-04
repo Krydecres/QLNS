@@ -1,0 +1,112 @@
+@model List<QLNS.FullNet.Data.Entities.EmployeeShift>
+
+@{
+    ViewData["Title"] = "Ca làm của tôi";
+}
+
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <h2 class="mb-1">Ca làm của tôi</h2>
+        <p class="text-muted mb-0">
+            Xem lịch ca làm việc đã được phân công.
+        </p>
+    </div>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-danger">
+            @ViewBag.ErrorMessage
+        </div>
+    }
+
+    <div class="card shadow-sm border-0 mb-3">
+        <div class="card-body">
+            <form method="get" asp-action="MyShifts" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label">Từ ngày</label>
+                    <input type="date"
+                           name="fromDate"
+                           value="@ViewBag.FromDate"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Đến ngày</label>
+                    <input type="date"
+                           name="toDate"
+                           value="@ViewBag.ToDate"
+                           class="form-control" />
+                </div>
+
+                <div class="col-md-auto">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Xem lịch
+                    </button>
+
+                    <a asp-action="MyShifts" class="btn btn-outline-secondary">
+                        Tuần này
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (ViewBag.EmployeeName != null)
+    {
+        <div class="alert alert-info">
+            Nhân viên: <strong>@ViewBag.EmployeeName</strong>
+        </div>
+    }
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ngày làm</th>
+                        <th>Ca làm</th>
+                        <th>Giờ bắt đầu</th>
+                        <th>Giờ kết thúc</th>
+                        <th>Nghỉ giữa ca</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.WorkDate.ToString("dd/MM/yyyy")</td>
+                                <td>@item.Shift?.Name</td>
+                                <td>@item.Shift?.StartTime.ToString(@"hh\:mm")</td>
+                                <td>@item.Shift?.EndTime.ToString(@"hh\:mm")</td>
+                                <td>@item.Shift?.BreakMinutes phút</td>
+                                <td>@item.Note</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                Chưa có ca làm nào trong khoảng thời gian này.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

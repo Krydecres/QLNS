@@ -1,0 +1,130 @@
+@model List<QLNS.FullNet.Data.Entities.EmployeeShift>
+
+@{
+    ViewData["Title"] = "Gán ca cho nhân viên";
+}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Gán ca cho nhân viên</h2>
+            <p class="text-muted mb-0">Xếp lịch và phân bổ nhân sự vào các ca làm việc.</p>
+        </div>
+
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Gán ca mới
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <form method="get" asp-action="Index" class="row g-2 mb-3">
+        <div class="col-md-3">
+            <input type="date"
+                   name="workDate"
+                   value="@ViewBag.WorkDate"
+                   class="form-control" />
+        </div>
+
+        <div class="col-md-3">
+            <select name="employeeId" class="form-select" asp-items="ViewBag.Employees">
+                <option value="">-- Tất cả nhân viên --</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <select name="shiftId" class="form-select" asp-items="ViewBag.Shifts">
+                <option value="">-- Tất cả ca làm --</option>
+            </select>
+        </div>
+
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-search"></i> Lọc
+            </button>
+
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                Làm mới
+            </a>
+        </div>
+    </form>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ngày làm</th>
+                        <th>Nhân viên</th>
+                        <th>Ca làm</th>
+                        <th>Thời gian</th>
+                        <th>Trạng thái</th>
+                        <th>Ghi chú</th>
+                        <th class="text-end" style="width: 180px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.WorkDate.ToString("dd/MM/yyyy")</td>
+                                <td>@item.Employee?.FullName</td>
+                                <td>@item.Shift?.Name</td>
+                                <td>
+                                    @item.Shift?.StartTime.ToString(@"hh\:mm")
+                                    -
+                                    @item.Shift?.EndTime.ToString(@"hh\:mm")
+                                </td>
+                                <td>
+                                    @if (item.IsActive)
+                                    {
+                                        <span class="badge bg-success">Đang áp dụng</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Ngừng áp dụng</span>
+                                    }
+                                </td>
+                                <td>@item.Note</td>
+                                <td class="text-end">
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-pencil-square"></i> Sửa
+                                    </a>
+
+                                    <form asp-action="Delete"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Bạn có chắc muốn xóa lịch ca này không?');">
+                                        @Html.AntiForgeryToken()
+
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i> Xóa
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                Chưa có lịch phân ca nào.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
