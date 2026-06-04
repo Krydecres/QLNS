@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QLNS.FullNet.Data;
 using QLNS.FullNet.Data.Entities;
+using QLNS.FullNet.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,9 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Đăng ký background service tự động chấm vắng mặt lúc 17:00
+builder.Services.AddHostedService<AbsenceMarkingService>();
 
 var app = builder.Build();
 //Nếu có cấu hình SeedAdmin:Password thì tự tạo tài khoản admin mặc định.

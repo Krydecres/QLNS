@@ -97,7 +97,7 @@ namespace QLNS.FullNet.Web.Controllers
                     worksheet.Cell(currentRow, 3).Value = item.Date.ToString("dd/MM/yyyy");
                     worksheet.Cell(currentRow, 4).Value = item.CheckInTime.HasValue ? item.CheckInTime.Value.ToString(@"hh\:mm") : "-";
                     worksheet.Cell(currentRow, 5).Value = item.CheckOutTime.HasValue ? item.CheckOutTime.Value.ToString(@"hh\:mm") : "-";
-                    worksheet.Cell(currentRow, 6).Value = item.Status;
+                    worksheet.Cell(currentRow, 6).Value = item.Status ?? "Có mặt";
                     worksheet.Cell(currentRow, 7).Value = item.Note;
                 }
 
@@ -124,14 +124,15 @@ namespace QLNS.FullNet.Web.Controllers
         public async Task<IActionResult> CheckIn(int? employeeId)
         {
             Employee? employee = null;
+            bool isAdminCheckingForEmployee = employeeId.HasValue && User.IsInRole("Admin");
 
-            if (employeeId.HasValue && User.IsInRole("Admin"))
+            if (isAdminCheckingForEmployee)
             {
                 employee = await _context.Employees.FirstOrDefaultAsync(e => e.Id == employeeId.Value);
                 if (employee == null)
                 {
                     TempData["ErrorMessage"] = "Không tìm thấy nhân viên đã chọn.";
-                    return Redirect(Request.Headers["Referer"].ToString() ?? "/");
+                    return RedirectToAction(nameof(Index));
                 }
             }
             else
@@ -141,7 +142,7 @@ namespace QLNS.FullNet.Web.Controllers
                 if (employee == null)
                 {
                     TempData["ErrorMessage"] = $"Không tìm thấy hồ sơ nhân sự khớp với tài khoản '{userEmail}'.";
-                    return Redirect(Request.Headers["Referer"].ToString() ?? "/");
+                    return RedirectToAction(nameof(MyAttendance));
                 }
             }
 
@@ -166,7 +167,10 @@ namespace QLNS.FullNet.Web.Controllers
                 TempData["SuccessMessage"] = $"Check-in cho '{employee.FullName}' thành công lúc {DateTime.Now:HH:mm}.";
             }
 
-            return Redirect(Request.Headers["Referer"].ToString() ?? "/");
+            // Admin chấm hộ → quay lại trang Index; Employee tự chấm → quay lại MyAttendance
+            return isAdminCheckingForEmployee
+                ? RedirectToAction(nameof(Index))
+                : RedirectToAction(nameof(MyAttendance));
         }
 
         // =======================================================
@@ -243,6 +247,51 @@ namespace QLNS.FullNet.Web.Controllers
             ViewBag.EndDate = endDate?.ToString("yyyy-MM-dd");
 
             return View(timekeepings);
+        }
+
+        // =======================================================
+        // 6. NHẬP CÔNG THỦ CÔNG (Admin)
+        // =======================================================
+        [Authorize(Roles = "Admin")]
+        public IActionResult ManualEntry()
+        {
+            ViewBag.EmployeeId = new SelectList(_context.Employees, "Id", "FullName");
+            return View();
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ManualEntry(Timekeeping model)
+        {
+            if (ModelState.IsValid)
+            {
+                var existing = await _context.Timekeepings
+                    .FirstOrDefaultAsync(t => t.EmployeeId == model.EmployeeId && t.Date.Date == model.Date.Date);
+
+                if (existing != null)
+                {
+                    existing.CheckInTime = model.CheckInTime;
+                    existing.CheckOutTime = model.CheckOutTime;
+                    existing.Note = model.Note;
+                    if (!string.IsNullOrWhiteSpace(model.Status))
+                        existing.Status = model.Status;
+                    _context.Update(existing);
+                }
+                else
+                {
+                    if (string.IsNullOrWhiteSpace(model.Status))
+                        model.Status = "Có mặt";
+                    _context.Add(model);
+                }
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Cập nhật dữ liệu chấm công thành công.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewBag.EmployeeId = new SelectList(_context.Employees, "Id", "FullName", model.EmployeeId);
+            return View(model);
         }
     }
 }

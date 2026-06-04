@@ -28,7 +28,7 @@ namespace QLNS.FullNet.Data.Entities
 
         [Display(Name = "Trạng thái")]
         [MaxLength(50)]
-        public string Status { get; set; } = "Có mặt";
+        public string? Status { get; set; }
 
         [Display(Name = "Ghi chú")]
         [MaxLength(250)]

@@ -27,6 +27,10 @@
                     <i class="bi bi-check2-circle"></i> Chấm công
                 </button>
             </form>
+            <!-- Nút Nhập công thủ công -->
+            <a asp-action="ManualEntry" class="btn btn-warning text-nowrap">
+                <i class="bi bi-pencil-square"></i> Nhập thủ công
+            </a>
             <!-- Nút Xuất Excel -->
             <a asp-controller="Timekeeping" asp-action="ExportExcel"
                asp-route-startDate="@ViewBag.StartDate"
@@ -102,13 +106,16 @@
                             <td>@(item.CheckInTime?.ToString(@"hh\:mm") ?? "-")</td>
                             <td>@(item.CheckOutTime?.ToString(@"hh\:mm") ?? "-")</td>
                             <td class="text-center">
-                                @if (item.Status == "Có mặt")
+                                @{
+                                    var status = item.Status ?? "Có mặt";
+                                }
+                                @if (status == "Có mặt")
                                 {
-                                    <span class="badge bg-success px-3 py-2">@item.Status</span>
+                                    <span class="badge bg-success px-3 py-2">@status</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-danger px-3 py-2">@item.Status</span>
+                                    <span class="badge bg-danger px-3 py-2">@status</span>
                                 }
                             </td>
                         </tr>
