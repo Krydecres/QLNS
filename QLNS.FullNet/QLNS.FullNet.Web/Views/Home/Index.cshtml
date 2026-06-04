@@ -1,5 +1,17 @@
-﻿@{
-    ViewData["Title"] = "Dashboard";
+@model QLNS.FullNet.Web.Models.AdminDashboardViewModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Dashboard Quản trị";
+    var now = DateTime.Now;
+
+    var salaryLabelsJson  = JsonSerializer.Serialize(Model.SalaryChartLabels);
+    var salaryDataJson    = JsonSerializer.Serialize(Model.SalaryChartData);
+    var attLabelsJson     = JsonSerializer.Serialize(Model.AttendanceLabels);
+    var attPresentJson    = JsonSerializer.Serialize(Model.AttendancePresentData);
+    var attLeaveJson      = JsonSerializer.Serialize(Model.AttendanceLeaveData);
+    var attAbsentJson     = JsonSerializer.Serialize(Model.AttendanceAbsentData);
+    var deptLabelsJson    = JsonSerializer.Serialize(Model.DeptLabels);
+    var deptDataJson      = JsonSerializer.Serialize(Model.DeptData);
 }
 
 <div class="dashboard">
@@ -9,70 +21,82 @@
         <div>
             <h1 class="dashboard-title">Tổng quan hệ thống</h1>
             <p class="dashboard-subtitle">
-                Quản lý nhân sự và chấm công — @DateTime.Now.ToString("dddd, dd/MM/yyyy")
+                Quản lý nhân sự và chấm công — @now.ToString("dddd, dd/MM/yyyy")
             </p>
         </div>
         <div class="dashboard-actions">
             <span class="badge-shift">
-                <i class="bi bi-sun"></i> Ca sáng đang diễn ra
+                <i class="bi bi-sun"></i> @now.ToString("HH:mm") — Đang hoạt động
             </span>
         </div>
     </div>
 
-    <!-- Stat Cards -->
-    <div class="stat-grid">
+    <!-- Stat Cards Row 1: Nhân sự & Chấm công -->
+    <div class="stat-grid mt-3">
         <div class="stat-card">
             <div class="stat-icon icon-blue"><i class="bi bi-people"></i></div>
             <div class="stat-label">Tổng nhân viên</div>
-            <div class="stat-value">48</div>
-            <div class="stat-note">4 phòng ban</div>
+            <div class="stat-value">@Model.TotalEmployees</div>
+            <div class="stat-note">@Model.TotalDepartments phòng ban · @Model.TotalPositions chức vụ</div>
         </div>
+
         <div class="stat-card">
             <div class="stat-icon icon-green"><i class="bi bi-patch-check"></i></div>
-            <div class="stat-label">Đã chấm công hôm nay</div>
-            <div class="stat-value">41</div>
-            <div class="stat-note text-success">85.4% có mặt</div>
+            <div class="stat-label">Có mặt hôm nay</div>
+            <div class="stat-value">@Model.PresentToday</div>
+            <div class="stat-note text-success">@Model.PresentRate% có mặt</div>
         </div>
+
         <div class="stat-card stat-card--warn">
             <div class="stat-icon icon-yellow"><i class="bi bi-person-x"></i></div>
-            <div class="stat-label">Vắng mặt / Chưa chấm</div>
-            <div class="stat-value">7</div>
-            <div class="stat-note text-warning">3 có phép, 4 chưa rõ</div>
+            <div class="stat-label">Chưa chấm công</div>
+            <div class="stat-value">@Model.NotCheckedToday</div>
+            <div class="stat-note text-warning">
+                @Model.AbsentToday vắng có phép
+            </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon icon-purple"><i class="bi bi-hourglass-split"></i></div>
-            <div class="stat-label">Tăng ca tháng này</div>
-            <div class="stat-value">124h</div>
-            <div class="stat-note">Trên toàn bộ nhân viên</div>
-        </div>
-        <div class="stat-card">
+
+        <div class="stat-card @(Model.PendingLeaveRequests > 0 ? "stat-card--warn" : "")">
             <div class="stat-icon icon-teal"><i class="bi bi-calendar-check"></i></div>
             <div class="stat-label">Đơn nghỉ phép chờ duyệt</div>
-            <div class="stat-value">5</div>
-            <div class="stat-note text-warning">Cần xử lý hôm nay</div>
+            <div class="stat-value">@Model.PendingLeaveRequests</div>
+            <div class="stat-note @(Model.PendingLeaveRequests > 0 ? "text-warning" : "text-muted")">
+                @(Model.PendingLeaveRequests > 0 ? "Cần xử lý" : "Đã xử lý hết")
+            </div>
         </div>
+
         <div class="stat-card">
             <div class="stat-icon icon-green"><i class="bi bi-cash-coin"></i></div>
-            <div class="stat-label">Lương đã tính tháng này</div>
-            <div class="stat-value">32</div>
-            <div class="stat-note">/ 48 nhân viên</div>
+            <div class="stat-label">Tổng lương tháng @now.Month</div>
+            <div class="stat-value" style="font-size:1.15rem">
+                @(Model.TotalSalaryThisMonth > 0 ? Model.TotalSalaryThisMonth.ToString("N0") + " đ" : "Chưa tính")
+            </div>
+            <div class="stat-note @(Model.SalaryUp ? "text-success" : "text-danger")">
+                @if (Model.TotalSalaryLastMonth > 0)
+                {
+                    <i class="bi bi-arrow-@(Model.SalaryUp ? "up" : "down")"></i>
+                    <text>@((Model.SalaryUp ? "+" : "") + Model.SalaryDiff.ToString("N0")) đ</text>
+                    <span class="text-muted">vs T@(now.Month == 1 ? 12 : now.Month - 1)</span>
+                }
+                else
+                {
+                    <span class="text-muted">@Model.SalaryCalculatedCount / @Model.TotalEmployees NV đã tính</span>
+                }
+            </div>
         </div>
-        <div class="stat-card stat-card--warn">
-            <div class="stat-icon icon-yellow"><i class="bi bi-file-earmark-x"></i></div>
-            <div class="stat-label">Hợp đồng sắp hết hạn</div>
-            <div class="stat-value">3</div>
-            <div class="stat-note text-warning">Trong vòng 30 ngày</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon icon-blue"><i class="bi bi-diagram-3"></i></div>
-            <div class="stat-label">Tổng phòng ban</div>
-            <div class="stat-value">4</div>
-            <div class="stat-note">IT, KD, HC, KT</div>
+
+        <div class="stat-card @(Model.PendingProfileUpdates > 0 ? "stat-card--warn" : "")">
+            <div class="stat-icon icon-purple"><i class="bi bi-person-lines-fill"></i></div>
+            <div class="stat-label">Cập nhật hồ sơ chờ duyệt</div>
+            <div class="stat-value">@Model.PendingProfileUpdates</div>
+            <div class="stat-note @(Model.PendingProfileUpdates > 0 ? "text-warning" : "text-muted")">
+                @(Model.PendingProfileUpdates > 0 ? "Cần xem xét" : "Không có yêu cầu")
+            </div>
         </div>
     </div>
 
     <!-- Charts Row 1 -->
-    <div class="chart-grid">
+    <div class="chart-grid mt-4">
         <div class="chart-card chart-card--wide">
             <h2 class="chart-title">Tình hình chấm công 7 ngày gần nhất</h2>
             <p class="chart-sub">Số lượt có mặt, vắng có phép và vắng không phép theo ngày.</p>
@@ -88,120 +112,162 @@
     <!-- Charts Row 2 -->
     <div class="chart-grid">
         <div class="chart-card chart-card--wide">
-            <h2 class="chart-title">Tổng lương chi trả theo tháng (6 tháng gần nhất)</h2>
-            <p class="chart-sub">Đơn vị: triệu đồng.</p>
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h2 class="chart-title">Tổng lương chi trả theo tháng (6 tháng gần nhất)</h2>
+                    <p class="chart-sub">Đơn vị: triệu đồng — dữ liệu thực từ bảng lương.</p>
+                </div>
+                <a asp-controller="Salaries" asp-action="Index" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-table me-1"></i>Xem bảng lương
+                </a>
+            </div>
             <canvas id="salaryChart" height="110"></canvas>
         </div>
         <div class="chart-card">
-            <h2 class="chart-title">Trạng thái nhân viên</h2>
-            <p class="chart-sub">Đang làm việc, thử việc, nghỉ việc.</p>
-            <canvas id="statusChart" height="200"></canvas>
+            <h2 class="chart-title">Số liệu nhanh tháng @now.Month/@now.Year</h2>
+            <p class="chart-sub">Tổng hợp các chỉ số quan trọng.</p>
+            <div class="list-group list-group-flush mt-2">
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
+                    <span class="text-muted"><i class="bi bi-people me-2 text-primary"></i>Tổng nhân viên</span>
+                    <strong>@Model.TotalEmployees</strong>
+                </div>
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
+                    <span class="text-muted"><i class="bi bi-cash-stack me-2 text-success"></i>Đã tính lương</span>
+                    <strong>@Model.SalaryCalculatedCount / @Model.TotalEmployees</strong>
+                </div>
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
+                    <span class="text-muted"><i class="bi bi-check2-circle me-2 text-success"></i>Có mặt hôm nay</span>
+                    <strong class="text-success">@Model.PresentToday (@Model.PresentRate%)</strong>
+                </div>
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
+                    <span class="text-muted"><i class="bi bi-x-circle me-2 text-danger"></i>Chưa chấm công</span>
+                    <strong class="text-danger">@Model.NotCheckedToday</strong>
+                </div>
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
+                    <span class="text-muted"><i class="bi bi-hourglass me-2 text-warning"></i>Đơn nghỉ chờ duyệt</span>
+                    <strong class="text-warning">@Model.PendingLeaveRequests</strong>
+                </div>
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
+                    <span class="text-muted"><i class="bi bi-person-lines-fill me-2 text-info"></i>Hồ sơ chờ duyệt</span>
+                    <strong class="text-info">@Model.PendingProfileUpdates</strong>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Table: Nhân viên vắng hôm nay -->
+    <!-- Table: Nhân viên chưa chấm công hôm nay -->
     <div class="chart-card mt-3">
-        <h2 class="chart-title">Nhân viên chưa chấm công hôm nay</h2>
-        <p class="chart-sub">Danh sách cần xác nhận trạng thái.</p>
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Mã NV</th>
-                    <th>Họ tên</th>
-                    <th>Phòng ban</th>
-                    <th>Ca làm</th>
-                    <th>Trạng thái</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>NV005</td><td>Nguyễn Văn An</td><td>Kinh doanh</td>
-                    <td>Ca sáng</td>
-                    <td><span class="badge-status badge-leave">Nghỉ có phép</span></td>
-                </tr>
-                <tr>
-                    <td>NV012</td><td>Trần Thị Bình</td><td>Kế toán</td>
-                    <td>Ca sáng</td>
-                    <td><span class="badge-status badge-leave">Nghỉ có phép</span></td>
-                </tr>
-                <tr>
-                    <td>NV019</td><td>Lê Hoàng Nam</td><td>IT</td>
-                    <td>Ca sáng</td>
-                    <td><span class="badge-status badge-absent">Chưa rõ lý do</span></td>
-                </tr>
-                <tr>
-                    <td>NV027</td><td>Phạm Thị Lan</td><td>Hành chính</td>
-                    <td>Ca sáng</td>
-                    <td><span class="badge-status badge-absent">Chưa rõ lý do</span></td>
-                </tr>
-                <tr>
-                    <td>NV033</td><td>Võ Minh Tuấn</td><td>Kinh doanh</td>
-                    <td>Ca sáng</td>
-                    <td><span class="badge-status badge-leave">Nghỉ có phép</span></td>
-                </tr>
-                <tr>
-                    <td>NV040</td><td>Đỗ Thị Hoa</td><td>IT</td>
-                    <td>Ca chiều</td>
-                    <td><span class="badge-status badge-absent">Chưa rõ lý do</span></td>
-                </tr>
-                <tr>
-                    <td>NV045</td><td>Bùi Quốc Hùng</td><td>Kế toán</td>
-                    <td>Ca chiều</td>
-                    <td><span class="badge-status badge-absent">Chưa rõ lý do</span></td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+                <h2 class="chart-title mb-0">Nhân viên chưa chấm công hôm nay</h2>
+                <p class="chart-sub mb-0">Danh sách cần xác nhận trạng thái — @now.ToString("dd/MM/yyyy")</p>
+            </div>
+            <a asp-controller="Timekeeping" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-clock-history me-1"></i>Dữ liệu chấm công
+            </a>
+        </div>
+        @if (Model.AbsentEmployees.Any())
+        {
+            <table class="data-table mt-2">
+                <thead>
+                    <tr>
+                        <th>Mã NV</th>
+                        <th>Họ tên</th>
+                        <th>Phòng ban</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var emp in Model.AbsentEmployees)
+                    {
+                        <tr>
+                            <td><span class="text-muted">NV-@emp.Id</span></td>
+                            <td class="fw-semibold">@emp.FullName</td>
+                            <td>@(emp.DepartmentName ?? "—")</td>
+                            <td>
+                                @if (emp.Status == "Nghỉ có phép")
+                                {
+                                    <span class="badge-status badge-leave">Nghỉ có phép</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-status badge-absent">Chưa chấm công</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-center text-muted py-4">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 2.5rem;"></i>
+                <p class="mt-2 mb-0 fw-semibold text-success">Tất cả nhân viên đã chấm công hôm nay!</p>
+            </div>
+        }
     </div>
 
 </div>
 
 @section Scripts {
 <script>
-const g = { dark:'#1D6A4A', mid:'#2D9F6F', light:'#6CC49A', pale:'#B8E4CF', lighter:'#E1F5EE' };
-const days = ['T2 23/6','T3 24/6','T4 25/6','T5 26/6','T6 27/6','T7 28/6','CN 29/6'];
+const g = { dark:'#1D6A4A', mid:'#2D9F6F', light:'#6CC49A', pale:'#B8E4CF' };
 
-// Chấm công 7 ngày
+// Chấm công 7 ngày — dữ liệu thực
+const attLabels  = @Html.Raw(attLabelsJson);
+const attPresent = @Html.Raw(attPresentJson);
+const attLeave   = @Html.Raw(attLeaveJson);
+const attAbsent  = @Html.Raw(attAbsentJson);
+
 new Chart(document.getElementById('attendanceChart'), {
     type: 'bar',
     data: {
-        labels: days,
+        labels: attLabels,
         datasets: [
-            { label: 'Có mặt', data: [44,43,45,42,41,30,28],
-              backgroundColor: g.mid, borderRadius: 4 },
-            { label: 'Nghỉ có phép', data: [2,3,2,4,3,5,4],
-              backgroundColor: g.light, borderRadius: 4 },
-            { label: 'Vắng không phép', data: [2,2,1,2,4,1,2],
-              backgroundColor: '#f0a04b', borderRadius: 4 }
+            { label: 'Có mặt',           data: attPresent, backgroundColor: g.mid,    borderRadius: 4 },
+            { label: 'Vắng có phép',     data: attLeave,   backgroundColor: g.light,  borderRadius: 4 },
+            { label: 'Vắng không phép',  data: attAbsent,  backgroundColor: '#f0a04b',borderRadius: 4 }
         ]
     },
     options: {
         plugins: { legend: { position: 'top' } },
-        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+        scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } } }
     }
 });
 
-// Phòng ban donut
+// Phòng ban donut — dữ liệu thực
+const deptLabels = @Html.Raw(deptLabelsJson);
+const deptData   = @Html.Raw(deptDataJson);
+const deptColors = [g.dark, g.mid, g.light, g.pale, '#a78bfa', '#60a5fa', '#f472b6'];
+
 new Chart(document.getElementById('deptChart'), {
     type: 'doughnut',
     data: {
-        labels: ['IT','Kinh doanh','Hành chính','Kế toán'],
+        labels: deptLabels.length ? deptLabels : ['Chưa có dữ liệu'],
         datasets: [{
-            data: [14,18,8,8],
-            backgroundColor: [g.dark, g.mid, g.light, g.pale],
+            data: deptData.length ? deptData : [1],
+            backgroundColor: deptColors,
             borderWidth: 2, borderColor: '#fff'
         }]
     },
-    options: { cutout:'60%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{size:11} } } } }
+    options: {
+        cutout: '60%',
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } }
+    }
 });
 
-// Lương theo tháng
+// Lương 6 tháng — dữ liệu thực
+const salaryLabels = @Html.Raw(salaryLabelsJson);
+const salaryData   = @Html.Raw(salaryDataJson);
+
 new Chart(document.getElementById('salaryChart'), {
     type: 'line',
     data: {
-        labels: ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6'],
+        labels: salaryLabels,
         datasets: [{
             label: 'Tổng lương (triệu đồng)',
-            data: [285, 270, 292, 305, 298, 312],
+            data: salaryData,
             borderColor: g.dark,
             backgroundColor: g.pale + '55',
             pointBackgroundColor: g.dark,
@@ -210,21 +276,10 @@ new Chart(document.getElementById('salaryChart'), {
             fill: true
         }]
     },
-    options: { plugins:{ legend:{ position:'top' } }, scales:{ y:{ beginAtZero:false } } }
-});
-
-// Trạng thái nhân viên
-new Chart(document.getElementById('statusChart'), {
-    type: 'doughnut',
-    data: {
-        labels: ['Đang làm việc','Thử việc','Đã nghỉ việc'],
-        datasets: [{
-            data: [38, 7, 3],
-            backgroundColor: [g.dark, g.light, '#d9534f'],
-            borderWidth: 2, borderColor: '#fff'
-        }]
-    },
-    options: { cutout:'60%', plugins:{ legend:{ position:'bottom', labels:{ boxWidth:12, font:{size:11} } } } }
+    options: {
+        plugins: { legend: { position: 'top' } },
+        scales: { y: { beginAtZero: false, ticks: { callback: v => v + 'tr' } } }
+    }
 });
 </script>
 }
