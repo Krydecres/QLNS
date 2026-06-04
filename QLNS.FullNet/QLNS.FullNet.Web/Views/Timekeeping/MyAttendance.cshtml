@@ -1,0 +1,101 @@
+@model IEnumerable<QLNS.FullNet.Data.Entities.Timekeeping>
+
+@{
+    ViewData["Title"] = "Chấm công của tôi";
+}
+
+<div class="dashboard">
+    <div class="dashboard-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="dashboard-title">Chấm công của tôi</h1>
+            <p class="dashboard-subtitle">Lịch sử điểm danh và trạng thái chấm công cá nhân</p>
+        </div>
+        <div class="dashboard-actions">
+            <form asp-action="CheckIn" method="post" class="m-0">
+                <button type="submit" class="btn btn-primary shadow-sm">
+                    <i class="bi bi-check2-circle"></i> Chấm công hôm nay
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Hiển thị thông báo nếu có -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mt-3 mb-0" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mt-3 mb-0" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Thanh công cụ Lọc dữ liệu -->
+    <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded shadow-sm mt-3 border">
+        <form asp-action="MyAttendance" method="get" class="m-0 d-flex flex-wrap gap-2 align-items-center">
+            <span class="fw-semibold text-muted me-2"><i class="bi bi-funnel"></i> Lọc thời gian:</span>
+            
+            <div class="input-group" style="width: auto;">
+                <span class="input-group-text bg-light">Từ</span>
+                <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate">
+            </div>
+            
+            <div class="input-group" style="width: auto;">
+                <span class="input-group-text bg-light">Đến</span>
+                <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate">
+            </div>
+
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Áp dụng</button>
+            
+            @if (ViewBag.StartDate != null || ViewBag.EndDate != null)
+            {
+                <a asp-action="MyAttendance" class="btn btn-outline-secondary">Xóa lọc</a>
+            }
+        </form>
+    </div>
+
+    <div class="chart-card mt-3">
+        <table class="data-table table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th width="20%">Ngày Chấm Công</th>
+                    <th width="20%">Giờ Ghi Nhận</th>
+                    <th>Trạng Thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">@item.Date.ToString("dd/MM/yyyy")</td>
+                            <td>@item.Date.ToString("HH:mm")</td>
+                            <td>
+                                @if (item.Status == "Có mặt")
+                                {
+                                    <span class="badge bg-success px-3 py-2 shadow-sm">@item.Status</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger px-3 py-2 shadow-sm">@item.Status</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="3" class="text-center text-muted py-4">Bạn chưa có dữ liệu chấm công nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

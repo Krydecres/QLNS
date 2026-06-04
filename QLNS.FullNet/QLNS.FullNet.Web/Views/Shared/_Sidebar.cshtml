@@ -103,11 +103,27 @@
                 </a>
             </li>
         </ul>
+
+        <div class="sidebar-section-label">CÁ NHÂN</div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="@Url.Action("MyProfile", "Employee")" class="sidebar-link @IsActive("Employee", "MyProfile")">
+                    <i class="bi bi-person"></i>
+                    <span>Thông tin cá nhân</span>
+                </a>
+            </li>
+        </ul>
     }
     else if (User.IsInRole("Employee"))
     {
         <div class="sidebar-section-label">CÁ NHÂN</div>
         <ul class="sidebar-nav">
+            <li>
+                <a href="@Url.Action("EmployeeDashboard", "Home")" class="sidebar-link @IsActive("Home", "EmployeeDashboard")">
+                    <i class="bi bi-grid-1x2-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
             <li>
                 <a href="@Url.Action("MyProfile", "Employee")" class="sidebar-link @IsActive("Employee", "MyProfile")">
                     <i class="bi bi-person"></i>

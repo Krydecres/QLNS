@@ -1,0 +1,171 @@
+@using QLNS.FullNet.Data
+@using System.Security.Claims
+@inject AppDbContext _context
+@{
+    ViewData["Title"] = "Dashboard Cá nhân";
+
+    var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+    var employee = _context.Employees.FirstOrDefault(e => e.Email == userEmail);
+
+    var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+    
+    var timekeepingsThisMonth = new List<QLNS.FullNet.Data.Entities.Timekeeping>();
+    var recentTimekeepings = new List<QLNS.FullNet.Data.Entities.Timekeeping>();
+    var profileRequests = new List<QLNS.FullNet.Data.Entities.ProfileUpdateRequest>();
+
+    if (employee != null)
+    {
+        timekeepingsThisMonth = _context.Timekeepings
+            .Where(t => t.EmployeeId == employee.Id && t.Date >= firstDayOfMonth)
+            .ToList();
+            
+        recentTimekeepings = _context.Timekeepings
+            .Where(t => t.EmployeeId == employee.Id)
+            .OrderByDescending(t => t.Date)
+            .Take(3)
+            .ToList();
+            
+        profileRequests = _context.ProfileUpdateRequests
+            .Where(r => r.EmployeeId == employee.Id)
+            .OrderByDescending(r => r.CreatedAt)
+            .Take(3)
+            .ToList();
+    }
+
+    var daysWorked = timekeepingsThisMonth.Count(t => t.Status == "Có mặt");
+    var workingDaysInMonth = 22; // Giả định số ngày công chuẩn
+}
+
+<div class="dashboard">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <div>
+            <h1 class="dashboard-title">Xin chào, @(employee?.FullName ?? User.Identity?.Name ?? "Nhân viên")!</h1>
+            <p class="dashboard-subtitle">
+                Tổng quan thông tin cá nhân và công việc của bạn — @DateTime.Now.ToString("dddd, dd/MM/yyyy")
+            </p>
+        </div>
+        <div class="dashboard-actions">
+            <span class="badge-shift">
+                <i class="bi bi-briefcase"></i> Trạng thái: Đang làm việc
+            </span>
+        </div>
+    </div>
+
+    <!-- Stat Cards -->
+    <div class="stat-grid mt-3">
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="bi bi-calendar-check"></i></div>
+            <div class="stat-label">Ngày công tháng này</div>
+            <div class="stat-value">@daysWorked/@workingDaysInMonth</div>
+            <div class="stat-note text-success">Cập nhật lúc @DateTime.Now.ToString("HH:mm")</div>
+        </div>
+        <div class="stat-card stat-card--warn">
+            <div class="stat-icon icon-yellow"><i class="bi bi-hourglass-split"></i></div>
+            <div class="stat-label">Số giờ tăng ca</div>
+            <div class="stat-value">0h</div>
+            <div class="stat-note">Chưa có dữ liệu</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-teal"><i class="bi bi-airplane"></i></div>
+            <div class="stat-label">Ngày phép còn lại</div>
+            <div class="stat-value">12 ngày</div>
+            <div class="stat-note text-muted">Trong tổng số 12 ngày</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="bi bi-cash-coin"></i></div>
+            <div class="stat-label">Trạng thái lương</div>
+            <div class="stat-value">Chờ chốt</div>
+            <div class="stat-note text-muted">Kỳ lương tháng này</div>
+        </div>
+    </div>
+
+    <!-- 2 Columns Layout -->
+    <div class="row mt-4">
+        <!-- Chấm công gần đây -->
+        <div class="col-md-6 mb-4">
+            <div class="chart-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="chart-title mb-0">Chấm công gần đây</h2>
+                    <a asp-controller="Timekeeping" asp-action="MyAttendance" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
+                </div>
+                <table class="data-table table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ngày</th>
+                            <th>Giờ ghi nhận</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (recentTimekeepings.Any())
+                        {
+                            foreach (var item in recentTimekeepings)
+                            {
+                                <tr>
+                                    <td>@item.Date.ToString("dd/MM/yyyy")</td>
+                                    <td>@item.Date.ToString("HH:mm")</td>
+                                    <td>
+                                        @if (item.Status == "Có mặt") {
+                                            <span class="badge bg-success">@item.Status</span>
+                                        } else {
+                                            <span class="badge bg-danger">@item.Status</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center text-muted py-4">Chưa có dữ liệu chấm công.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Thông báo & Đơn từ -->
+        <div class="col-md-6 mb-4">
+            <div class="chart-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="chart-title mb-0">Đơn từ & Yêu cầu</h2>
+                    <a asp-controller="LeaveRequest" asp-action="MyLeaves" class="btn btn-sm btn-outline-primary">Tạo đơn</a>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @if (profileRequests.Any())
+                    {
+                        foreach (var req in profileRequests)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                                <div>
+                                    <div class="fw-bold"><i class="bi bi-person-lines-fill text-info me-2"></i>Yêu cầu cập nhật hồ sơ</div>
+                                    <small class="text-muted">Gửi lúc: @req.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                                @if (req.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark rounded-pill">Đang chờ duyệt</span>
+                                }
+                                else if (req.Status == "Approved")
+                                {
+                                    <span class="badge bg-success rounded-pill">Đã duyệt</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger rounded-pill">Từ chối</span>
+                                }
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item px-0 py-3 text-center text-muted">
+                            Chưa có đơn từ hay yêu cầu nào.
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
