@@ -34,6 +34,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<QLNS.FullNet.Web.Services.ISalaryCalculationService, QLNS.FullNet.Web.Services.SalaryCalculationService>();
 
 // Đăng ký background service tự động chấm vắng mặt lúc 17:00
 builder.Services.AddHostedService<AbsenceMarkingService>();
