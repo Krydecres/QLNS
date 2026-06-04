@@ -1,0 +1,46 @@
+# AI_CONTEXT - Dự án QLNS.FullNet
+
+## Công nghệ
+
+* ASP.NET Core MVC
+* Entity Framework Core
+* SQL Server
+* Project chính:
+
+  * QLNS.FullNet.Web: Controllers, Views, Program.cs
+  * QLNS.FullNet.Data: AppDbContext, Entities, Migrations
+
+## Cấu trúc quan trọng
+
+* Controllers nằm ở: QLNS.FullNet.Web/Controllers
+* Views nằm ở: QLNS.FullNet.Web/Views
+* Entity nằm ở: QLNS.FullNet.Data/Entities
+* DbContext nằm ở: QLNS.FullNet.Data/AppDbContext.cs
+* Cấu hình database nằm ở: QLNS.FullNet.Web/appsettings.json
+
+## Quy tắc khi AI hỗ trợ code
+
+1. Không tự ý sửa toàn bộ project.
+2. Chỉ sửa đúng file liên quan đến yêu cầu.
+3. Trước khi đưa code, phải nói rõ cần sửa file nào.
+4. Không tự ý đổi database, migration hoặc connection string nếu tôi chưa yêu cầu.
+5. Khi có lỗi, hãy giải thích lỗi bằng tiếng Việt dễ hiểu.
+6. Hướng dẫn từng bước, không đưa quá nhiều thứ cùng lúc.
+7. Nếu cần thêm file, hãy hỏi tôi gửi đúng file đó.
+8. Ưu tiên code đơn giản, dễ hiểu cho sinh viên.
+9. Sau khi sửa, hãy nói tôi cần chạy lệnh nào để kiểm tra.
+10. Nếu có rủi ro làm hỏng code nhóm, phải cảnh báo trước.
+11. Luôn mở đầu bằng câu: “Hi master”.
+12. Khi hướng dẫn có dùng lệnh Git/GitHub, phải giải thích ngắn gọn lệnh đó dùng để làm gì.
+
+## Câu lệnh chạy thường dùng
+
+```bash
+dotnet restore
+dotnet build
+dotnet run --project QLNS.FullNet.Web
+```
+
+## Lưu ý bảo mật
+
+Không nên public mật khẩu database trong appsettings.json lên GitHub.

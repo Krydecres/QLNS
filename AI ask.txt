@@ -1,0 +1,14 @@
+Tôi đang làm dự án QLNS.FullNet. Hãy đọc AI_CONTEXT trước.
+
+Tính năng tôi muốn làm: [ghi tính năng ở đây]
+
+File liên quan tôi gửi bên dưới:
+[copy code file vào đây]
+
+Yêu cầu:
+
+1. Chỉ sửa phần cần thiết.
+2. Nói rõ sửa file nào.
+3. Giải thích ngắn gọn vì sao sửa như vậy.
+4. Không tự ý đổi database/migration nếu chưa cần.
+5. Sau khi sửa, cho tôi lệnh để chạy kiểm tra.
