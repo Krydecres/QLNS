@@ -161,6 +161,12 @@
                 </a>
             </li>
             <li>
+                <a href="@Url.Action("MyShifts", "EmployeeShift")" class="sidebar-link @IsActive("EmployeeShift", "MyShifts")">
+                    <i class="bi bi-calendar-week"></i>
+                    <span>Ca làm của tôi</span>
+                </a>
+            </li>
+            <li>
                 <a href="@Url.Action("MyLeaves", "LeaveRequest")" class="sidebar-link @IsActive("LeaveRequest", "MyLeaves")">
                     <i class="bi bi-calendar-minus"></i>
                     <span>Nghỉ phép của tôi</span>

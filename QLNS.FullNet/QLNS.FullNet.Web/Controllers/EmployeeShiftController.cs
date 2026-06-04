@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QLNS.FullNet.Data;
 using QLNS.FullNet.Data.Entities;
+using System.Security.Claims;
 
 namespace QLNS.FullNet.Web.Controllers;
 
-[Authorize(Roles = "Admin")]
+[Authorize]
 public class EmployeeShiftController : Controller
 {
     private readonly AppDbContext _context;
@@ -17,6 +18,7 @@ public class EmployeeShiftController : Controller
         _context = context;
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Index(DateTime? workDate, int? employeeId, int? shiftId)
     {
         var query = _context.EmployeeShifts
@@ -52,6 +54,7 @@ public class EmployeeShiftController : Controller
         return View(employeeShifts);
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create()
     {
         await LoadSelectLists();
@@ -65,6 +68,7 @@ public class EmployeeShiftController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(EmployeeShift employeeShift)
     {
         await ValidateEmployeeShift(employeeShift);
@@ -83,6 +87,7 @@ public class EmployeeShiftController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int id)
     {
         var employeeShift = await _context.EmployeeShifts.FindAsync(id);
@@ -99,6 +104,7 @@ public class EmployeeShiftController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(int id, EmployeeShift employeeShift)
     {
         if (id != employeeShift.Id)
@@ -124,6 +130,7 @@ public class EmployeeShiftController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int id)
     {
         var employeeShift = await _context.EmployeeShifts.FindAsync(id);
@@ -137,6 +144,61 @@ public class EmployeeShiftController : Controller
         }
 
         return RedirectToAction(nameof(Index));
+    }
+
+    [Authorize(Roles = "Employee")]
+    public async Task<IActionResult> MyShifts(DateTime? fromDate, DateTime? toDate)
+    {
+        var email = User.FindFirstValue(ClaimTypes.Email);
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            email = User.Identity?.Name;
+        }
+
+        if (string.IsNullOrWhiteSpace(email))
+        {
+            return RedirectToAction("Login", "Auth");
+        }
+
+        var employee = await _context.Employees
+            .FirstOrDefaultAsync(e => e.Email == email);
+
+        if (employee == null)
+        {
+            ViewBag.ErrorMessage = "Không tìm thấy hồ sơ nhân viên tương ứng với tài khoản đang đăng nhập.";
+            ViewBag.FromDate = DateTime.Today.ToString("yyyy-MM-dd");
+            ViewBag.ToDate = DateTime.Today.AddDays(7).ToString("yyyy-MM-dd");
+
+            return View(new List<EmployeeShift>());
+        }
+
+        var startDate = fromDate ?? DateTime.Today;
+        var endDate = toDate ?? DateTime.Today.AddDays(7);
+
+        if (endDate.Date < startDate.Date)
+        {
+            ModelState.AddModelError("", "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.");
+            endDate = startDate;
+        }
+
+        var myShifts = await _context.EmployeeShifts
+            .Include(es => es.Employee)
+            .Include(es => es.Shift)
+            .Where(es =>
+                es.EmployeeId == employee.Id &&
+                es.WorkDate.Date >= startDate.Date &&
+                es.WorkDate.Date <= endDate.Date &&
+                es.IsActive)
+            .OrderBy(es => es.WorkDate)
+            .ThenBy(es => es.Shift!.StartTime)
+            .ToListAsync();
+
+        ViewBag.FromDate = startDate.ToString("yyyy-MM-dd");
+        ViewBag.ToDate = endDate.ToString("yyyy-MM-dd");
+        ViewBag.EmployeeName = employee.FullName;
+
+        return View(myShifts);
     }
 
     private async Task LoadSelectLists(int? selectedEmployeeId = null, int? selectedShiftId = null)
