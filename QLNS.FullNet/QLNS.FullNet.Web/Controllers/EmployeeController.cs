@@ -124,8 +124,12 @@ namespace QLNS.FullNet.Web.Controllers
         // 7. XEM HỒ SƠ CÁ NHÂN (Dành cho Role Employee)
         public async Task<IActionResult> MyProfile()
         {
-            // Ưu tiên lấy email từ claim, nếu không có thì lấy username
-            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+            // Ưu tiên lấy email từ claim. Nếu rỗng (tài khoản không có email), chuyển sang dùng Username
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                userEmail = User.Identity?.Name;
+            }
             
             if (string.IsNullOrEmpty(userEmail)) 
             {
@@ -181,7 +185,12 @@ namespace QLNS.FullNet.Web.Controllers
         [Authorize(Roles = "Employee")]
         public async Task<IActionResult> EditMyProfile()
         {
-            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                userEmail = User.Identity?.Name;
+            }
+            
             var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == userEmail);
             
             if (employee == null) return NotFound();
@@ -195,7 +204,12 @@ namespace QLNS.FullNet.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditMyProfile(int id, string phoneNumber, DateTime? dateOfBirth)
         {
-            var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                userEmail = User.Identity?.Name;
+            }
+            
             var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == userEmail);
             
             if (employee == null || employee.Id != id) return NotFound();

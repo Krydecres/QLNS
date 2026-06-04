@@ -1,7 +1,5 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using QLNS.FullNet.Web.Models;
-
+using Microsoft.AspNetCore.Authorization;
 namespace QLNS.FullNet.Web.Controllers;
 
 public class HomeController : Controller
@@ -11,4 +9,9 @@ public class HomeController : Controller
         return View();
     }
 
+    [Authorize(Roles = "Employee")]
+    public IActionResult EmployeeDashboard()
+    {
+        return View();
+    }
 }

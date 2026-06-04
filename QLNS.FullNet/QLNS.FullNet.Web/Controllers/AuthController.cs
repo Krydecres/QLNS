@@ -157,7 +157,7 @@ public class AuthController : Controller
         }
         else if (role == "Employee")
         {
-            return RedirectToAction("MyProfile", "Employee"); // Example for Employee view
+            return RedirectToAction("EmployeeDashboard", "Home");
         }
         return RedirectToAction("Index", "Home");
     }

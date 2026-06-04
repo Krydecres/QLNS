@@ -6,96 +6,127 @@
     var todayRecord = ViewBag.TodayRecord as Timekeeping;
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h3 mb-0 text-gray-800">Chấm công của tôi</h1>
-</div>
-
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        @TempData["SuccessMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-
-
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        @TempData["ErrorMessage"]
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-}
-
-<!-- Check-in / Check-out actions -->
-<div class="card shadow mb-4 border-left-primary">
-    <div class="card-body">
-        <h5 class="card-title">Hôm nay: @DateTime.Today.ToString("dd/MM/yyyy")</h5>
-        
-        <div class="mt-3 d-flex gap-3">
+<div class="dashboard">
+    <div class="dashboard-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="dashboard-title">Chấm công của tôi</h1>
+            <p class="dashboard-subtitle">Lịch sử điểm danh và trạng thái chấm công cá nhân</p>
+        </div>
+        <div class="dashboard-actions d-flex gap-2">
             @if (todayRecord == null || todayRecord.CheckInTime == null)
             {
-                <form asp-action="CheckIn" method="post">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-sign-in-alt"></i> Check-in
+                <form asp-action="CheckIn" method="post" class="m-0">
+                    <button type="submit" class="btn btn-primary shadow-sm">
+                        <i class="bi bi-box-arrow-in-right"></i> Check-in hôm nay
                     </button>
                 </form>
             }
             else
             {
-                <button class="btn btn-secondary btn-lg" disabled>
-                    <i class="fas fa-check"></i> Đã Check-in (@todayRecord.CheckInTime?.ToString("hh\\:mm"))
+                <button class="btn btn-secondary shadow-sm" disabled>
+                    <i class="bi bi-check-lg"></i> Đã Check-in (@todayRecord.CheckInTime?.ToString(@"hh\:mm"))
                 </button>
             }
 
             @if (todayRecord != null && todayRecord.CheckInTime != null && todayRecord.CheckOutTime == null)
             {
-                <form asp-action="CheckOut" method="post">
-                    <button type="submit" class="btn btn-warning btn-lg">
-                        <i class="fas fa-sign-out-alt"></i> Check-out
+                <form asp-action="CheckOut" method="post" class="m-0">
+                    <button type="submit" class="btn btn-warning shadow-sm">
+                        <i class="bi bi-box-arrow-right"></i> Check-out
                     </button>
                 </form>
             }
             else if (todayRecord != null && todayRecord.CheckOutTime != null)
             {
-                <button class="btn btn-secondary btn-lg" disabled>
-                    <i class="fas fa-check-double"></i> Đã Check-out (@todayRecord.CheckOutTime?.ToString("hh\\:mm"))
+                <button class="btn btn-secondary shadow-sm" disabled>
+                    <i class="bi bi-check2-all"></i> Đã Check-out (@todayRecord.CheckOutTime?.ToString(@"hh\:mm"))
                 </button>
             }
         </div>
     </div>
-</div>
 
-<!-- History -->
-<div class="card shadow mb-4">
-    <div class="card-header py-3">
-        <h6 class="m-0 font-weight-bold text-primary">Lịch sử chấm công</h6>
+    <!-- Thông báo -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mt-3 mb-0" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mt-3 mb-0" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Bộ lọc thời gian -->
+    <div class="d-flex justify-content-between align-items-center bg-white p-3 rounded shadow-sm mt-3 border">
+        <form asp-action="MyAttendance" method="get" class="m-0 d-flex flex-wrap gap-2 align-items-center">
+            <span class="fw-semibold text-muted me-2"><i class="bi bi-funnel"></i> Lọc thời gian:</span>
+
+            <div class="input-group" style="width: auto;">
+                <span class="input-group-text bg-light">Từ</span>
+                <input type="date" name="startDate" class="form-control" value="@ViewBag.StartDate">
+            </div>
+
+            <div class="input-group" style="width: auto;">
+                <span class="input-group-text bg-light">Đến</span>
+                <input type="date" name="endDate" class="form-control" value="@ViewBag.EndDate">
+            </div>
+
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Áp dụng</button>
+
+            @if (ViewBag.StartDate != null || ViewBag.EndDate != null)
+            {
+                <a asp-action="MyAttendance" class="btn btn-outline-secondary">Xóa lọc</a>
+            }
+        </form>
     </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
-                <thead class="table-light">
-                    <tr>
-                        <th>Ngày</th>
-                        <th>Check-in</th>
-                        <th>Check-out</th>
-                        <th>Ghi chú</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
+
+    <!-- Bảng lịch sử -->
+    <div class="chart-card mt-3">
+        <table class="data-table table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th width="20%">Ngày Chấm Công</th>
+                    <th width="15%">Giờ Vào</th>
+                    <th width="15%">Giờ Ra</th>
+                    <th>Trạng Thái</th>
+                    <th>Ghi Chú</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
                     {
                         <tr>
-                            <td>@item.Date.ToString("dd/MM/yyyy")</td>
-                            <td>@(item.CheckInTime?.ToString("hh\\:mm") ?? "-")</td>
-                            <td>@(item.CheckOutTime?.ToString("hh\\:mm") ?? "-")</td>
-                            <td>@item.Note</td>
+                            <td class="fw-bold">@item.Date.ToString("dd/MM/yyyy")</td>
+                            <td>@(item.CheckInTime?.ToString(@"hh\:mm") ?? "-")</td>
+                            <td>@(item.CheckOutTime?.ToString(@"hh\:mm") ?? "-")</td>
+                            <td>
+                                @if (item.Status == "Có mặt")
+                                {
+                                    <span class="badge bg-success px-3 py-2 shadow-sm">@item.Status</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger px-3 py-2 shadow-sm">@item.Status</span>
+                                }
+                            </td>
+                            <td class="text-muted">@item.Note</td>
                         </tr>
                     }
-                </tbody>
-            </table>
-        </div>
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">Bạn chưa có dữ liệu chấm công nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
-
