@@ -1,0 +1,82 @@
+@model QLNS.FullNet.Data.Entities.Salary
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">Chỉnh sửa bảng lương</h1>
+        <a asp-action="Index" asp-route-month="@Model.Month" asp-route-year="@Model.Year" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow border-0">
+        <div class="card-body p-4">
+            <form asp-action="Edit" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+
+                <div class="row g-3">
+                    <!-- Nhân viên -->
+                    <div class="col-md-6">
+                        <label asp-for="EmployeeId" class="form-label fw-semibold">Nhân viên</label>
+                        <select asp-for="EmployeeId" asp-items="@(ViewBag.Employees as SelectList)" class="form-select">
+                            <option value="">-- Chọn nhân viên --</option>
+                        </select>
+                        <span asp-validation-for="EmployeeId" class="text-danger"></span>
+                    </div>
+
+                    <!-- Tháng -->
+                    <div class="col-md-3">
+                        <label asp-for="Month" class="form-label fw-semibold">Tháng</label>
+                        <input asp-for="Month" class="form-control" type="number" min="1" max="12" />
+                        <span asp-validation-for="Month" class="text-danger"></span>
+                    </div>
+
+                    <!-- Năm -->
+                    <div class="col-md-3">
+                        <label asp-for="Year" class="form-label fw-semibold">Năm</label>
+                        <input asp-for="Year" class="form-control" type="number" min="2000" />
+                        <span asp-validation-for="Year" class="text-danger"></span>
+                    </div>
+
+                    <hr class="my-2" />
+
+                    <!-- Lương cơ bản -->
+                    <div class="col-md-4">
+                        <label asp-for="BaseSalary" class="form-label fw-semibold">Lương cơ bản (đ)</label>
+                        <input asp-for="BaseSalary" class="form-control" type="number" step="1000" min="0" />
+                        <span asp-validation-for="BaseSalary" class="text-danger"></span>
+                    </div>
+
+                    <!-- Phụ cấp -->
+                    <div class="col-md-4">
+                        <label asp-for="Allowance" class="form-label fw-semibold">Phụ cấp (đ)</label>
+                        <input asp-for="Allowance" class="form-control" type="number" step="1000" min="0" />
+                        <span asp-validation-for="Allowance" class="text-danger"></span>
+                    </div>
+
+                    <!-- Khấu trừ -->
+                    <div class="col-md-4">
+                        <label asp-for="Deduction" class="form-label fw-semibold">Khấu trừ (đ)</label>
+                        <input asp-for="Deduction" class="form-control" type="number" step="1000" min="0" />
+                        <span asp-validation-for="Deduction" class="text-danger"></span>
+                    </div>
+
+                    <!-- Tổng lương (chỉ đọc) -->
+                    <div class="col-md-12">
+                        <div class="alert alert-info d-flex align-items-center mb-0 mt-2">
+                            <i class="bi bi-info-circle me-2 fs-5"></i>
+                            <span>Tổng lương hiện tại: <strong>@Model.TotalSalary.ToString("N0") đ</strong> — sẽ được tự động tính lại khi lưu.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-save me-1"></i> Cập nhật
+                    </button>
+                    <a asp-action="Index" asp-route-month="@Model.Month" asp-route-year="@Model.Year" class="btn btn-outline-secondary ms-2">Hủy</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

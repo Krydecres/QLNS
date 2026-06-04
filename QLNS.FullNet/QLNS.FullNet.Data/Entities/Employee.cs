@@ -31,5 +31,11 @@ namespace QLNS.FullNet.Data.Entities
         public int? PositionId { get; set; }
         [ForeignKey("PositionId")]
         public Position? Position { get; set; }
+
+        [Display(Name = "Lương cơ bản")]
+        public decimal BaseSalary { get; set; } = 5000000;
+
+        [Display(Name = "Phụ cấp")]
+        public decimal Allowance { get; set; } = 0;
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using QLNS.FullNet.Data;
@@ -33,6 +33,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<QLNS.FullNet.Web.Services.ISalaryCalculationService, QLNS.FullNet.Web.Services.SalaryCalculationService>();
 
 var app = builder.Build();
 //Nếu có cấu hình SeedAdmin:Password thì tự tạo tài khoản admin mặc định.

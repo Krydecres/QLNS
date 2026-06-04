@@ -1,0 +1,102 @@
+@model List<QLNS.FullNet.Data.Entities.Salary>
+
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold">
+            Dữ liệu bảng lương
+        </h1>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-circle me-1"></i> Thêm mới
+        </a>
+    </div>
+
+    <!-- Filter & Generate Form -->
+    <div class="card shadow border-0 mb-4">
+        <div class="card-body">
+            <form method="get" asp-controller="Salaries" asp-action="Index" class="row g-3 align-items-end">
+                <div class="col-auto">
+                    <label class="form-label">Tháng</label>
+                    <input type="number" name="month" class="form-control" value="@ViewBag.SelectedMonth" min="1" max="12" required />
+                </div>
+                <div class="col-auto">
+                    <label class="form-label">Năm</label>
+                    <input type="number" name="year" class="form-control" value="@ViewBag.SelectedYear" min="2000" required />
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-secondary">Xem</button>
+                </div>
+                <div class="col-auto ms-auto">
+                    <button type="submit" asp-controller="Salaries" asp-action="Seed" class="btn btn-primary">
+                        Tính lương tháng @ViewBag.SelectedMonth/@ViewBag.SelectedYear
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Card -->
+    <div class="card shadow border-0">
+        <div class="card-body p-4">
+            @if (Model != null && Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Kỳ Lương</th>
+                                <th>Nhân viên</th>
+                                <th>Lương cơ bản</th>
+                                <th>Phụ cấp</th>
+                                <th>Khấu trừ</th>
+                                <th>Tổng lương</th>
+                                <th class="text-center">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Month / @item.Year</td>
+                                <td>
+                                    @(item.Employee?.FullName ?? $"NV-{item.EmployeeId}")
+                                </td>
+                                <td>@item.BaseSalary.ToString("N0") đ</td>
+                                <td class="text-success fw-semibold">
+                                    + @item.Allowance.ToString("N0") đ
+                                </td>
+                                <td class="text-danger fw-semibold">
+                                    - @item.Deduction.ToString("N0") đ
+                                </td>
+                                <td>
+                                    <span class="badge bg-success fs-6">
+                                        @item.TotalSalary.ToString("N0") đ
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1" title="Sửa">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản lương này?')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-warning">
+                    Chưa có dữ liệu lương cho kỳ @ViewBag.SelectedMonth/@ViewBag.SelectedYear
+                </div>
+            }
+        </div>
+    </div>
+</div>
