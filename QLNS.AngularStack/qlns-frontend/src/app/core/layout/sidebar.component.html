@@ -1,0 +1,108 @@
+<nav class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <span class="sidebar-title">QLNS</span>
+    </div>
+
+    @if (!auth.role()) {
+        <div class="sidebar-section-label">TÀI KHOẢN</div>
+        <ul class="sidebar-nav">
+            <li>
+                <a routerLink="/login" routerLinkActive="active" class="sidebar-link">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Đăng nhập</span>
+                </a>
+            </li>
+            <li>
+                <a routerLink="/register" routerLinkActive="active" class="sidebar-link">
+                    <i class="bi bi-person-plus"></i>
+                    <span>Đăng ký</span>
+                </a>
+            </li>
+        </ul>
+    }
+    @else if (auth.role() === 'Admin') {
+        <div class="sidebar-section-label">TỔNG QUAN</div>
+        <ul class="sidebar-nav">
+            <li>
+                <a routerLink="/admin-dashboard" routerLinkActive="active" class="sidebar-link">
+                    <i class="bi bi-grid-1x2-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-section-label">QUẢN TRỊ NHÂN SỰ</div>
+        <ul class="sidebar-nav">
+            <li>
+                 <a href="javascript:void(0)" class="sidebar-link">
+                    <i class="bi bi-person-gear"></i>
+                    <span>Người dùng & phân quyền</span>
+                </a>
+            </li>
+            <li>
+                <a href="javascript:void(0)" class="sidebar-link">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Quản lý nhân viên</span>
+                </a>
+            </li>
+            <li>
+                <a href="javascript:void(0)" class="sidebar-link">
+                    <i class="bi bi-diagram-3"></i>
+                    <span>Phòng ban</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-section-label">LƯƠNG THƯỞNG</div>
+        <ul class="sidebar-nav">
+            <li>
+                <a href="javascript:void(0)" class="sidebar-link">
+                    <i class="bi bi-table"></i>
+                    <span>Bảng lương</span>
+                </a>
+            </li>
+        </ul>
+    }
+    @else if (auth.role() === 'Employee') {
+        <div class="sidebar-section-label">CÁ NHÂN</div>
+        <ul class="sidebar-nav">
+            <li>
+                <a routerLink="/employee-dashboard" routerLinkActive="active" class="sidebar-link">
+                    <i class="bi bi-grid-1x2-fill"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="javascript:void(0)" class="sidebar-link">
+                    <i class="bi bi-person"></i>
+                    <span>Thông tin cá nhân</span>
+                </a>
+            </li>
+            <li>
+                <a href="javascript:void(0)" class="sidebar-link">
+                    <i class="bi bi-clock"></i>
+                    <span>Chấm công của tôi</span>
+                </a>
+            </li>
+        </ul>
+    }
+
+    <div class="sidebar-footer mt-auto">
+        @if (auth.role()) {
+            <div class="m-0 p-3">
+                <button (click)="logout()" class="btn btn-danger w-100 d-flex align-items-center justify-content-center gap-2">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Đăng xuất
+                </button>
+            </div>
+        }
+        @else {
+            <div class="today-card">
+                <div class="today-label">Hôm nay</div>
+                <div class="today-schedule">Vui lòng đăng nhập</div>
+                <div class="today-sub">để sử dụng hệ thống</div>
+            </div>
+        }
+    </div>
+</nav>
