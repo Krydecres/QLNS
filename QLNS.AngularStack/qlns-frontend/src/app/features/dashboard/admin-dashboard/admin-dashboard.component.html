@@ -1,0 +1,77 @@
+<div class="dashboard">
+
+    <div class="dashboard-header">
+        <div>
+            <h1 class="dashboard-title">Tổng quan hệ thống</h1>
+            <p class="dashboard-subtitle">
+                Quản lý nhân sự và chấm công
+            </p>
+        </div>
+        <div class="dashboard-actions">
+            <span class="badge-shift">
+                <i class="bi bi-sun"></i> 10:00 — Đang hoạt động
+            </span>
+        </div>
+    </div>
+
+    <div class="stat-grid mt-3">
+        <div class="stat-card">
+            <div class="stat-icon icon-blue"><i class="bi bi-people"></i></div>
+            <div class="stat-label">Tổng nhân viên</div>
+            <div class="stat-value">120</div>
+            <div class="stat-note">5 phòng ban · 12 chức vụ</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-green"><i class="bi bi-patch-check"></i></div>
+            <div class="stat-label">Có mặt hôm nay</div>
+            <div class="stat-value">110</div>
+            <div class="stat-note text-success">91% có mặt</div>
+        </div>
+
+        <div class="stat-card stat-card--warn">
+            <div class="stat-icon icon-yellow"><i class="bi bi-person-x"></i></div>
+            <div class="stat-label">Chưa chấm công</div>
+            <div class="stat-value">10</div>
+            <div class="stat-note text-warning">
+                0 vắng có phép
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon icon-teal"><i class="bi bi-calendar-check"></i></div>
+            <div class="stat-label">Đơn nghỉ phép chờ duyệt</div>
+            <div class="stat-value">3</div>
+            <div class="stat-note text-warning">
+                Cần xử lý
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-grid mt-4">
+        <div class="chart-card chart-card--wide d-flex justify-content-center align-items-center bg-light">
+            <div class="text-center text-muted">
+                <i class="bi bi-bar-chart" style="font-size: 3rem;"></i>
+                <p>Biểu đồ Chấm công (Dummy)</p>
+            </div>
+        </div>
+        <div class="chart-card">
+            <h2 class="chart-title">Số liệu nhanh</h2>
+            <div class="list-group list-group-flush mt-2">
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
+                    <span class="text-muted"><i class="bi bi-people me-2 text-primary"></i>Tổng nhân viên</span>
+                    <strong>120</strong>
+                </div>
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
+                    <span class="text-muted"><i class="bi bi-check2-circle me-2 text-success"></i>Có mặt hôm nay</span>
+                    <strong class="text-success">110</strong>
+                </div>
+                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
+                    <span class="text-muted"><i class="bi bi-hourglass me-2 text-warning"></i>Đơn chờ duyệt</span>
+                    <strong class="text-warning">3</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

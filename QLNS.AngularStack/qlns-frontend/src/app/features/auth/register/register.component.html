@@ -1,0 +1,55 @@
+<div class="d-flex justify-content-center align-items-center mt-5 mb-5">
+    <div class="card shadow border-0 rounded-4" style="max-width: 500px; width: 100%;">
+        <div class="card-header bg-success text-white text-center py-4 rounded-top-4">
+            <h3 class="mb-0 fw-bold"><i class="bi bi-person-plus-fill me-2"></i> Đăng ký tài khoản</h3>
+        </div>
+        <div class="card-body p-4 p-md-5">
+
+                <form (ngSubmit)="onRegister()">
+                    <div class="form-floating mb-3">
+                        <input id="username" name="username" [(ngModel)]="user.username" autocomplete="username" class="form-control rounded-3" placeholder="Tài khoản" required />
+                        <label for="username"><i class="bi bi-person me-1"></i> Tài khoản</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input id="fullName" name="fullName" [(ngModel)]="user.fullName" autocomplete="name" class="form-control rounded-3" placeholder="Họ và tên" required />
+                        <label for="fullName"><i class="bi bi-person-badge me-1"></i> Họ và tên</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input id="email" name="email" [(ngModel)]="user.email" autocomplete="email" class="form-control rounded-3" placeholder="Email" type="email" required />
+                        <label for="email"><i class="bi bi-envelope me-1"></i> Email</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input id="password" name="password" [(ngModel)]="user.password" autocomplete="new-password" type="password" class="form-control rounded-3" placeholder="Mật khẩu" required />
+                        <label for="password"><i class="bi bi-lock me-1"></i> Mật khẩu</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input id="confirmPassword" name="confirmPassword" [(ngModel)]="user.confirmPassword" autocomplete="new-password" type="password" class="form-control rounded-3" placeholder="Xác nhận mật khẩu" required />
+                        <label for="confirmPassword"><i class="bi bi-check-circle me-1"></i> Xác nhận mật khẩu</label>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <select id="role" name="role" [(ngModel)]="user.role" class="form-select rounded-3">
+                            <option value="Employee">Nhân viên</option>
+                            <option value="Admin">Quản trị viên</option>
+                        </select>
+                        <label for="role"><i class="bi bi-shield-lock me-1"></i> Vai trò</label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg rounded-3 fw-bold shadow-sm">
+                            Đăng ký
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="mt-4 text-center">
+                    <span class="text-muted">Đã có tài khoản?</span> 
+                    <a routerLink="/login" class="text-decoration-none fw-semibold">Đăng nhập</a>
+                </div>
+        </div>
+    </div>
+</div>
