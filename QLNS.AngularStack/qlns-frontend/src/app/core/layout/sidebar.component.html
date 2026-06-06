@@ -53,6 +53,18 @@
                     <span>Phòng ban</span>
                 </a>
             </li>
+            <li>
+                <a routerLink="/timekeeping/list" routerLinkActive="active" class="sidebar-link">
+                    <i class="bi bi-clock-history"></i>
+                    <span>Danh sách Chấm công</span>
+                </a>
+            </li>
+            <li>
+                <a routerLink="/timekeeping/manual-entry" routerLinkActive="active" class="sidebar-link">
+                    <i class="bi bi-calendar-check"></i>
+                    <span>Nhập chấm công</span>
+                </a>
+            </li>
         </ul>
         <div class="sidebar-section-label">LƯƠNG THƯỞNG</div>
         <ul class="sidebar-nav">
@@ -80,7 +92,7 @@
                 </a>
             </li>
             <li>
-                <a href="javascript:void(0)" class="sidebar-link">
+                <a routerLink="/timekeeping/my-attendance" routerLinkActive="active" class="sidebar-link">
                     <i class="bi bi-clock"></i>
                     <span>Chấm công của tôi</span>
                 </a>

@@ -1,0 +1,83 @@
+<div class="manual-entry-container">
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">Nhập chấm công</h2>
+      <p class="page-subtitle">Nhập dữ liệu chấm công thủ công cho nhân viên</p>
+    </div>
+  </div>
+
+  <div class="card mt-4 mx-auto" style="max-width: 600px;">
+    <div class="card-body p-4">
+      
+      @if (successMessage) {
+        <div class="alert alert-success d-flex align-items-center mb-4">
+          <i class="bi bi-check-circle-fill me-2"></i>
+          <div>{{ successMessage }}</div>
+        </div>
+      }
+
+      @if (errorMessage) {
+        <div class="alert alert-danger d-flex align-items-center mb-4">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <div>{{ errorMessage }}</div>
+        </div>
+      }
+
+      <form (ngSubmit)="onSubmit()" #entryForm="ngForm">
+        
+        <div class="mb-3">
+          <label class="form-label fw-medium">Nhân viên <span class="text-danger">*</span></label>
+          <select class="form-select" [(ngModel)]="formData.username" name="username" required>
+            <option value="">-- Chọn nhân viên --</option>
+            @for (user of users; track user.username) {
+              <option [value]="user.username">{{ user.fullName }} ({{ user.username }})</option>
+            }
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-medium">Ngày chấm công <span class="text-danger">*</span></label>
+          <input type="date" class="form-control" [(ngModel)]="formData.date" name="date" required>
+        </div>
+
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-medium">Giờ vào</label>
+            <input type="time" class="form-control" [(ngModel)]="formData.checkInTime" name="checkInTime">
+          </div>
+          <div class="col-md-6 mt-3 mt-md-0">
+            <label class="form-label fw-medium">Giờ ra</label>
+            <input type="time" class="form-control" [(ngModel)]="formData.checkOutTime" name="checkOutTime">
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-medium">Trạng thái</label>
+          <select class="form-select" [(ngModel)]="formData.status" name="status">
+            <option value="Có mặt">Có mặt</option>
+            <option value="Đi trễ">Đi trễ</option>
+            <option value="Vắng có phép">Vắng có phép</option>
+            <option value="Vắng không phép">Vắng không phép</option>
+          </select>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-medium">Ghi chú</label>
+          <textarea class="form-control" [(ngModel)]="formData.note" name="note" rows="2" placeholder="Lý do đi trễ, vắng..."></textarea>
+        </div>
+
+        <div class="d-grid">
+          <button type="submit" class="btn btn-primary" [disabled]="submitting || entryForm.invalid">
+            @if (submitting) {
+              <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              Đang lưu...
+            } @else {
+              <i class="bi bi-save me-2"></i> Lưu chấm công
+            }
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>

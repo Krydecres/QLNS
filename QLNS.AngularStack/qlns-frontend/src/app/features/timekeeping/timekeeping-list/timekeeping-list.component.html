@@ -1,0 +1,87 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 mb-0 text-gray-800 fw-bold">Danh sách Chấm công</h1>
+      <p class="text-muted mb-0">Quản lý lịch sử và trạng thái chấm công của nhân viên</p>
+    </div>
+    <div class="d-flex gap-2 align-items-center">
+      <form (ngSubmit)="checkInForEmployee()" class="m-0 d-flex gap-2">
+        <select name="employeeId" class="form-select shadow-sm" [(ngModel)]="selectedEmployeeUsername" style="min-width: 200px;">
+          <option value="">-- Chọn nhân viên --</option>
+          <option *ngFor="let user of users" [value]="user.username">{{ user.fullName }} ({{ user.username }})</option>
+        </select>
+        <button type="submit" class="btn btn-primary text-nowrap shadow-sm">
+          <i class="bi bi-check2-circle me-1"></i> Chấm công
+        </button>
+      </form>
+      <a routerLink="/timekeeping/manual-entry" class="btn btn-warning text-nowrap shadow-sm text-dark fw-medium">
+        <i class="bi bi-pencil-square me-1"></i> Nhập thủ công
+      </a>
+      <button (click)="exportExcel()" class="btn btn-success shadow-sm">
+        <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = null" aria-label="Close"></button>
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = null" aria-label="Close"></button>
+  </div>
+
+  <div class="bg-white p-3 rounded shadow-sm mt-3 border d-flex justify-content-between align-items-center">
+    <form (ngSubmit)="applyFilter()" class="m-0 d-flex flex-wrap gap-3 align-items-center">
+      <span class="fw-semibold text-muted"><i class="bi bi-funnel me-1"></i> Lọc thời gian:</span>
+      <div class="input-group shadow-sm" style="width: auto;">
+        <span class="input-group-text bg-light border-end-0">Từ</span>
+        <input type="date" name="startDate" class="form-control border-start-0" [(ngModel)]="startDate">
+      </div>
+      <div class="input-group shadow-sm" style="width: auto;">
+        <span class="input-group-text bg-light border-end-0">Đến</span>
+        <input type="date" name="endDate" class="form-control border-start-0" [(ngModel)]="endDate">
+      </div>
+      <button type="submit" class="btn btn-primary shadow-sm"><i class="bi bi-search me-1"></i> Áp dụng</button>
+      <button type="button" *ngIf="startDate || endDate" (click)="clearFilter()" class="btn btn-outline-secondary shadow-sm">Xóa lọc</button>
+    </form>
+  </div>
+
+  <div class="card shadow-sm border-0 mt-4 rounded-3 overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0 custom-table">
+        <thead class="table-light text-muted">
+          <tr>
+            <th width="10%" class="ps-4">ID</th>
+            <th>Tên Nhân Viên</th>
+            <th>Ngày Chấm Công</th>
+            <th>Giờ Vào</th>
+            <th>Giờ Ra</th>
+            <th width="20%" class="text-center pe-4">Trạng Thái</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of timekeepings" class="border-bottom">
+            <td class="ps-4 text-muted">#{{ item.id }}</td>
+            <td class="fw-bold text-primary">{{ item.fullName }}</td>
+            <td>{{ item.date | date:'dd/MM/yyyy' }}</td>
+            <td><span class="badge bg-light text-dark border">{{ item.checkInTime || '-' }}</span></td>
+            <td><span class="badge bg-light text-dark border">{{ item.checkOutTime || '-' }}</span></td>
+            <td class="text-center pe-4">
+              <span class="badge px-3 py-2 rounded-pill" [ngClass]="{'bg-success': item.status === 'Có mặt', 'bg-danger': item.status !== 'Có mặt'}">
+                {{ item.status || 'Có mặt' }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="timekeepings.length === 0">
+            <td colspan="6" class="text-center text-muted py-5">
+              <i class="bi bi-inbox fs-2 d-block mb-2 text-light"></i>
+              Chưa có dữ liệu chấm công.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

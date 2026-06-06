@@ -5,12 +5,22 @@ import { tap } from 'rxjs/operators';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   role = signal<string | null>(null);
+  username = signal<string | null>(null);
+  fullName = signal<string | null>(null);
   private http = inject(HttpClient);
 
   constructor() {
     const savedRole = localStorage.getItem('role');
+    const savedUsername = localStorage.getItem('username');
+    const savedFullName = localStorage.getItem('fullName');
     if (savedRole) {
       this.role.set(savedRole);
+    }
+    if (savedUsername) {
+      this.username.set(savedUsername);
+    }
+    if (savedFullName) {
+      this.fullName.set(savedFullName);
     }
   }
 
@@ -21,7 +31,11 @@ export class AuthService {
     }).pipe(
       tap(res => {
         localStorage.setItem('role', res.role);
+        localStorage.setItem('username', res.username);
+        localStorage.setItem('fullName', res.fullName);
         this.role.set(res.role);
+        this.username.set(res.username);
+        this.fullName.set(res.fullName);
       })
     );
   }
@@ -32,6 +46,10 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('role');
+    localStorage.removeItem('username');
+    localStorage.removeItem('fullName');
     this.role.set(null);
+    this.username.set(null);
+    this.fullName.set(null);
   }
 }

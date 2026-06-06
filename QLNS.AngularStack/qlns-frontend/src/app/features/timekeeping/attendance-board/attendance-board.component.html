@@ -1,0 +1,94 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0 text-gray-800 fw-bold">Chấm công của tôi</h1>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = null" aria-label="Close"></button>
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = null" aria-label="Close"></button>
+  </div>
+
+  <!-- Check-in / Check-out actions -->
+  <div class="card shadow-sm mb-4 border-start border-primary border-4 rounded-3">
+    <div class="card-body">
+      <h5 class="card-title fw-semibold text-dark">Hôm nay: {{ todayDate }}</h5>
+
+      <div class="mt-3 d-flex gap-3">
+        <button *ngIf="!todayRecord || !todayRecord.checkInTime" (click)="checkIn()" class="btn btn-primary btn-lg shadow-sm">
+          <i class="bi bi-box-arrow-in-right me-1"></i> Check-in
+        </button>
+        <button *ngIf="todayRecord && todayRecord.checkInTime" class="btn btn-secondary btn-lg shadow-sm" disabled>
+          <i class="bi bi-check-lg me-1"></i> Đã Check-in ({{ todayRecord.checkInTime }})
+        </button>
+
+        <button *ngIf="todayRecord && todayRecord.checkInTime && !todayRecord.checkOutTime" (click)="checkOut()" class="btn btn-warning btn-lg shadow-sm text-dark fw-medium">
+          <i class="bi bi-box-arrow-right me-1"></i> Check-out
+        </button>
+        <button *ngIf="todayRecord && todayRecord.checkOutTime" class="btn btn-secondary btn-lg shadow-sm" disabled>
+          <i class="bi bi-check2-all me-1"></i> Đã Check-out ({{ todayRecord.checkOutTime }})
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- History -->
+  <div class="bg-white p-3 rounded shadow-sm mb-4 border d-flex justify-content-between align-items-center">
+    <form (ngSubmit)="applyFilter()" class="m-0 d-flex flex-wrap gap-3 align-items-center">
+      <span class="fw-semibold text-muted"><i class="bi bi-funnel me-1"></i> Lọc thời gian:</span>
+      <div class="input-group shadow-sm" style="width: auto;">
+        <span class="input-group-text bg-light border-end-0">Từ</span>
+        <input type="date" name="startDate" class="form-control border-start-0" [(ngModel)]="startDate">
+      </div>
+      <div class="input-group shadow-sm" style="width: auto;">
+        <span class="input-group-text bg-light border-end-0">Đến</span>
+        <input type="date" name="endDate" class="form-control border-start-0" [(ngModel)]="endDate">
+      </div>
+      <button type="submit" class="btn btn-primary shadow-sm"><i class="bi bi-search me-1"></i> Áp dụng</button>
+      <button type="button" *ngIf="startDate || endDate" (click)="clearFilter()" class="btn btn-outline-secondary shadow-sm">Xóa lọc</button>
+    </form>
+  </div>
+
+  <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+    <div class="card-header bg-white py-3 border-bottom">
+      <h6 class="m-0 fw-bold text-primary">Lịch sử chấm công</h6>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0 custom-table">
+          <thead class="table-light text-muted">
+            <tr>
+              <th class="ps-4">Ngày</th>
+              <th>Check-in</th>
+              <th>Check-out</th>
+              <th>Trạng thái</th>
+              <th class="pe-4">Ghi chú</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of timekeepings" class="border-bottom">
+              <td class="ps-4 fw-medium">{{ item.date | date:'dd/MM/yyyy' }}</td>
+              <td><span class="badge bg-light text-dark border">{{ item.checkInTime || '-' }}</span></td>
+              <td><span class="badge bg-light text-dark border">{{ item.checkOutTime || '-' }}</span></td>
+              <td>
+                <span class="badge px-3 py-2 rounded-pill" [ngClass]="{'bg-success': item.status === 'Có mặt', 'bg-danger': item.status !== 'Có mặt'}">
+                  {{ item.status || 'Có mặt' }}
+                </span>
+              </td>
+              <td class="pe-4 text-muted">{{ item.note || '-' }}</td>
+            </tr>
+            <tr *ngIf="timekeepings.length === 0">
+              <td colspan="5" class="text-center text-muted py-5">
+                <i class="bi bi-inbox fs-2 d-block mb-2 text-light"></i>
+                Không có dữ liệu lịch sử chấm công.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
