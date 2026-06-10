@@ -1,10 +1,14 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+
 import { LayoutComponent } from './core/layout/layout.component';
 import { HomeComponent } from './features/home/home.component';
 import { LoginComponent } from './features/auth/login/login.component';
 import { RegisterComponent } from './features/auth/register/register.component';
+
 import { AdminDashboardComponent } from './features/dashboard/admin-dashboard/admin-dashboard.component';
 import { EmployeeDashboardComponent } from './features/dashboard/employee-dashboard/employee-dashboard.component';
+
 import { AttendanceBoardComponent } from './features/timekeeping/attendance-board/attendance-board.component';
 import { ManualEntryComponent } from './features/timekeeping/manual-entry/manual-entry.component';
 import { TimekeepingListComponent } from './features/timekeeping/timekeeping-list/timekeeping-list.component';
@@ -24,35 +28,132 @@ import { MyProfileComponent } from './features/employee/my-profile/my-profile.co
 import { MyDepartmentComponent } from './features/employee/my-department/my-department.component';
 
 export const routes: Routes = [
-    {
-        path: '',
-        component: LayoutComponent,
-        children: [
-            { path: '', component: HomeComponent },
-            { path: 'login', component: LoginComponent },
-            { path: 'register', component: RegisterComponent },
-            { path: 'admin-dashboard', component: AdminDashboardComponent },
-            { path: 'employee-dashboard', component: EmployeeDashboardComponent },
-            { path: 'timekeeping/list', component: TimekeepingListComponent },
-            { path: 'timekeeping/my-attendance', component: AttendanceBoardComponent },
-            { path: 'timekeeping/manual-entry', component: ManualEntryComponent },
+  {
+    path: '',
+    component: LayoutComponent,
+    children: [
+      { path: '', component: HomeComponent },
+      { path: 'login', component: LoginComponent },
+      { path: 'register', component: RegisterComponent },
 
-            { path: 'departments', component: DepartmentListComponent },
-            { path: 'departments/create', component: DepartmentFormComponent },
-            { path: 'departments/edit/:id', component: DepartmentFormComponent },
-            { path: 'departments/details/:id', component: DepartmentDetailsComponent },
+      {
+        path: 'admin-dashboard',
+        component: AdminDashboardComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'employee-dashboard',
+        component: EmployeeDashboardComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Employee'] }
+      },
 
-            { path: 'positions', component: PositionListComponent },
-            { path: 'positions/create', component: PositionFormComponent },
-            { path: 'positions/edit/:id', component: PositionFormComponent },
-            { path: 'positions/details/:id', component: PositionDetailsComponent },
+      {
+        path: 'timekeeping/list',
+        component: TimekeepingListComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'timekeeping/manual-entry',
+        component: ManualEntryComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'timekeeping/my-attendance',
+        component: AttendanceBoardComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Employee'] }
+      },
 
-            { path: 'employees', component: EmployeeListComponent },
-            { path: 'employees/create', component: EmployeeFormComponent },
-            { path: 'employees/edit/:id', component: EmployeeFormComponent },
-            { path: 'employees/pending-updates', component: PendingUpdatesComponent },
-            { path: 'employees/my-profile', component: MyProfileComponent },
-            { path: 'employees/my-department', component: MyDepartmentComponent }
-        ]
-    }
+      {
+        path: 'departments',
+        component: DepartmentListComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'departments/create',
+        component: DepartmentFormComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'departments/edit/:id',
+        component: DepartmentFormComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'departments/details/:id',
+        component: DepartmentDetailsComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+
+      {
+        path: 'positions',
+        component: PositionListComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'positions/create',
+        component: PositionFormComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'positions/edit/:id',
+        component: PositionFormComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'positions/details/:id',
+        component: PositionDetailsComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+
+      {
+        path: 'employees',
+        component: EmployeeListComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'employees/create',
+        component: EmployeeFormComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'employees/edit/:id',
+        component: EmployeeFormComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'employees/pending-updates',
+        component: PendingUpdatesComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'employees/my-profile',
+        component: MyProfileComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Employee'] }
+      },
+      {
+        path: 'employees/my-department',
+        component: MyDepartmentComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Employee'] }
+      }
+    ]
+  }
 ];
