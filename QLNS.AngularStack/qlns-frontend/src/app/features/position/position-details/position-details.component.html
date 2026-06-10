@@ -1,0 +1,41 @@
+<div class="dashboard">
+    <div class="dashboard-header d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="dashboard-title">Chức vụ: {{ position?.name }}</h1>
+            <p class="dashboard-subtitle">Danh sách các nhân viên thuộc chức vụ này.</p>
+        </div>
+        <div class="dashboard-actions">
+            <a routerLink="/positions" class="btn btn-light border">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+    </div>
+
+    <div class="chart-card mt-3">
+        <table class="data-table table table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th width="10%">Mã NV</th>
+                    <th>Họ và tên</th>
+                    <th>Email</th>
+                    <th>Số điện thoại</th>
+                    <th>Phòng ban</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of employees">
+                    <td>NV-{{ item.id }}</td>
+                    <td class="fw-bold text-primary">{{ item.fullName }}</td>
+                    <td>{{ item.email }}</td>
+                    <td>{{ item.phoneNumber }}</td>
+                    <td>
+                        <span class="badge bg-info text-dark">{{ item.department?.name || 'Chưa có' }}</span>
+                    </td>
+                </tr>
+                <tr *ngIf="employees.length === 0">
+                    <td colspan="5" class="text-center text-muted py-4">Chức vụ này chưa có nhân viên.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

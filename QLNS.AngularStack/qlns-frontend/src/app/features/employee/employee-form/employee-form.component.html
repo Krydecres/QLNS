@@ -1,0 +1,67 @@
+<div class="dashboard">
+    <div class="dashboard-header">
+        <div>
+            <h1 class="dashboard-title">{{ isEditMode ? 'Chỉnh sửa nhân viên' : 'Thêm mới nhân viên' }}</h1>
+            <p class="dashboard-subtitle">{{ isEditMode ? 'Cập nhật thông tin nhân viên' : 'Tạo hồ sơ nhân sự mới trên hệ thống' }}</p>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-md-8">
+            <div class="chart-card">
+                <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fullName" class="form-label fw-bold">Họ và tên</label>
+                            <input type="text" id="fullName" formControlName="fullName" class="form-control" placeholder="Nhập họ và tên..." />
+                            <span *ngIf="employeeForm.get('fullName')?.invalid && employeeForm.get('fullName')?.touched" class="text-danger mt-1 d-block">
+                                Họ và tên không được để trống
+                            </span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label fw-bold">Email</label>
+                            <input type="email" id="email" formControlName="email" class="form-control" placeholder="Nhập email..." />
+                            <span *ngIf="employeeForm.get('email')?.invalid && employeeForm.get('email')?.touched" class="text-danger mt-1 d-block">
+                                Email không hợp lệ hoặc để trống
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phoneNumber" class="form-label fw-bold">Số điện thoại</label>
+                            <input type="text" id="phoneNumber" formControlName="phoneNumber" class="form-control" placeholder="Nhập số điện thoại..." />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="dateOfBirth" class="form-label fw-bold">Ngày sinh</label>
+                            <input type="date" id="dateOfBirth" formControlName="dateOfBirth" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="departmentId" class="form-label fw-bold">Phòng ban</label>
+                        <select id="departmentId" formControlName="departmentId" class="form-select">
+                            <option value="">-- Chọn phòng ban --</option>
+                            <option *ngFor="let d of departments" [value]="d.id">{{ d.name }}</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="positionId" class="form-label fw-bold">Chức vụ</label>
+                        <select id="positionId" formControlName="positionId" class="form-select">
+                            <option value="">-- Chọn chức vụ --</option>
+                            <option *ngFor="let p of positions" [value]="p.id">{{ p.name }}</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary" [disabled]="employeeForm.invalid">
+                            <i class="bi bi-save"></i> Lưu dữ liệu
+                        </button>
+                        <a routerLink="/employees" class="btn btn-light border">
+                            <i class="bi bi-x-circle"></i> Hủy bỏ
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

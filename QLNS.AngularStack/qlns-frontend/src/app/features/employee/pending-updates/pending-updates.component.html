@@ -1,0 +1,35 @@
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">Phê duyệt cập nhật hồ sơ</h1>
+        <p class="dashboard-subtitle">Các yêu cầu thay đổi thông tin từ nhân viên</p>
+    </div>
+
+    <div class="chart-card mt-3">
+        <table class="table data-table align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>Thời gian gửi</th>
+                    <th>Nhân viên</th>
+                    <th>SĐT mới</th>
+                    <th>Ngày sinh mới</th>
+                    <th class="text-center">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of requests">
+                    <td>{{ item.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td class="fw-bold text-primary">{{ item.employee?.fullName }}</td>
+                    <td>{{ item.newPhoneNumber }}</td>
+                    <td>{{ item.newDateOfBirth | date:'dd/MM/yyyy' }}</td>
+                    <td class="text-center">
+                        <button (click)="approve(item.id, true)" class="btn btn-sm btn-success me-1">Duyệt</button>
+                        <button (click)="approve(item.id, false)" class="btn btn-sm btn-danger">Từ chối</button>
+                    </td>
+                </tr>
+                <tr *ngIf="requests.length === 0">
+                    <td colspan="5" class="text-center text-muted py-4">Không có yêu cầu nào đang chờ duyệt.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

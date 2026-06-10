@@ -42,17 +42,32 @@
                 </a>
             </li>
             <li>
-                <a href="javascript:void(0)" class="sidebar-link">
+                <a routerLink="/employees" routerLinkActive="active" class="sidebar-link">
                     <i class="bi bi-person-badge"></i>
                     <span>Quản lý nhân viên</span>
                 </a>
             </li>
             <li>
-                <a href="javascript:void(0)" class="sidebar-link">
+                <a routerLink="/employees/pending-updates" routerLinkActive="active" class="sidebar-link">
+                    <i class="bi bi-card-checklist"></i>
+                    <span>Duyệt hồ sơ</span>
+                </a>
+            </li>
+            <li>
+                <a routerLink="/departments" routerLinkActive="active" class="sidebar-link">
                     <i class="bi bi-diagram-3"></i>
                     <span>Phòng ban</span>
                 </a>
             </li>
+            <li>
+                <a routerLink="/positions" routerLinkActive="active" class="sidebar-link">
+                    <i class="bi bi-award"></i>
+                    <span>Chức vụ</span>
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-section-label">CHẤM CÔNG & CA LÀM</div>
+        <ul class="sidebar-nav">
             <li>
                 <a routerLink="/timekeeping/list" routerLinkActive="active" class="sidebar-link">
                     <i class="bi bi-clock-history"></i>
@@ -86,9 +101,15 @@
                 </a>
             </li>
             <li>
-                <a href="javascript:void(0)" class="sidebar-link">
+                <a routerLink="/employees/my-profile" routerLinkActive="active" class="sidebar-link">
                     <i class="bi bi-person"></i>
-                    <span>Thông tin cá nhân</span>
+                    <span>Hồ sơ cá nhân</span>
+                </a>
+            </li>
+            <li>
+                <a routerLink="/employees/my-department" routerLinkActive="active" class="sidebar-link">
+                    <i class="bi bi-people"></i>
+                    <span>Phòng ban của tôi</span>
                 </a>
             </li>
             <li>

@@ -10,17 +10,23 @@ export class AuthService {
   private http = inject(HttpClient);
 
   constructor() {
-    const savedRole = localStorage.getItem('role');
-    const savedUsername = localStorage.getItem('username');
-    const savedFullName = localStorage.getItem('fullName');
-    if (savedRole) {
-      this.role.set(savedRole);
-    }
-    if (savedUsername) {
-      this.username.set(savedUsername);
-    }
-    if (savedFullName) {
-      this.fullName.set(savedFullName);
+    this.loadAuth();
+  }
+
+  loadAuth() {
+    if (typeof localStorage !== 'undefined') {
+      const savedRole = localStorage.getItem('role');
+      const savedUsername = localStorage.getItem('username');
+      const savedFullName = localStorage.getItem('fullName');
+      if (savedRole) {
+        this.role.set(savedRole);
+      }
+      if (savedUsername) {
+        this.username.set(savedUsername);
+      }
+      if (savedFullName) {
+        this.fullName.set(savedFullName);
+      }
     }
   }
 

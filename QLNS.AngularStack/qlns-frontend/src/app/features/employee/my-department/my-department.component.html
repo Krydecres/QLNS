@@ -1,0 +1,85 @@
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="bi bi-people-fill text-primary"></i> Phòng ban của tôi
+            </h1>
+            <p class="text-muted mb-0" *ngIf="department">
+                <i class="bi bi-diagram-3 me-1"></i>
+                <strong class="text-primary">{{ department.name }}</strong>
+                &mdash; {{ members.length }} thành viên
+            </p>
+        </div>
+    </div>
+
+    <div class="alert alert-warning d-flex align-items-center gap-2" *ngIf="noDept">
+        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        <span>Bạn chưa được xếp vào phòng ban nào. Vui lòng liên hệ Admin để cập nhật.</span>
+    </div>
+
+    <ng-container *ngIf="!noDept && department">
+        <!-- Banner phòng ban -->
+        <div class="card border-0 mb-4 text-white shadow" style="background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); border-radius: 16px;">
+            <div class="card-body d-flex align-items-center gap-4 py-4">
+                <div class="rounded-circle bg-white bg-opacity-25 d-flex align-items-center justify-content-center shadow-sm"
+                     style="width: 80px; height: 80px; flex-shrink: 0;">
+                    <i class="bi bi-building fs-2 text-white"></i>
+                </div>
+                <div>
+                    <h2 class="mb-1 fw-bold">{{ department.name }}</h2>
+                    <div class="d-flex gap-3 mt-2">
+                        <span class="badge bg-white bg-opacity-25 py-2 px-3">
+                            <i class="bi bi-people me-1"></i> {{ members.length }} thành viên
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách thành viên dạng card -->
+        <div class="row g-3">
+            <div class="col-12 col-sm-6 col-lg-4" *ngFor="let member of members">
+                <div class="card border-0 shadow-sm h-100"
+                     [ngClass]="{'border-primary border-2': isMe(member)}"
+                     [style.borderRadius]="'12px'"
+                     [style.border]="isMe(member) ? '2px solid #1a73e8 !important;' : ''">
+                    <div class="card-body d-flex align-items-start gap-3 py-3">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white fw-bold fs-5 shadow-sm"
+                             [style.width]="'52px'" [style.height]="'52px'"
+                             [style.background]="isMe(member) ? '#1a73e8' : '#6c757d'">
+                            {{ member.fullName.substring(0, 1).toUpperCase() }}
+                        </div>
+                        <div class="flex-grow-1 min-width-0">
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="fw-bold text-truncate">{{ member.fullName }}</span>
+                                <span class="badge bg-primary" style="font-size: 0.7rem;" *ngIf="isMe(member)">Bạn</span>
+                            </div>
+                            <div class="text-muted small mt-1">
+                                <i class="bi bi-briefcase me-1"></i>
+                                {{ member.position?.name || 'Chưa có chức vụ' }}
+                            </div>
+                            <div class="text-muted small text-truncate">
+                                <i class="bi bi-envelope me-1"></i>
+                                {{ member.email }}
+                            </div>
+                            <div class="text-muted small" *ngIf="member.phoneNumber">
+                                <i class="bi bi-telephone me-1"></i>
+                                {{ member.phoneNumber }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pt-0 pb-2 px-3 text-end">
+                        <small class="text-muted">
+                            <i class="bi bi-person-badge me-1"></i>NV-{{ member.id }}
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center py-5 text-muted" *ngIf="members.length === 0">
+            <i class="bi bi-people fs-1 d-block mb-3"></i>
+            Phòng ban chưa có thành viên nào
+        </div>
+    </ng-container>
+</div>
