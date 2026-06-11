@@ -1,0 +1,66 @@
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Quản lý Ngày nghỉ lễ</h1>
+        <a routerLink="/holidays/create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Thêm ngày nghỉ lễ
+        </a>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex align-items-center gap-2">
+            <i class="bi bi-calendar-event text-primary"></i>
+            <h6 class="m-0 font-weight-bold text-primary">Danh sách ngày nghỉ lễ (lặp lại hàng năm)</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="130">Ngày/Tháng</th>
+                            <th width="200">Năm nay ({{ currentYear }})</th>
+                            <th>Tên ngày nghỉ lễ</th>
+                            <th>Mô tả</th>
+                            <th width="150">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (item of holidays; track item.id) {
+                            <tr [ngClass]="isToday(item.month, item.day) ? 'table-success' : ''">
+                                <td class="fw-bold text-center fs-5">
+                                    <i class="bi bi-calendar2 text-danger"></i>
+                                    {{ item.day | number:'2.0-0' }}/{{ item.month | number:'2.0-0' }}
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge py-2 px-3" 
+                                          [ngClass]="isToday(item.month, item.day) ? 'bg-success' : (isPast(item.month, item.day) ? 'bg-secondary' : 'bg-primary')">
+                                        {{ getDateForThisYear(item.month, item.day) | date:'dd/MM/yyyy' }}
+                                        @if (isToday(item.month, item.day)) {
+                                            <span class="ms-1">🎉</span>
+                                        }
+                                    </span>
+                                </td>
+                                <td>{{ item.name }}</td>
+                                <td class="text-muted">{{ item.description || '' }}</td>
+                                <td>
+                                    <a [routerLink]="['/holidays/edit', item.id]" class="btn btn-warning btn-sm" title="Sửa">
+                                        <i class="bi bi-pencil"></i> Sửa
+                                    </a>
+                                    <button class="btn btn-danger btn-sm ms-1" (click)="deleteHoliday(item.id, item.name)" title="Xóa">
+                                        <i class="bi bi-trash"></i> Xóa
+                                    </button>
+                                </td>
+                            </tr>
+                        } @empty {
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">
+                                    <i class="bi bi-calendar-x fs-3 d-block mb-2"></i>
+                                    Chưa có dữ liệu ngày nghỉ lễ
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

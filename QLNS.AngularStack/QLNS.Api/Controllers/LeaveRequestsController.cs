@@ -28,7 +28,9 @@ namespace QLNS.Api.Controllers
             var appUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.Username == username);
             if (appUser == null) return NotFound(new { message = "Không tìm thấy người dùng." });
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == appUser.Email);
+            var employee = await _context.Employees.FirstOrDefaultAsync(e =>
+                (!string.IsNullOrEmpty(appUser.Email) && e.Email == appUser.Email) ||
+                e.Email == appUser.Username);
             if (employee == null) return NotFound(new { message = "Hồ sơ nhân viên không tồn tại." });
 
             var leaves = await _context.LeaveRequests
@@ -65,7 +67,9 @@ namespace QLNS.Api.Controllers
             var appUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.Username == username);
             if (appUser == null) return NotFound(new { message = "Không tìm thấy người dùng." });
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == appUser.Email);
+            var employee = await _context.Employees.FirstOrDefaultAsync(e =>
+                (!string.IsNullOrEmpty(appUser.Email) && e.Email == appUser.Email) ||
+                e.Email == appUser.Username);
             if (employee == null) return NotFound(new { message = "Hồ sơ nhân viên không tồn tại." });
 
             if (model.EndDate < model.StartDate)
@@ -152,6 +156,111 @@ namespace QLNS.Api.Controllers
 
             string action = model.Status == LeaveRequestStatus.Approved ? "đã duyệt" : "từ chối";
             return Ok(new { message = $"Đã {action} đơn nghỉ phép." });
+        }
+
+        // =======================================================
+        // 5. NGÀY NGHỈ CỦA TÔI (Employee)
+        // =======================================================
+        public class DayOffItemDto
+        {
+            public string Type { get; set; } = string.Empty;
+            public DateTime Date { get; set; }
+            public DateTime? EndDate { get; set; }
+            public string Title { get; set; } = string.Empty;
+            public string? Description { get; set; }
+            public string BadgeClass { get; set; } = string.Empty;
+            public string Icon { get; set; } = string.Empty;
+        }
+
+        public class MyDaysOffResponseDto
+        {
+            public System.Collections.Generic.List<DayOffItemDto> UpcomingDays { get; set; } = new System.Collections.Generic.List<DayOffItemDto>();
+            public System.Collections.Generic.List<DayOffItemDto> PastDays { get; set; } = new System.Collections.Generic.List<DayOffItemDto>();
+            public int CurrentYear { get; set; }
+            public int TotalHolidays { get; set; }
+            public int TotalLeaves { get; set; }
+        }
+
+        [HttpGet("my-days-off/{username}")]
+        public async Task<IActionResult> GetMyDaysOff(string username, [FromQuery] int? year)
+        {
+            var appUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.Username == username);
+            if (appUser == null) return NotFound(new { message = "Không tìm thấy người dùng." });
+
+            var employee = await _context.Employees.FirstOrDefaultAsync(e =>
+                (!string.IsNullOrEmpty(appUser.Email) && e.Email == appUser.Email) ||
+                e.Email == appUser.Username);
+            if (employee == null) return NotFound(new { message = "Hồ sơ nhân viên không tồn tại." });
+
+            int selectedYear = year ?? DateTime.Now.Year;
+            var today = DateTime.Today;
+
+            var holidays = await _context.Holidays
+                .Where(h => h.Month >= 1 && h.Month <= 12 && h.Day >= 1 && h.Day <= 31)
+                .OrderBy(h => h.Month).ThenBy(h => h.Day)
+                .ToListAsync();
+
+            var leaveRequests = await _context.LeaveRequests
+                .Where(l => l.EmployeeId == employee.Id
+                    && l.Status == LeaveRequestStatus.Approved
+                    && (l.StartDate.Year == selectedYear || l.EndDate.Year == selectedYear))
+                .OrderBy(l => l.StartDate)
+                .ToListAsync();
+
+            var allDays = new System.Collections.Generic.List<DayOffItemDto>();
+
+            foreach (var h in holidays)
+            {
+                try {
+                    int daysInMonth = DateTime.DaysInMonth(selectedYear, h.Month);
+                    int day = h.Day > daysInMonth ? daysInMonth : h.Day;
+                    var d = new DateTime(selectedYear, h.Month, day);
+                    allDays.Add(new DayOffItemDto
+                    {
+                        Type = "Holiday",
+                        Date = d,
+                        Title = h.Name,
+                        Description = h.Description,
+                        BadgeClass = "bg-danger",
+                        Icon = "bi-star-fill"
+                    });
+                } catch { }
+            }
+
+            foreach (var lr in leaveRequests)
+            {
+                allDays.Add(new DayOffItemDto
+                {
+                    Type = "Leave",
+                    Date = lr.StartDate,
+                    EndDate = lr.EndDate,
+                    Title = "Nghỉ phép: " + lr.Reason,
+                    Description = lr.ApprovalNote,
+                    BadgeClass = "bg-success",
+                    Icon = "bi-calendar-check"
+                });
+            }
+
+            var upcoming = allDays
+                .Where(d => d.Date >= today)
+                .OrderBy(d => d.Date)
+                .ToList();
+
+            var past = allDays
+                .Where(d => d.Date < today)
+                .OrderByDescending(d => d.Date)
+                .ToList();
+
+            var response = new MyDaysOffResponseDto
+            {
+                UpcomingDays = upcoming,
+                PastDays = past,
+                CurrentYear = selectedYear,
+                TotalHolidays = holidays.Count,
+                TotalLeaves = leaveRequests.Count
+            };
+
+            return Ok(response);
         }
     }
 }

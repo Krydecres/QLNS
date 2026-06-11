@@ -1,0 +1,55 @@
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h3 mb-0 text-gray-800">{{ isEditMode ? 'Cập nhật Ngày nghỉ lễ' : 'Thêm Mới Ngày nghỉ lễ' }}</h2>
+        <a routerLink="/holidays" class="btn btn-secondary shadow-sm">
+            <i class="bi bi-arrow-left fa-sm text-white-50"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow mb-4 border-0">
+        <div class="card-body">
+            @if (errorMessage) {
+                <div class="alert alert-danger">{{ errorMessage }}</div>
+            }
+            
+            <form [formGroup]="holidayForm" (ngSubmit)="onSubmit()">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Tên ngày lễ <span class="text-danger">*</span></label>
+                    <input type="text" id="name" class="form-control" formControlName="name" placeholder="VD: Tết Dương Lịch">
+                    @if (holidayForm.get('name')?.invalid && holidayForm.get('name')?.touched) {
+                        <div class="text-danger mt-1 small">Vui lòng nhập tên ngày lễ.</div>
+                    }
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="month" class="form-label">Tháng <span class="text-danger">*</span></label>
+                        <input type="number" id="month" class="form-control" formControlName="month" min="1" max="12">
+                        @if (holidayForm.get('month')?.invalid && holidayForm.get('month')?.touched) {
+                            <div class="text-danger mt-1 small">Tháng không hợp lệ (1-12).</div>
+                        }
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="day" class="form-label">Ngày <span class="text-danger">*</span></label>
+                        <input type="number" id="day" class="form-control" formControlName="day" min="1" max="31">
+                        @if (holidayForm.get('day')?.invalid && holidayForm.get('day')?.touched) {
+                            <div class="text-danger mt-1 small">Ngày không hợp lệ (1-31).</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Mô tả</label>
+                    <textarea id="description" class="form-control" formControlName="description" rows="3" placeholder="Ghi chú thêm..."></textarea>
+                </div>
+
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="bi bi-save me-1"></i> Lưu Ngày Lễ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

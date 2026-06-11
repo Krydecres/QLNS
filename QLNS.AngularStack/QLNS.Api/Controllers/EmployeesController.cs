@@ -52,11 +52,30 @@ public class EmployeesController : ControllerBase
             return BadRequest();
         }
 
+        // Lấy thông tin email cũ trước khi update
+        var existingEmployee = await _context.Employees.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
+        if (existingEmployee == null)
+        {
+            return NotFound();
+        }
+
         _context.Entry(employee).State = EntityState.Modified;
 
         try
         {
             await _context.SaveChangesAsync();
+
+            // Nếu email thay đổi → cập nhật AppUser.Email tương ứng để giữ liên kết
+            if (!string.Equals(existingEmployee.Email, employee.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var appUser = await _context.AppUsers
+                    .FirstOrDefaultAsync(u => u.Email == existingEmployee.Email);
+                if (appUser != null)
+                {
+                    appUser.Email = employee.Email;
+                    await _context.SaveChangesAsync();
+                }
+            }
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -113,10 +132,13 @@ public class EmployeesController : ControllerBase
         var appUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.Username == username);
         if (appUser == null) return NotFound("User not found");
 
+        // Tìm theo email của AppUser, fallback username nếu không có email
         var employee = await _context.Employees
             .Include(e => e.Department)
             .Include(e => e.Position)
-            .FirstOrDefaultAsync(e => e.Email == appUser.Email || e.Email == appUser.Username);
+            .FirstOrDefaultAsync(e =>
+                (!string.IsNullOrEmpty(appUser.Email) && e.Email == appUser.Email) ||
+                e.Email == appUser.Username);
 
         if (employee == null) return NotFound("Employee profile not found");
 
@@ -132,10 +154,13 @@ public class EmployeesController : ControllerBase
         var appUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.Username == username);
         if (appUser == null) return NotFound("User not found");
 
+        // Tìm theo email của AppUser, fallback username nếu không có email
         var me = await _context.Employees
             .Include(e => e.Department)
             .Include(e => e.Position)
-            .FirstOrDefaultAsync(e => e.Email == appUser.Email || e.Email == appUser.Username);
+            .FirstOrDefaultAsync(e =>
+                (!string.IsNullOrEmpty(appUser.Email) && e.Email == appUser.Email) ||
+                e.Email == appUser.Username);
 
         if (me == null) return NotFound("Employee profile not found");
 

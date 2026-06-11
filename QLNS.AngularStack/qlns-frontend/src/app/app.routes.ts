@@ -30,6 +30,10 @@ import { MyDepartmentComponent } from './features/employee/my-department/my-depa
 import { MyLeavesComponent } from './features/leave/my-leaves/my-leaves.component';
 import { LeaveFormComponent } from './features/leave/leave-form/leave-form.component';
 import { LeaveApprovalComponent } from './features/leave/leave-approval/leave-approval.component';
+import { MyDaysOffComponent } from './features/leave/my-days-off/my-days-off.component';
+
+import { HolidayListComponent } from './features/admin/holiday/holiday-list/holiday-list.component';
+import { HolidayFormComponent } from './features/admin/holiday/holiday-form/holiday-form.component';
 
 export const routes: Routes = [
   {
@@ -110,6 +114,24 @@ export const routes: Routes = [
         data: { roles: ['Admin'] }
       },
       {
+        path: 'holidays',
+        component: HolidayListComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'holidays/create',
+        component: HolidayFormComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'holidays/edit/:id',
+        component: HolidayFormComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
         path: 'positions/edit/:id',
         component: PositionFormComponent,
         canActivate: [authGuard],
@@ -167,6 +189,12 @@ export const routes: Routes = [
       {
         path: 'leave/create',
         component: LeaveFormComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Employee'] }
+      },
+      {
+        path: 'leave/my-days-off',
+        component: MyDaysOffComponent,
         canActivate: [authGuard],
         data: { roles: ['Employee'] }
       },

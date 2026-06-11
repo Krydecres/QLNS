@@ -93,7 +93,9 @@ namespace QLNS.Api.Controllers
             var appUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.Username == username);
             if (appUser == null) return NotFound(new { message = "User not found" });
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == appUser.Email);
+            var employee = await _context.Employees.FirstOrDefaultAsync(e =>
+                (!string.IsNullOrEmpty(appUser.Email) && e.Email == appUser.Email) ||
+                e.Email == appUser.Username);
             if (employee == null) return NotFound(new { message = "Employee profile not found" });
 
             var query = _context.Timekeepings
@@ -136,7 +138,9 @@ namespace QLNS.Api.Controllers
             var appUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.Username == model.Username);
             if (appUser == null) return NotFound(new { message = "User not found" });
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == appUser.Email);
+            var employee = await _context.Employees.FirstOrDefaultAsync(e =>
+                (!string.IsNullOrEmpty(appUser.Email) && e.Email == appUser.Email) ||
+                e.Email == appUser.Username);
             if (employee == null) return NotFound(new { message = "Employee profile not found" });
 
             var existing = await _context.Timekeepings
@@ -197,7 +201,9 @@ namespace QLNS.Api.Controllers
             var appUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.Username == username);
             if (appUser == null) return NotFound(new { message = "User not found" });
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == appUser.Email);
+            var employee = await _context.Employees.FirstOrDefaultAsync(e =>
+                (!string.IsNullOrEmpty(appUser.Email) && e.Email == appUser.Email) ||
+                e.Email == appUser.Username);
             if (employee == null) return NotFound(new { message = "Employee profile not found" });
 
             var today = DateTime.Today;
@@ -230,7 +236,9 @@ namespace QLNS.Api.Controllers
             var appUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.Username == username);
             if (appUser == null) return NotFound(new { message = "User not found" });
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == appUser.Email);
+            var employee = await _context.Employees.FirstOrDefaultAsync(e =>
+                (!string.IsNullOrEmpty(appUser.Email) && e.Email == appUser.Email) ||
+                e.Email == appUser.Username);
             if (employee == null) return NotFound(new { message = "Employee profile not found" });
 
             var today = DateTime.Today;

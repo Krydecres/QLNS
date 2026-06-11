@@ -52,4 +52,26 @@ export class MyLeavesComponent implements OnInit {
       default: return 'Không xác định';
     }
   }
+
+  // Format yyyy-MM-dd thành dd/MM/yyyy, tránh lệch timezone
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = dateStr.substring(8, 10);
+    const m = dateStr.substring(5, 7);
+    const y = dateStr.substring(0, 4);
+    return `${d}/${m}/${y}`;
+  }
+
+  // Format datetime — giữ nguyên nếu có phần giờ
+  formatDateTime(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = dateStr.substring(8, 10);
+    const m = dateStr.substring(5, 7);
+    const y = dateStr.substring(0, 4);
+    if (dateStr.length > 10) {
+      const time = dateStr.substring(11, 16);
+      return `${d}/${m}/${y} ${time}`;
+    }
+    return `${d}/${m}/${y}`;
+  }
 }

@@ -1,0 +1,181 @@
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="bi bi-calendar2-heart text-danger"></i> Ngày nghỉ của tôi
+            </h1>
+            <p class="text-muted mb-0">Bao gồm ngày nghỉ lễ và đơn xin nghỉ đã được duyệt</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <label class="form-label mb-0 fw-semibold">Năm:</label>
+            <select class="form-select form-select-sm" [(ngModel)]="currentYear" (ngModelChange)="onYearChange()" style="width: auto;">
+                @for (y of years; track y) {
+                    <option [ngValue]="y">{{ y }}</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <!-- Thống kê tổng quan -->
+    @if (isLoading) {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status" style="width: 2.5rem; height: 2.5rem;">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <div class="mt-2 text-muted">Đang tải dữ liệu năm {{ currentYear }}...</div>
+        </div>
+    } @else {
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body p-2">
+                    <div class="fs-2 fw-bold text-danger">{{ totalHolidays }}</div>
+                    <div class="text-muted small">Ngày nghỉ lễ</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body p-2">
+                    <div class="fs-2 fw-bold text-success">{{ totalLeaves }}</div>
+                    <div class="text-muted small">Lần nghỉ phép</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body p-2">
+                    <div class="fs-2 fw-bold text-primary">{{ upcomingDays.length }}</div>
+                    <div class="text-muted small">Sắp tới</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="card border-0 shadow-sm text-center py-3">
+                <div class="card-body p-2">
+                    <div class="fs-2 fw-bold text-secondary">{{ pastDays.length }}</div>
+                    <div class="text-muted small">Đã qua</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ngày nghỉ sắp tới -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header d-flex align-items-center gap-2 bg-primary text-white py-3">
+            <i class="bi bi-calendar-event-fill fs-5"></i>
+            <h5 class="mb-0">Sắp tới — Năm {{ currentYear }}</h5>
+            <span class="badge bg-light text-primary ms-auto">{{ upcomingDays.length }} ngày</span>
+        </div>
+        <div class="card-body p-0">
+            @if (upcomingDays.length > 0) {
+                <div class="list-group list-group-flush">
+                    @for (item of upcomingDays; track $index) {
+                        <div class="list-group-item list-group-item-action d-flex align-items-start gap-3 py-3">
+                            <!-- Khối ngày/tháng bên trái -->
+                            <div class="text-center" style="min-width: 64px;">
+                                <div class="fw-bold fs-4 lh-1" [class.text-danger]="item.type === 'Holiday'" [class.text-success]="item.type === 'Leave'">
+                                    {{ getDay(item.date) }}
+                                </div>
+                                <div class="text-muted small text-uppercase">
+                                    TH {{ getMonth(item.date) }}
+                                </div>
+                            </div>
+                            <!-- Thông tin ngày nghỉ -->
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="badge" [ngClass]="item.badgeClass">
+                                        <i class="bi" [ngClass]="item.icon"></i>
+                                        {{ item.type === 'Holiday' ? 'Ngày lễ' : 'Nghỉ phép' }}
+                                    </span>
+                                    <span class="fw-semibold">{{ item.title }}</span>
+                                </div>
+                                @if (item.description) {
+                                    <div class="text-muted small">{{ item.description }}</div>
+                                }
+                                @if (item.type === 'Leave' && item.endDate) {
+                                    <div class="text-muted small">
+                                        <i class="bi bi-arrow-right"></i>
+                                        Đến {{ formatDate(item.endDate) }}
+                                        ({{ getDurationDays(item.date, item.endDate) }} ngày)
+                                    </div>
+                                }
+                            </div>
+                            <!-- Đếm ngày còn lại -->
+                            <div class="text-end">
+                                @if (getDaysLeft(item.date) === 0) {
+                                    <span class="badge bg-warning text-dark">Hôm nay</span>
+                                } @else {
+                                    <span class="badge bg-light text-muted border">{{ getDaysLeft(item.date) }} ngày nữa</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            } @else {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+                    Không có ngày nghỉ sắp tới trong năm {{ currentYear }}
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Ngày nghỉ đã qua -->
+    @if (pastDays.length > 0) {
+        <div class="card shadow-sm mb-4">
+            <div class="card-header d-flex align-items-center gap-2 py-3">
+                <i class="bi bi-clock-history text-muted fs-5"></i>
+                <h5 class="mb-0 text-muted">Đã qua — Năm {{ currentYear }}</h5>
+                <span class="badge bg-secondary ms-auto">{{ pastDays.length }} ngày</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush">
+                    @for (item of pastDays; track $index) {
+                        <div class="list-group-item d-flex align-items-start gap-3 py-3 opacity-75">
+                            <!-- Khối ngày/tháng bên trái -->
+                            <div class="text-center" style="min-width: 64px;">
+                                <div class="fw-bold fs-4 lh-1 text-muted">
+                                    {{ getDay(item.date) }}
+                                </div>
+                                <div class="text-muted small text-uppercase">
+                                    TH {{ getMonth(item.date) }}
+                                </div>
+                            </div>
+                            <!-- Thông tin ngày nghỉ -->
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="badge opacity-75" [ngClass]="item.badgeClass">
+                                        <i class="bi" [ngClass]="item.icon"></i>
+                                        {{ item.type === 'Holiday' ? 'Ngày lễ' : 'Nghỉ phép' }}
+                                    </span>
+                                    <span class="text-muted">{{ item.title }}</span>
+                                </div>
+                                @if (item.description) {
+                                    <div class="text-muted small">{{ item.description }}</div>
+                                }
+                                @if (item.type === 'Leave' && item.endDate) {
+                                    <div class="text-muted small">
+                                        <i class="bi bi-arrow-right"></i>
+                                        Đến {{ formatDate(item.endDate) }}
+                                    </div>
+                                }
+                            </div>
+                            <div>
+                                <i class="bi bi-check2-circle text-muted"></i>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Link xin nghỉ phép mới -->
+    <div class="d-flex justify-content-center">
+        <a routerLink="/leave/create" class="btn btn-outline-success">
+            <i class="bi bi-plus-circle"></i> Xin nghỉ phép mới
+        </a>
+    </div>
+    } <!-- end @else (not loading) -->
+</div>
