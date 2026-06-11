@@ -14,6 +14,16 @@
                class="btn btn-outline-success">
                 <i class="bi bi-file-earmark-excel me-1"></i> Xuất Excel
             </a>
+            <!-- Gửi Email hàng loạt -->
+            <form asp-action="SendAllPayslips" method="post" class="d-inline"
+                  onsubmit="return confirm('Bạn có chắc chắn muốn GỬI EMAIL PHIẾU LƯƠNG cho TẤT CẢ nhân viên trong tháng này?')">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="month" value="@ViewBag.SelectedMonth" />
+                <input type="hidden" name="year" value="@ViewBag.SelectedYear" />
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-envelope-paper me-1"></i> Gửi tất cả
+                </button>
+            </form>
             <!-- Xóa toàn bộ -->
             <form asp-action="DeleteAll" method="post" class="d-inline"
                   onsubmit="return confirm('Xóa TOÀN BỘ dữ liệu lương của tất cả các tháng? Hành động này không thể hoàn tác!')">
@@ -179,7 +189,14 @@
                                         @item.TotalSalary.ToString("N0") đ
                                     </span>
                                 </td>
-                                <td class="text-center">
+                                <td class="text-center text-nowrap">
+                                    <form asp-action="SendPayslip" asp-route-id="@item.Id" method="post" class="d-inline"
+                                          onsubmit="return confirm('Gửi email phiếu lương cho nhân viên này?')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-info me-1" title="Gửi Email">
+                                            <i class="bi bi-envelope"></i>
+                                        </button>
+                                    </form>
                                     <a asp-action="Edit" asp-route-id="@item.Id"
                                        class="btn btn-sm btn-outline-primary me-1" title="Sửa">
                                         <i class="bi bi-pencil-square"></i>

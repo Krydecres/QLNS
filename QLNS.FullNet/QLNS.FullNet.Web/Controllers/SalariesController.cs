@@ -11,11 +11,13 @@ namespace QLNS.FullNet.Web.Controllers
     {
         private readonly AppDbContext _context;
         private readonly ISalaryCalculationService _salaryService;
+        private readonly IEmailService _emailService;
 
-        public SalariesController(AppDbContext context, ISalaryCalculationService salaryService)
+        public SalariesController(AppDbContext context, ISalaryCalculationService salaryService, IEmailService emailService)
         {
             _context = context;
             _salaryService = salaryService;
+            _emailService = emailService;
         }
 
         // ============ HIỂN THỊ DANH SÁCH ============
@@ -212,6 +214,84 @@ namespace QLNS.FullNet.Web.Controllers
                 content,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 $"BangLuong_T{month}_{year}.xlsx");
+        }
+
+        // ============ GỬI EMAIL PHIẾU LƯƠNG (CÁ NHÂN) ============
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendPayslip(int id)
+        {
+            var salary = await _context.Salaries
+                .Include(s => s.Employee)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (salary == null || salary.Employee == null || string.IsNullOrEmpty(salary.Employee.Email))
+            {
+                TempData["ErrorMessage"] = "Không tìm thấy dữ liệu lương hoặc nhân viên chưa có email.";
+                return RedirectToAction(nameof(Index), new { month = salary?.Month, year = salary?.Year });
+            }
+
+            string subject = $"[QLNS] Phiếu lương kỳ T{salary.Month}/{salary.Year}";
+            string body = $@"
+                <h3>Chào {salary.Employee.FullName},</h3>
+                <p>Phòng Nhân sự gửi bạn chi tiết bảng lương kỳ <b>T{salary.Month}/{salary.Year}</b>:</p>
+                <ul>
+                    <li><b>Lương ngày công:</b> {salary.BaseSalary:N0} đ</li>
+                    <li><b>Phụ cấp:</b> {salary.Allowance:N0} đ</li>
+                    <li><b>Khấu trừ (Phạt/Vắng):</b> {salary.Deduction:N0} đ</li>
+                </ul>
+                <h4 style='color: green;'>Tổng lương thực nhận: {salary.TotalSalary:N0} đ</h4>
+                <br/>
+                <p>Nếu có thắc mắc, vui lòng liên hệ phòng Nhân sự.</p>
+                <p>Trân trọng.</p>
+            ";
+
+            await _emailService.SendEmailAsync(salary.Employee.Email, subject, body);
+
+            TempData["SuccessMessage"] = $"Đã gửi phiếu lương thành công đến {salary.Employee.Email}";
+            return RedirectToAction(nameof(Index), new { month = salary.Month, year = salary.Year });
+        }
+
+        // ============ GỬI EMAIL PHIẾU LƯƠNG (TẤT CẢ) ============
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SendAllPayslips(int month, int year)
+        {
+            var salaries = await _context.Salaries
+                .Include(s => s.Employee)
+                .Where(s => s.Month == month && s.Year == year && s.Employee != null && !string.IsNullOrEmpty(s.Employee.Email))
+                .ToListAsync();
+
+            if (!salaries.Any())
+            {
+                TempData["ErrorMessage"] = "Không có nhân viên nào có email hợp lệ để gửi.";
+                return RedirectToAction(nameof(Index), new { month, year });
+            }
+
+            int successCount = 0;
+            foreach (var salary in salaries)
+            {
+                string subject = $"[QLNS] Phiếu lương kỳ T{salary.Month}/{salary.Year}";
+                string body = $@"
+                    <h3>Chào {salary.Employee!.FullName},</h3>
+                    <p>Phòng Nhân sự gửi bạn chi tiết bảng lương kỳ <b>T{salary.Month}/{salary.Year}</b>:</p>
+                    <ul>
+                        <li><b>Lương ngày công:</b> {salary.BaseSalary:N0} đ</li>
+                        <li><b>Phụ cấp:</b> {salary.Allowance:N0} đ</li>
+                        <li><b>Khấu trừ (Phạt/Vắng):</b> {salary.Deduction:N0} đ</li>
+                    </ul>
+                    <h4 style='color: green;'>Tổng lương thực nhận: {salary.TotalSalary:N0} đ</h4>
+                    <br/>
+                    <p>Nếu có thắc mắc, vui lòng liên hệ phòng Nhân sự.</p>
+                    <p>Trân trọng.</p>
+                ";
+
+                await _emailService.SendEmailAsync(salary.Employee.Email!, subject, body);
+                successCount++;
+            }
+
+            TempData["SuccessMessage"] = $"Đã gửi thành công {successCount} phiếu lương.";
+            return RedirectToAction(nameof(Index), new { month, year });
         }
 
         // ============ HELPER: Dropdown nhân viên ============

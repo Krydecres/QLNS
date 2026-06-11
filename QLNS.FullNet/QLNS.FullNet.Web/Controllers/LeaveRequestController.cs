@@ -16,10 +16,14 @@ namespace QLNS.FullNet.Web.Controllers
     public class LeaveRequestController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly QLNS.FullNet.Web.Services.IEmailService _emailService;
+        private readonly IConfiguration _configuration;
 
-        public LeaveRequestController(AppDbContext context)
+        public LeaveRequestController(AppDbContext context, QLNS.FullNet.Web.Services.IEmailService emailService, IConfiguration configuration)
         {
             _context = context;
+            _emailService = emailService;
+            _configuration = configuration;
         }
 
         // --- NHÂN VIÀN ---
@@ -153,12 +157,29 @@ namespace QLNS.FullNet.Web.Controllers
             {
                 if (model.EndDate < model.StartDate)
                 {
-                    ModelState.AddModelError("EndDate", "Ngày kết thúc phải lớn hơn hoặc bằng ngày bật đầu.");
+                    ModelState.AddModelError("EndDate", "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.");
                     return View(model);
                 }
 
                 _context.LeaveRequests.Add(model);
                 await _context.SaveChangesAsync();
+
+                // Gửi email cho Admin
+                var adminEmail = _configuration["EmailSettings:AdminEmail"] ?? "admin@qlns.local";
+                string subject = $"[QLNS] Đơn xin nghỉ phép mới từ {employee.FullName}";
+                string body = $@"
+                    <h3>Kính gửi Quản lý,</h3>
+                    <p>Nhân viên <b>{employee.FullName}</b> vừa nộp đơn xin nghỉ phép.</p>
+                    <ul>
+                        <li><b>Lý do:</b> {model.Reason}</li>
+                        <li><b>Từ ngày:</b> {model.StartDate:dd/MM/yyyy}</li>
+                        <li><b>Đến ngày:</b> {model.EndDate:dd/MM/yyyy}</li>
+                    </ul>
+                    <p>Vui lòng đăng nhập vào hệ thống để duyệt đơn.</p>
+                    <p>Trân trọng.</p>";
+                
+                await _emailService.SendEmailAsync(adminEmail, subject, body);
+
                 TempData["SuccessMessage"] = "Gửi đơn xin nghỉ phép thành công!";
                 return RedirectToAction(nameof(MyLeaves));
             }
@@ -185,7 +206,7 @@ namespace QLNS.FullNet.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ProcessRequest(int id, LeaveRequestStatus status, string note)
         {
-            var request = await _context.LeaveRequests.FindAsync(id);
+            var request = await _context.LeaveRequests.Include(l => l.Employee).FirstOrDefaultAsync(l => l.Id == id);
             if (request == null)
             {
                 return NotFound("Không tìm thấy đơn xin nghỉ phép.");
@@ -193,7 +214,7 @@ namespace QLNS.FullNet.Web.Controllers
 
             if (request.Status != LeaveRequestStatus.Pending)
             {
-                TempData["ErrorMessage"] = "Đơn này đá đỳc xỬ lý trước đó.";
+                TempData["ErrorMessage"] = "Đơn này đã được xử lý trước đó.";
                 return RedirectToAction(nameof(Approval));
             }
 
@@ -207,8 +228,26 @@ namespace QLNS.FullNet.Web.Controllers
             request.ApprovalNote = note;
 
             await _context.SaveChangesAsync();
-            string action = status == LeaveRequestStatus.Approved ? "đá duyệt" : "từ chôi";
-            TempData["SuccessMessage"] = "Đã " + action + " đơn nghỉ phép.";
+            string actionStr = status == LeaveRequestStatus.Approved ? "đã duyệt" : "từ chối";
+            string actionColor = status == LeaveRequestStatus.Approved ? "green" : "red";
+            
+            // Gửi email báo kết quả cho nhân viên
+            if (request.Employee != null && !string.IsNullOrEmpty(request.Employee.Email))
+            {
+                string subject = $"[QLNS] Kết quả đơn xin nghỉ phép: {actionStr.ToUpper()}";
+                string body = $@"
+                    <h3>Chào {request.Employee.FullName},</h3>
+                    <p>Đơn xin nghỉ phép của bạn từ ngày <b>{request.StartDate:dd/MM/yyyy}</b> đến <b>{request.EndDate:dd/MM/yyyy}</b> 
+                       đã được Quản lý xử lý.</p>
+                    <p>Kết quả: <b style='color:{actionColor};'>{actionStr.ToUpper()}</b></p>
+                    <p>Ghi chú từ quản lý: <i>{note ?? "Không có"}</i></p>
+                    <br/>
+                    <p>Trân trọng.</p>";
+                
+                await _emailService.SendEmailAsync(request.Employee.Email, subject, body);
+            }
+
+            TempData["SuccessMessage"] = "Đã " + actionStr + " đơn nghỉ phép.";
 
             return RedirectToAction(nameof(Approval));
         }
