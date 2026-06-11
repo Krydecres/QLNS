@@ -246,12 +246,19 @@ namespace QLNS.FullNet.Web.Controllers
 
         // 11. TẢI ẢNH ĐẠI DIỆN
 [HttpPost]
-public async Task<IActionResult> UploadAvatar(IFormFile avatarFile, [FromServices] IWebHostEnvironment env)
+public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)
 {
     // 1. Kiểm tra xem người dùng đã chọn file chưa
     if (avatarFile == null || avatarFile.Length == 0)
     {
         TempData["ErrorMessage"] = "Vui lòng chọn một file ảnh.";
+        return RedirectToAction("MyProfile");
+    }
+
+    // Giới hạn kích thước ảnh dưới 1MB vì lưu vào Database sẽ tốn dung lượng
+    if (avatarFile.Length > 1 * 1024 * 1024)
+    {
+        TempData["ErrorMessage"] = "Kích thước ảnh quá lớn. Vui lòng chọn ảnh dưới 1MB.";
         return RedirectToAction("MyProfile");
     }
 
@@ -269,25 +276,16 @@ public async Task<IActionResult> UploadAvatar(IFormFile avatarFile, [FromService
         return NotFound("Không tìm thấy tài khoản nhân viên.");
     }
 
-    // 3. Khởi tạo thư mục lưu file trong wwwroot/images/avatars
-    var uploadsFolder = Path.Combine(env.WebRootPath, "images", "avatars");
-    if (!Directory.Exists(uploadsFolder))
+    // 3. Chuyển đổi file ảnh thành chuỗi Base64
     {
-        Directory.CreateDirectory(uploadsFolder);
+        await avatarFile.CopyToAsync(memoryStream);
+        var fileBytes = memoryStream.ToArray();
+        var base64String = Convert.ToBase64String(fileBytes);
+        
+        // 4. Lưu chuỗi Data URI vào thẳng cột AvatarUrl của Database
+        employee.AvatarUrl = $"data:{avatarFile.ContentType};base64,{base64String}";
     }
 
-    // 4. Tạo tên file ngẫu nhiên để tránh trùng lặp
-    var uniqueFileName = Guid.NewGuid().ToString() + "_" + avatarFile.FileName;
-    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-    // 5. Lưu file vào server
-    using (var fileStream = new FileStream(filePath, FileMode.Create))
-    {
-        await avatarFile.CopyToAsync(fileStream);
-    }
-
-    // 6. Cập nhật đường dẫn ảnh mới vào database
-    employee.AvatarUrl = $"/images/avatars/{uniqueFileName}";
     _context.Update(employee);
     await _context.SaveChangesAsync();
 
