@@ -1,0 +1,46 @@
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h3 mb-0 text-gray-800">Tạo đơn xin nghỉ phép</h2>
+        <a routerLink="/leave/my-leaves" class="btn btn-secondary shadow-sm">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại
+        </a>
+    </div>
+
+    <div class="card shadow mb-4 border-0" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-body p-4">
+            @if (errorMessage) {
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ errorMessage }}
+                </div>
+            }
+
+            <form (ngSubmit)="onSubmit()" #leaveForm="ngForm">
+                <div class="mb-3">
+                    <label for="startDate" class="form-label fw-bold">Từ ngày <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="startDate" name="startDate"
+                        [(ngModel)]="model.startDate" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="endDate" class="form-label fw-bold">Đến ngày <span class="text-danger">*</span></label>
+                    <input type="date" class="form-control" id="endDate" name="endDate"
+                        [(ngModel)]="model.endDate" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="reason" class="form-label fw-bold">Lý do <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="reason" name="reason" rows="4"
+                        placeholder="Nhập lý do xin nghỉ..."
+                        [(ngModel)]="model.reason" required></textarea>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg" [disabled]="!leaveForm.valid">
+                        <i class="bi bi-send-fill me-2"></i> Gửi đơn xin nghỉ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

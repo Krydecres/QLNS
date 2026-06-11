@@ -27,6 +27,10 @@ import { PendingUpdatesComponent } from './features/employee/pending-updates/pen
 import { MyProfileComponent } from './features/employee/my-profile/my-profile.component';
 import { MyDepartmentComponent } from './features/employee/my-department/my-department.component';
 
+import { MyLeavesComponent } from './features/leave/my-leaves/my-leaves.component';
+import { LeaveFormComponent } from './features/leave/leave-form/leave-form.component';
+import { LeaveApprovalComponent } from './features/leave/leave-approval/leave-approval.component';
+
 export const routes: Routes = [
   {
     path: '',
@@ -153,6 +157,24 @@ export const routes: Routes = [
         component: MyDepartmentComponent,
         canActivate: [authGuard],
         data: { roles: ['Employee'] }
+      },
+      {
+        path: 'leave/my-leaves',
+        component: MyLeavesComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Employee'] }
+      },
+      {
+        path: 'leave/create',
+        component: LeaveFormComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Employee'] }
+      },
+      {
+        path: 'leave/approval',
+        component: LeaveApprovalComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
       }
     ]
   }

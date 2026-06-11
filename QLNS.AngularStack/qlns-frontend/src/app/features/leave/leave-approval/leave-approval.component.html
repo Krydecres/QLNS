@@ -1,0 +1,97 @@
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h3 mb-0 text-gray-800">Duyệt xin nghỉ phép</h2>
+    </div>
+
+    <div class="card shadow mb-4 border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ngày gửi</th>
+                            <th>Nhân viên</th>
+                            <th>Từ ngày</th>
+                            <th>Đến ngày</th>
+                            <th>Lý do</th>
+                            <th>Trạng thái</th>
+                            <th>Người duyệt</th>
+                            <th>Ghi chú</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (request of requests; track request.id) {
+                            <tr>
+                                <td>{{ request.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                                <td><strong>{{ request.employeeName }}</strong></td>
+                                <td>{{ request.startDate | date:'dd/MM/yyyy' }}</td>
+                                <td>{{ request.endDate | date:'dd/MM/yyyy' }}</td>
+                                <td>{{ request.reason }}</td>
+                                <td>
+                                    <span class="badge" [ngClass]="getStatusBadgeClass(request.status)">
+                                        {{ getStatusLabel(request.status) }}
+                                    </span>
+                                </td>
+                                <td>{{ request.approvedByName || '-' }}</td>
+                                <td>{{ request.approvalNote || '-' }}</td>
+                                <td class="text-center">
+                                    @if (request.status === 0) {
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-success" (click)="openApprovalModal(request, 1)" title="Duyệt">
+                                                <i class="bi bi-check-circle"></i>
+                                            </button>
+                                            <button class="btn btn-danger" (click)="openApprovalModal(request, 2)" title="Từ chối">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        </div>
+                                    }
+                                </td>
+                            </tr>
+                        } @empty {
+                            <tr>
+                                <td colspan="9" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                    Không có đơn xin nghỉ phép nào.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Duyệt / Từ chối -->
+@if (selectedRequest) {
+    <div class="modal fade show" tabindex="-1" style="display: block; background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ actionStatus === 1 ? 'Xác nhận Duyệt đơn' : 'Xác nhận Từ chối đơn' }}
+                    </h5>
+                    <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <strong>Nhân viên:</strong> {{ selectedRequest.employeeName }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="approvalNote" class="form-label">Ghi chú duyệt</label>
+                        <textarea id="approvalNote" class="form-control" rows="3" [(ngModel)]="approvalNote" placeholder="Nhập ghi chú..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" (click)="closeModal()">Đóng</button>
+                    <button type="button" class="btn" 
+                            [ngClass]="actionStatus === 1 ? 'btn-success' : 'btn-danger'" 
+                            (click)="submitAction()">
+                        Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
