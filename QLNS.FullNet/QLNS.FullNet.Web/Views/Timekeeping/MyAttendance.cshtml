@@ -78,6 +78,7 @@
                 <thead class="table-light">
                     <tr>
                         <th>Ngày</th>
+                        <th>Ca làm</th>
                         <th>Check-in</th>
                         <th>Check-out</th>
                         <th>Trạng thái</th>
@@ -89,6 +90,7 @@
                     {
                         <tr>
                             <td>@item.Date.ToString("dd/MM/yyyy")</td>
+                            <td>@(item.Shift?.Name ?? "Ca tự do")</td>
                             <td>@(item.CheckInTime?.ToString(@"hh\:mm") ?? "-")</td>
                             <td>@(item.CheckOutTime?.ToString(@"hh\:mm") ?? "-")</td>
                             <td>

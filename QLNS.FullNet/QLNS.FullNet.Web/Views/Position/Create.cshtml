@@ -7,12 +7,12 @@
     <div class="dashboard-header">
         <div>
             <h1 class="dashboard-title">Thêm mới chức vụ</h1>
-            <p class="dashboard-subtitle">Tạo mới một chức vụ trên hệ thống</p>
+            <p class="dashboard-subtitle">Tạo mới một chức vụ và cấu hình mức lương ngày công</p>
         </div>
     </div>
 
     <div class="row mt-3">
-        <div class="col-md-6">
+        <div class="col-md-7">
             <div class="chart-card">
                 <form asp-action="Create" method="post">
                     <div class="mb-3">
@@ -20,7 +20,30 @@
                         <input asp-for="Name" class="form-control" placeholder="Ví dụ: Trưởng phòng, Nhân viên, Giám đốc..." />
                         <span asp-validation-for="Name" class="text-danger mt-1 d-block"></span>
                     </div>
-                    
+
+                    <div class="mb-3">
+                        <label asp-for="DailyWage" class="form-label fw-bold">
+                            <i class="bi bi-currency-dollar text-success me-1"></i> Lương ngày công (VNĐ/ngày)
+                        </label>
+                        <div class="input-group">
+                            <input asp-for="DailyWage" class="form-control" type="number" step="1000" min="0"
+                                   placeholder="Ví dụ: 500000" />
+                            <span class="input-group-text">đ / ngày</span>
+                        </div>
+                        <div class="form-text text-muted">
+                            Đây là mức lương tính cho 1 ngày công chuẩn. Sẽ được nhân với Hệ số Ca làm khi tính bảng lương.
+                        </div>
+                        <span asp-validation-for="DailyWage" class="text-danger mt-1 d-block"></span>
+                    </div>
+
+                    <div class="alert alert-info border-0 py-2 px-3 mt-2">
+                        <small>
+                            <i class="bi bi-info-circle me-1"></i>
+                            <strong>Ví dụ:</strong> Nếu lương ngày công = <strong>500,000đ</strong> và nhân viên làm Ca Tăng ca (hệ số 1.5x),
+                            thì tổng tiền ca đó = <strong>750,000đ</strong>.
+                        </small>
+                    </div>
+
                     <div class="d-flex gap-2 mt-4">
                         <button type="submit" class="btn btn-primary"><i class="bi bi-save"></i> Lưu dữ liệu</button>
                         <a asp-action="Index" class="btn btn-light border"><i class="bi bi-x-circle"></i> Hủy bỏ</a>
@@ -30,3 +53,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

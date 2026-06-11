@@ -15,6 +15,12 @@ namespace QLNS.FullNet.Data.Entities
         [ForeignKey("EmployeeId")]
         public Employee? Employee { get; set; }
 
+        [Display(Name = "Ca làm")]
+        public int? ShiftId { get; set; }
+
+        [ForeignKey("ShiftId")]
+        public Shift? Shift { get; set; }
+
         [Required]
         [Display(Name = "Ngày chấm công")]
         [DataType(DataType.Date)]

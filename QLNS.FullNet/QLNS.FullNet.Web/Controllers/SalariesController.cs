@@ -71,39 +71,7 @@ namespace QLNS.FullNet.Web.Controllers
             return RedirectToAction(nameof(Index), new { month, year });
         }
 
-        // ============ THÊM MỚI (GET) ============
-        public async Task<IActionResult> Create()
-        {
-            await PopulateEmployeesDropdown();
-            return View(new Salary
-            {
-                Month = DateTime.Now.Month,
-                Year = DateTime.Now.Year
-            });
-        }
-
-        // ============ THÊM MỚI (POST) ============
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Salary salary)
-        {
-            // Loại bỏ validation cho navigation property
-            ModelState.Remove("Employee");
-
-            if (!ModelState.IsValid)
-            {
-                await PopulateEmployeesDropdown(salary.EmployeeId);
-                return View(salary);
-            }
-
-            // Tính tổng lương
-            salary.TotalSalary = salary.BaseSalary + salary.Allowance - salary.Deduction;
-
-            _context.Salaries.Add(salary);
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index), new { month = salary.Month, year = salary.Year });
-        }
+        // ============ THÊM MỚI (GET/POST) ĐÃ BỊ XÓA THEO YÊU CẦU ============
 
         // ============ CHỈNH SỬA (GET) ============
         public async Task<IActionResult> Edit(int id)
@@ -171,6 +139,79 @@ namespace QLNS.FullNet.Web.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index), new { month, year });
+        }
+
+        // ============ XÓA TOÀN BỘ (POST) ============
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteAll()
+        {
+            var all = await _context.Salaries.ToListAsync();
+            _context.Salaries.RemoveRange(all);
+            await _context.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = $"Đã xóa toàn bộ {all.Count} bản ghi lương. Vui lòng tính lại.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        // ============ XUẤT EXCEL ============
+        public async Task<IActionResult> ExportExcel(int month, int year)
+        {
+            var salaries = await _context.Salaries
+                .Include(s => s.Employee)
+                .Where(s => s.Month == month && s.Year == year)
+                .AsNoTracking()
+                .ToListAsync();
+
+            if (!salaries.Any())
+            {
+                TempData["ErrorMessage"] = $"Không có dữ liệu lương của tháng {month}/{year} để xuất.";
+                return RedirectToAction(nameof(Index), new { month, year });
+            }
+
+            using var workbook = new ClosedXML.Excel.XLWorkbook();
+            var worksheet = workbook.Worksheets.Add($"Lương T{month}-{year}");
+
+            // Header
+            worksheet.Cell(1, 1).Value = "Kỳ lương";
+            worksheet.Cell(1, 2).Value = "Mã NV";
+            worksheet.Cell(1, 3).Value = "Tên nhân viên";
+            worksheet.Cell(1, 4).Value = "Lương ngày công";
+            worksheet.Cell(1, 5).Value = "Phụ cấp";
+            worksheet.Cell(1, 6).Value = "Khấu trừ";
+            worksheet.Cell(1, 7).Value = "Tổng lương";
+
+            // Format Header
+            var headerRange = worksheet.Range("A1:G1");
+            headerRange.Style.Font.Bold = true;
+            headerRange.Style.Fill.BackgroundColor = ClosedXML.Excel.XLColor.LightGray;
+            headerRange.Style.Alignment.Horizontal = ClosedXML.Excel.XLAlignmentHorizontalValues.Center;
+
+            // Dữ liệu
+            int row = 2;
+            foreach (var item in salaries)
+            {
+                worksheet.Cell(row, 1).Value = $"T{item.Month}/{item.Year}";
+                worksheet.Cell(row, 2).Value = item.EmployeeId;
+                worksheet.Cell(row, 3).Value = item.Employee?.FullName;
+                worksheet.Cell(row, 4).Value = item.BaseSalary;
+                worksheet.Cell(row, 5).Value = item.Allowance;
+                worksheet.Cell(row, 6).Value = item.Deduction;
+                worksheet.Cell(row, 7).Value = item.TotalSalary;
+                row++;
+            }
+
+            // Auto-fit columns
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            var content = stream.ToArray();
+
+            return File(
+                content,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                $"BangLuong_T{month}_{year}.xlsx");
         }
 
         // ============ HELPER: Dropdown nhân viên ============

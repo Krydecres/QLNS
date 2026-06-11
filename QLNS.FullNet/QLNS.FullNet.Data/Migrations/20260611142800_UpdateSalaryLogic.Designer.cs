@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QLNS.FullNet.Data;
 
@@ -11,9 +12,11 @@ using QLNS.FullNet.Data;
 namespace QLNS.FullNet.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260611142800_UpdateSalaryLogic")]
+    partial class UpdateSalaryLogic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,7 +55,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AppUsers", (string)null);
+                    b.ToTable("AppUsers");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.AuditLog", b =>
@@ -65,7 +68,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AuditLogs", (string)null);
+                    b.ToTable("AuditLogs");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.Department", b =>
@@ -82,7 +85,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Departments", (string)null);
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.Employee", b =>
@@ -127,7 +130,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasIndex("PositionId");
 
-                    b.ToTable("Employees", (string)null);
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.EmployeeShift", b =>
@@ -160,7 +163,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasIndex("ShiftId");
 
-                    b.ToTable("EmployeeShifts", (string)null);
+                    b.ToTable("EmployeeShifts");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.Holiday", b =>
@@ -186,7 +189,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Holidays", (string)null);
+                    b.ToTable("Holidays");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.LeaveRequest", b =>
@@ -228,7 +231,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("LeaveRequests", (string)null);
+                    b.ToTable("LeaveRequests");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.Position", b =>
@@ -248,7 +251,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Positions", (string)null);
+                    b.ToTable("Positions");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.ProfileUpdateRequest", b =>
@@ -279,7 +282,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("ProfileUpdateRequests", (string)null);
+                    b.ToTable("ProfileUpdateRequests");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.Salary", b =>
@@ -319,7 +322,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasIndex("EmployeeId");
 
-                    b.ToTable("Salaries", (string)null);
+                    b.ToTable("Salaries");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.Shift", b =>
@@ -356,7 +359,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Shifts", (string)null);
+                    b.ToTable("Shifts");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.Timekeeping", b =>
@@ -396,7 +399,7 @@ namespace QLNS.FullNet.Data.Migrations
 
                     b.HasIndex("ShiftId");
 
-                    b.ToTable("Timekeepings", (string)null);
+                    b.ToTable("Timekeepings");
                 });
 
             modelBuilder.Entity("QLNS.FullNet.Data.Entities.Employee", b =>

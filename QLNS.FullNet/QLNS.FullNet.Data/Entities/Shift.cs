@@ -30,5 +30,8 @@ public class Shift
     [StringLength(255)]
     public string? Description { get; set; }
 
+    [Display(Name = "Hệ số lương (Tăng ca)")]
+    public decimal WageMultiplier { get; set; } = 1.0m;
+
     public bool IsActive { get; set; } = true;
 }

@@ -53,6 +53,25 @@
                     <label asp-for="IsActive" class="form-check-label">Đang sử dụng</label>
                 </div>
 
+                <!-- Hệ số lương -->
+                <div class="mb-3 p-3 border rounded bg-light">
+                    <label asp-for="WageMultiplier" class="form-label fw-bold">
+                        <i class="bi bi-calculator text-warning me-1"></i>
+                        Hệ số lương (WageMultiplier)
+                    </label>
+                    <div class="input-group" style="max-width: 250px;">
+                        <input asp-for="WageMultiplier" class="form-control" type="number" step="0.1" min="0.5" max="5.0" />
+                        <span class="input-group-text">× lương ngày</span>
+                    </div>
+                    <div class="form-text mt-1">
+                        <strong>Hướng dẫn:</strong><br>
+                        - Ca bình thường: <code>1.0</code><br>
+                        - Tăng ca ngày thường: <code>1.5</code><br>
+                        - Tăng ca cuối tuần / lễ: <code>2.0</code>
+                    </div>
+                    <span asp-validation-for="WageMultiplier" class="text-danger"></span>
+                </div>
+
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-save"></i> Lưu

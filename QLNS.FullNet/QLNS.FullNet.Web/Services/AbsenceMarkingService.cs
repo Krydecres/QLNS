@@ -28,31 +28,36 @@ namespace QLNS.FullNet.Web.Services
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                var now = DateTime.Now;
-                var todayTrigger = now.Date + TriggerTime;
+                // Cố định múi giờ UTC+7 (Việt Nam)
+                var vnTime = DateTime.UtcNow.AddHours(7);
+                var todayTrigger = vnTime.Date + TriggerTime;
 
                 // Tính thời gian chờ đến lần kích hoạt tiếp theo
                 TimeSpan delay;
-                if (now < todayTrigger)
+                DateTime targetDate; // Ngày cần đánh vắng
+
+                if (vnTime < todayTrigger)
                 {
                     // Hôm nay chưa đến 17:00 → chờ đến 17:00 hôm nay
-                    delay = todayTrigger - now;
+                    delay = todayTrigger - vnTime;
+                    targetDate = vnTime.Date;
                 }
                 else
                 {
                     // Đã qua 17:00 → chờ đến 17:00 ngày mai
-                    delay = todayTrigger.AddDays(1) - now;
+                    delay = todayTrigger.AddDays(1) - vnTime;
+                    targetDate = vnTime.Date.AddDays(1);
                 }
 
                 _logger.LogInformation(
-                    "AbsenceMarkingService: Lần chấm vắng mặt tiếp theo lúc {NextRun:dd/MM/yyyy HH:mm}.",
-                    now + delay);
+                    "AbsenceMarkingService: Lần chấm vắng mặt tiếp theo lúc {NextRun:dd/MM/yyyy HH:mm} (Giờ VN).",
+                    vnTime + delay);
 
                 await Task.Delay(delay, stoppingToken);
 
                 if (!stoppingToken.IsCancellationRequested)
                 {
-                    await MarkAbsentEmployeesAsync(DateTime.Today);
+                    await MarkAbsentEmployeesAsync(targetDate);
                 }
             }
         }

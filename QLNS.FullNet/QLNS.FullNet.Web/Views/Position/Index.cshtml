@@ -7,7 +7,7 @@
     <div class="dashboard-header d-flex justify-content-between align-items-center">
         <div>
             <h1 class="dashboard-title">Danh sách chức vụ</h1>
-            <p class="dashboard-subtitle">Quản lý các cấp bậc chức vụ trong công ty</p>
+            <p class="dashboard-subtitle">Quản lý các cấp bậc chức vụ và mức lương ngày công</p>
         </div>
         <div class="dashboard-actions">
             <a asp-action="Create" class="btn btn-primary">
@@ -16,12 +16,21 @@
         </div>
     </div>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mt-3 mb-0" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <div class="chart-card mt-3">
         <table class="data-table table table-hover align-middle mb-0">
             <thead>
                 <tr>
-                    <th width="10%">Mã CV</th>
+                    <th width="8%">Mã CV</th>
                     <th>Tên chức vụ</th>
+                    <th class="text-end">Lương ngày công</th>
                     <th width="20%" class="text-center">Thao tác</th>
                 </tr>
             </thead>
@@ -31,9 +40,12 @@
                     foreach (var item in Model)
                     {
                         <tr>
-                            <td>@item.Id</td>
+                            <td class="text-muted">#@item.Id</td>
                             <td class="fw-bold">
                                 <a asp-action="Details" asp-route-id="@item.Id">@item.Name</a>
+                            </td>
+                            <td class="text-end fw-semibold text-success">
+                                @item.DailyWage.ToString("N0") đ
                             </td>
                             <td class="text-center">
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i> Sửa</a>
@@ -47,7 +59,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="3" class="text-center text-muted py-4">Chưa có dữ liệu chức vụ.</td>
+                        <td colspan="4" class="text-center text-muted py-4">Chưa có dữ liệu chức vụ.</td>
                     </tr>
                 }
             </tbody>

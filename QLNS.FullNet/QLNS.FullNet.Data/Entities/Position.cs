@@ -7,4 +7,7 @@ public class Position
     [Required(ErrorMessage = "Tên chức vụ không được để trống")]
     [Display(Name = "Tên chức vụ")]
     public string Name { get; set; } = string.Empty;
+
+    [Display(Name = "Lương ngày công")]
+    public decimal DailyWage { get; set; } = 300000;
 }

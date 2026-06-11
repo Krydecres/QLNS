@@ -40,6 +40,15 @@ builder.Services.AddScoped<QLNS.FullNet.Web.Services.ISalaryCalculationService, 
 builder.Services.AddHostedService<AbsenceMarkingService>();
 
 var app = builder.Build();
+
+// --- Cấu hình định dạng Ngày/Tháng/Năm thống nhất toàn hệ thống (vi-VN) ---
+var supportedCultures = new[] { new System.Globalization.CultureInfo("vi-VN") };
+app.UseRequestLocalization(new Microsoft.AspNetCore.Builder.RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("vi-VN"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+});
 //Nếu có cấu hình SeedAdmin:Password thì tự tạo tài khoản admin mặc định.
 //Nếu không có thì chỉ chuẩn hóa role sai/rỗng.
 try

@@ -1,0 +1,204 @@
+@{
+    ViewData["Title"] = "Cài đặt lương";
+    var positions = ViewBag.Positions as List<QLNS.FullNet.Data.Entities.Position>;
+    var shifts = ViewBag.Shifts as List<QLNS.FullNet.Data.Entities.Shift>;
+}
+
+<div class="container-fluid py-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold mb-1">
+                <i class="bi bi-sliders text-primary me-2"></i>
+                Cài đặt Lương
+            </h1>
+            <p class="text-muted mb-0">Cấu hình mức lương ngày công theo chức vụ và hệ số lương theo ca làm việc</p>
+        </div>
+        <a asp-controller="Salaries" asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Quay lại bảng lương
+        </a>
+    </div>
+
+    <!-- Thông báo -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+
+        <!-- Panel 1: Lương ngày công theo Chức vụ -->
+        <div class="col-lg-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-white border-bottom d-flex align-items-center gap-2 py-3">
+                    <div class="rounded-circle bg-primary bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                        <i class="bi bi-award text-primary"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-semibold">Lương ngày công theo Chức vụ</h5>
+                        <small class="text-muted">Số tiền trả cho 1 ngày công chuẩn (hệ số × 1.0)</small>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    @if (positions != null && positions.Any())
+                    {
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Chức vụ</th>
+                                    <th>Lương/ngày</th>
+                                    <th style="width: 100px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var pos in positions)
+                                {
+                                    <tr>
+                                        <td class="fw-semibold align-middle">
+                                            <i class="bi bi-person-badge text-secondary me-1"></i>
+                                            @pos.Name
+                                        </td>
+                                        <td class="align-middle">
+                                            <form asp-action="UpdatePositionWage" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="positionId" value="@pos.Id" />
+                                                <div class="d-flex gap-1 align-items-center">
+                                                    <div class="input-group input-group-sm" style="max-width: 160px;">
+                                                        <input type="number" name="dailyWage" class="form-control text-end"
+                                                               value="@pos.DailyWage.ToString("F0")" step="10000" min="0" />
+                                                        <span class="input-group-text">đ</span>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-sm btn-primary text-nowrap">
+                                                        <i class="bi bi-save2"></i> Lưu
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-award fs-3 d-block mb-2"></i>
+                            Chưa có chức vụ nào.
+                            <a asp-controller="Position" asp-action="Create">Thêm chức vụ</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 2: Hệ số lương theo Ca làm -->
+        <div class="col-lg-6">
+            <div class="card shadow border-0 h-100">
+                <div class="card-header bg-white border-bottom d-flex align-items-center gap-2 py-3">
+                    <div class="rounded-circle bg-warning bg-opacity-10 p-2 d-flex align-items-center justify-content-center" style="width:40px;height:40px;">
+                        <i class="bi bi-calculator text-warning"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0 fw-semibold">Hệ số lương theo Ca làm việc</h5>
+                        <small class="text-muted">Hệ số × lương ngày công khi làm ca này</small>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    @if (shifts != null && shifts.Any())
+                    {
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tên ca</th>
+                                    <th>Thời gian</th>
+                                    <th>Hệ số</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var shift in shifts)
+                                {
+                                    <tr>
+                                        <td class="align-middle fw-semibold">
+                                            @shift.Name
+                                            @if (!shift.IsActive)
+                                            {
+                                                <span class="badge bg-secondary ms-1 small">Tắt</span>
+                                            }
+                                        </td>
+                                        <td class="align-middle text-muted small">
+                                            @shift.StartTime.ToString(@"hh\:mm") – @shift.EndTime.ToString(@"hh\:mm")
+                                        </td>
+                                        <td class="align-middle">
+                                            <form asp-action="UpdateShiftMultiplier" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="shiftId" value="@shift.Id" />
+                                                <div class="d-flex gap-1 align-items-center">
+                                                    <div class="input-group input-group-sm" style="max-width: 120px;">
+                                                        <input type="number" name="wageMultiplier" class="form-control text-center"
+                                                               value="@shift.WageMultiplier.ToString("0.##")" step="0.1" min="0.5" max="5.0" />
+                                                        <span class="input-group-text">×</span>
+                                                    </div>
+                                                    <button type="submit" class="btn btn-sm btn-warning text-nowrap">
+                                                        <i class="bi bi-save2"></i> Lưu
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="p-4 text-center text-muted">
+                            <i class="bi bi-calendar2-week fs-3 d-block mb-2"></i>
+                            Chưa có ca làm việc nào.
+                            <a asp-controller="Shift" asp-action="Create">Thêm ca làm</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Hướng dẫn sử dụng -->
+    <div class="card border-0 bg-light mt-4">
+        <div class="card-body py-3">
+            <h6 class="fw-bold mb-2"><i class="bi bi-lightbulb text-warning me-1"></i> Hướng dẫn cấu hình tự động tính lương</h6>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:24px;height:24px;min-width:24px;">1</span>
+                        <span class="small">Đặt <strong>Lương ngày công</strong> cho từng chức vụ (VD: Giám đốc = 2,000,000đ/ngày)</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center" style="width:24px;height:24px;min-width:24px;">2</span>
+                        <span class="small">Đặt <strong>Hệ số lương</strong> cho Ca làm (Ca thường = 1.0, Tăng ca = 1.5, Lễ = 2.0)</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-success rounded-circle d-flex align-items-center justify-content-center" style="width:24px;height:24px;min-width:24px;">3</span>
+                        <span class="small">Vào <strong>Bảng lương</strong>, chọn tháng và bấm <em>Tính lương</em> — hệ thống tự động tổng hợp!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

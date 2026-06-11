@@ -31,6 +31,7 @@ namespace QLNS.FullNet.Web.Controllers
         {
             var query = _context.Timekeepings
                 .Include(t => t.Employee)
+                .Include(t => t.Shift)
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -61,6 +62,7 @@ namespace QLNS.FullNet.Web.Controllers
         {
             var query = _context.Timekeepings
                 .Include(t => t.Employee)
+                .Include(t => t.Shift)
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -83,10 +85,11 @@ namespace QLNS.FullNet.Web.Controllers
                 worksheet.Cell(currentRow, 1).Value = "ID Chấm Công";
                 worksheet.Cell(currentRow, 2).Value = "Tên Nhân Viên";
                 worksheet.Cell(currentRow, 3).Value = "Ngày Chấm Công";
-                worksheet.Cell(currentRow, 4).Value = "Giờ Vào";
-                worksheet.Cell(currentRow, 5).Value = "Giờ Ra";
-                worksheet.Cell(currentRow, 6).Value = "Trạng Thái";
-                worksheet.Cell(currentRow, 7).Value = "Ghi Chú";
+                worksheet.Cell(currentRow, 4).Value = "Ca Làm";
+                worksheet.Cell(currentRow, 5).Value = "Giờ Vào";
+                worksheet.Cell(currentRow, 6).Value = "Giờ Ra";
+                worksheet.Cell(currentRow, 7).Value = "Trạng Thái";
+                worksheet.Cell(currentRow, 8).Value = "Ghi Chú";
                 worksheet.Row(currentRow).Style.Font.Bold = true;
 
                 foreach (var item in timekeepings)
@@ -95,10 +98,11 @@ namespace QLNS.FullNet.Web.Controllers
                     worksheet.Cell(currentRow, 1).Value = item.Id;
                     worksheet.Cell(currentRow, 2).Value = item.Employee?.FullName ?? "N/A";
                     worksheet.Cell(currentRow, 3).Value = item.Date.ToString("dd/MM/yyyy");
-                    worksheet.Cell(currentRow, 4).Value = item.CheckInTime.HasValue ? item.CheckInTime.Value.ToString(@"hh\:mm") : "-";
-                    worksheet.Cell(currentRow, 5).Value = item.CheckOutTime.HasValue ? item.CheckOutTime.Value.ToString(@"hh\:mm") : "-";
-                    worksheet.Cell(currentRow, 6).Value = item.Status ?? "Có mặt";
-                    worksheet.Cell(currentRow, 7).Value = item.Note;
+                    worksheet.Cell(currentRow, 4).Value = item.Shift?.Name ?? "Ca tự do";
+                    worksheet.Cell(currentRow, 5).Value = item.CheckInTime.HasValue ? item.CheckInTime.Value.ToString(@"hh\:mm") : "-";
+                    worksheet.Cell(currentRow, 6).Value = item.CheckOutTime.HasValue ? item.CheckOutTime.Value.ToString(@"hh\:mm") : "-";
+                    worksheet.Cell(currentRow, 7).Value = item.Status ?? "Có mặt";
+                    worksheet.Cell(currentRow, 8).Value = item.Note;
                 }
 
                 worksheet.Columns().AdjustToContents();
@@ -147,25 +151,51 @@ namespace QLNS.FullNet.Web.Controllers
             }
 
             var today = DateTime.Today;
-            var record = await _context.Timekeepings
-                .FirstOrDefaultAsync(t => t.EmployeeId == employee.Id && t.Date.Date == today);
+            
+            var assignedShifts = await _context.EmployeeShifts
+                .Where(es => es.EmployeeId == employee.Id && es.WorkDate.Date == today && es.IsActive)
+                .ToListAsync();
+                
+            var existingRecords = await _context.Timekeepings
+                .Where(t => t.EmployeeId == employee.Id && t.Date.Date == today)
+                .ToListAsync();
 
-            if (record != null)
+            int? shiftIdToAssign = null;
+
+            if (assignedShifts.Any())
             {
-                TempData["ErrorMessage"] = $"Nhân viên '{employee.FullName}' đã được chấm công hôm nay rồi.";
+                // Tìm ca đầu tiên chưa được chấm
+                var unrecordedShift = assignedShifts.FirstOrDefault(es => !existingRecords.Any(t => t.ShiftId == es.ShiftId));
+                if (unrecordedShift != null)
+                {
+                    shiftIdToAssign = unrecordedShift.ShiftId;
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = $"Nhân viên '{employee.FullName}' đã hoàn thành tất cả các ca được phân công hôm nay.";
+                    return isAdminCheckingForEmployee ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(MyAttendance));
+                }
             }
             else
             {
-                _context.Timekeepings.Add(new Timekeeping
+                // Không được phân ca. Chỉ cho check-in 1 lần (tương đương 1 ca mặc định).
+                if (existingRecords.Any())
                 {
-                    EmployeeId = employee.Id,
-                    Date = DateTime.Now,
-                    CheckInTime = DateTime.Now.TimeOfDay,
-                    Status = "Có mặt"
-                });
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = $"Check-in cho '{employee.FullName}' thành công lúc {DateTime.Now:HH:mm}.";
+                    TempData["ErrorMessage"] = $"Nhân viên '{employee.FullName}' đã được chấm công hôm nay rồi.";
+                    return isAdminCheckingForEmployee ? RedirectToAction(nameof(Index)) : RedirectToAction(nameof(MyAttendance));
+                }
             }
+
+            _context.Timekeepings.Add(new Timekeeping
+            {
+                EmployeeId = employee.Id,
+                ShiftId = shiftIdToAssign,
+                Date = DateTime.Now,
+                CheckInTime = DateTime.Now.TimeOfDay,
+                Status = "Có mặt"
+            });
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = $"Check-in cho '{employee.FullName}' thành công lúc {DateTime.Now:HH:mm}.";
 
             // Admin chấm hộ → quay lại trang Index; Employee tự chấm → quay lại MyAttendance
             return isAdminCheckingForEmployee
@@ -187,25 +217,31 @@ namespace QLNS.FullNet.Web.Controllers
             if (employee == null) return NotFound("Hồ sơ nhân viên không tồn tại.");
 
             var today = DateTime.Today;
+            
+            // Tìm bản ghi chấm công gần nhất chưa có CheckOut
             var record = await _context.Timekeepings
-                .FirstOrDefaultAsync(t => t.EmployeeId == employee.Id && t.Date.Date == today);
+                .Where(t => t.EmployeeId == employee.Id && t.Date.Date == today && t.CheckOutTime == null)
+                .OrderByDescending(t => t.CheckInTime)
+                .FirstOrDefaultAsync();
 
-            if (record != null && record.CheckInTime != null)
+            if (record != null)
             {
-                if (record.CheckOutTime == null)
-                {
-                    record.CheckOutTime = DateTime.Now.TimeOfDay;
-                    await _context.SaveChangesAsync();
-                    TempData["SuccessMessage"] = "Check-out thành công!";
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "Bạn đã check-out hôm nay rồi.";
-                }
+                record.CheckOutTime = DateTime.Now.TimeOfDay;
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Check-out thành công!";
             }
             else
             {
-                TempData["ErrorMessage"] = "Bạn chưa check-in hôm nay.";
+                // Kiểm tra xem đã có bản ghi nào hoàn tất chưa
+                var anyCompleted = await _context.Timekeepings.AnyAsync(t => t.EmployeeId == employee.Id && t.Date.Date == today && t.CheckOutTime != null);
+                if (anyCompleted)
+                {
+                    TempData["ErrorMessage"] = "Bạn đã hoàn thành check-out cho các ca làm việc của mình.";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Bạn chưa check-in ca nào, hoặc đã bị đánh vắng.";
+                }
             }
 
             return RedirectToAction(nameof(MyAttendance));
@@ -227,6 +263,7 @@ namespace QLNS.FullNet.Web.Controllers
             }
 
             var query = _context.Timekeepings
+                .Include(t => t.Shift)
                 .Where(t => t.EmployeeId == employee.Id)
                 .AsNoTracking()
                 .AsQueryable();

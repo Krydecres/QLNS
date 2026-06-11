@@ -120,14 +120,10 @@
                     <span>Bảng lương</span>
                 </a>
             </li>
-        </ul>
-
-        <div class="sidebar-section-label">CÁ NHÂN</div>
-        <ul class="sidebar-nav">
             <li>
-                <a href="@Url.Action("MyProfile", "Employee")" class="sidebar-link @IsActive("Employee", "MyProfile")">
-                    <i class="bi bi-person"></i>
-                    <span>Thông tin cá nhân</span>
+                <a href="@Url.Action("Index", "SalarySettings")" class="sidebar-link @IsActive("SalarySettings")">
+                    <i class="bi bi-sliders"></i>
+                    <span>Cài đặt lương</span>
                 </a>
             </li>
         </ul>

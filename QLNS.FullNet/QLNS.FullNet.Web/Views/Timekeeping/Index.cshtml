@@ -89,6 +89,7 @@
                     <th width="10%">ID</th>
                     <th>Tên Nhân Viên</th>
                     <th>Ngày Chấm Công</th>
+                    <th>Ca Làm</th>
                     <th>Giờ Vào</th>
                     <th>Giờ Ra</th>
                     <th width="20%" class="text-center">Trạng Thái</th>
@@ -103,6 +104,7 @@
                             <td>@item.Id</td>
                             <td class="fw-bold text-primary">@(item.Employee?.FullName ?? "N/A")</td>
                             <td>@item.Date.ToString("dd/MM/yyyy")</td>
+                            <td>@(item.Shift?.Name ?? "Ca tự do")</td>
                             <td>@(item.CheckInTime?.ToString(@"hh\:mm") ?? "-")</td>
                             <td>@(item.CheckOutTime?.ToString(@"hh\:mm") ?? "-")</td>
                             <td class="text-center">
@@ -124,7 +126,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="6" class="text-center text-muted py-4">Chưa có dữ liệu chấm công.</td>
+                        <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu chấm công.</td>
                     </tr>
                 }
             </tbody>

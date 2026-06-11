@@ -57,6 +57,9 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Employee>().Property(e => e.BaseSalary).HasPrecision(18, 2);
         modelBuilder.Entity<Employee>().Property(e => e.Allowance).HasPrecision(18, 2);
 
+        modelBuilder.Entity<Position>().Property(e => e.DailyWage).HasPrecision(18, 2);
+        modelBuilder.Entity<Shift>().Property(e => e.WageMultiplier).HasPrecision(5, 2);
+
         modelBuilder.Entity<Timekeeping>().HasKey(e => e.Id);
         modelBuilder.Entity<ProfileUpdateRequest>().HasKey(e => e.Id);
     }
