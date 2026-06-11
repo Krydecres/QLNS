@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { UserList } from './features/admin/users/user-list/user-list';
 
 import { LayoutComponent } from './core/layout/layout.component';
 import { HomeComponent } from './features/home/home.component';
@@ -27,23 +28,17 @@ import { PendingUpdatesComponent } from './features/employee/pending-updates/pen
 import { MyProfileComponent } from './features/employee/my-profile/my-profile.component';
 import { MyDepartmentComponent } from './features/employee/my-department/my-department.component';
 
-import { MyLeavesComponent } from './features/leave/my-leaves/my-leaves.component';
-import { LeaveFormComponent } from './features/leave/leave-form/leave-form.component';
-import { LeaveApprovalComponent } from './features/leave/leave-approval/leave-approval.component';
-import { MyDaysOffComponent } from './features/leave/my-days-off/my-days-off.component';
-
-import { HolidayListComponent } from './features/admin/holiday/holiday-list/holiday-list.component';
-import { HolidayFormComponent } from './features/admin/holiday/holiday-form/holiday-form.component';
-
 export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
     children: [
+      // Public
       { path: '', component: HomeComponent },
       { path: 'login', component: LoginComponent },
       { path: 'register', component: RegisterComponent },
 
+      // Dashboard
       {
         path: 'admin-dashboard',
         component: AdminDashboardComponent,
@@ -57,6 +52,15 @@ export const routes: Routes = [
         data: { roles: ['Employee'] }
       },
 
+      // User & Role - Admin
+      {
+        path: 'admin/users',
+        component: UserList,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+
+      // Timekeeping - Admin
       {
         path: 'timekeeping/list',
         component: TimekeepingListComponent,
@@ -69,6 +73,8 @@ export const routes: Routes = [
         canActivate: [authGuard],
         data: { roles: ['Admin'] }
       },
+
+      // Timekeeping - Employee
       {
         path: 'timekeeping/my-attendance',
         component: AttendanceBoardComponent,
@@ -76,6 +82,7 @@ export const routes: Routes = [
         data: { roles: ['Employee'] }
       },
 
+      // Department - Admin
       {
         path: 'departments',
         component: DepartmentListComponent,
@@ -101,6 +108,7 @@ export const routes: Routes = [
         data: { roles: ['Admin'] }
       },
 
+      // Position - Admin
       {
         path: 'positions',
         component: PositionListComponent,
@@ -110,24 +118,6 @@ export const routes: Routes = [
       {
         path: 'positions/create',
         component: PositionFormComponent,
-        canActivate: [authGuard],
-        data: { roles: ['Admin'] }
-      },
-      {
-        path: 'holidays',
-        component: HolidayListComponent,
-        canActivate: [authGuard],
-        data: { roles: ['Admin'] }
-      },
-      {
-        path: 'holidays/create',
-        component: HolidayFormComponent,
-        canActivate: [authGuard],
-        data: { roles: ['Admin'] }
-      },
-      {
-        path: 'holidays/edit/:id',
-        component: HolidayFormComponent,
         canActivate: [authGuard],
         data: { roles: ['Admin'] }
       },
@@ -144,6 +134,7 @@ export const routes: Routes = [
         data: { roles: ['Admin'] }
       },
 
+      // Employee Management - Admin
       {
         path: 'employees',
         component: EmployeeListComponent,
@@ -168,6 +159,8 @@ export const routes: Routes = [
         canActivate: [authGuard],
         data: { roles: ['Admin'] }
       },
+
+      // Employee Personal Pages
       {
         path: 'employees/my-profile',
         component: MyProfileComponent,
@@ -179,30 +172,6 @@ export const routes: Routes = [
         component: MyDepartmentComponent,
         canActivate: [authGuard],
         data: { roles: ['Employee'] }
-      },
-      {
-        path: 'leave/my-leaves',
-        component: MyLeavesComponent,
-        canActivate: [authGuard],
-        data: { roles: ['Employee'] }
-      },
-      {
-        path: 'leave/create',
-        component: LeaveFormComponent,
-        canActivate: [authGuard],
-        data: { roles: ['Employee'] }
-      },
-      {
-        path: 'leave/my-days-off',
-        component: MyDaysOffComponent,
-        canActivate: [authGuard],
-        data: { roles: ['Employee'] }
-      },
-      {
-        path: 'leave/approval',
-        component: LeaveApprovalComponent,
-        canActivate: [authGuard],
-        data: { roles: ['Admin'] }
       }
     ]
   }

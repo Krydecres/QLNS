@@ -1,1 +1,75 @@
-<p>user-list works!</p>
+<div class="user-page">
+  <div class="page-header">
+    <div>
+      <h2>Người dùng & phân quyền</h2>
+      <p>Quản lý tài khoản, vai trò và reset mật khẩu người dùng.</p>
+    </div>
+
+    <button type="button" class="btn btn-primary" (click)="loadUsers()">
+      Tải lại
+    </button>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="isLoading" class="loading-box">
+    Đang tải danh sách tài khoản...
+  </div>
+
+  <div *ngIf="!isLoading" class="table-card">
+    <table class="user-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Họ tên</th>
+          <th>Email</th>
+          <th>Role hiện tại</th>
+          <th>Đổi quyền</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let user of users">
+          <td>{{ user.username }}</td>
+          <td>{{ user.fullName || 'Chưa có' }}</td>
+          <td>{{ user.email || 'Chưa có' }}</td>
+          <td>
+            <span class="role-badge" [class.admin]="user.role === 'Admin'">
+              {{ user.role }}
+            </span>
+          </td>
+          <td>
+            <select
+              class="form-select"
+              [ngModel]="user.role"
+              (ngModelChange)="changeRole(user, $event)">
+              <option value="Admin">Admin</option>
+              <option value="Employee">Employee</option>
+            </select>
+          </td>
+          <td>
+            <button
+              type="button"
+              class="btn btn-warning btn-sm"
+              (click)="resetPassword(user)">
+              Reset mật khẩu
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="users.length === 0">
+          <td colspan="6" class="empty-row">
+            Chưa có tài khoản nào.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
