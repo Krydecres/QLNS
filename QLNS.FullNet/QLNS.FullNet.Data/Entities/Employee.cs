@@ -32,6 +32,9 @@ namespace QLNS.FullNet.Data.Entities
         [ForeignKey("PositionId")]
         public Position? Position { get; set; }
 
+        [Display(Name = "Ảnh đại diện")]
+        public string? AvatarUrl { get; set; }
+
         [Display(Name = "Lương cơ bản")]
         public decimal BaseSalary { get; set; } = 5000000;
 

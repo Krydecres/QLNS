@@ -244,29 +244,55 @@ namespace QLNS.FullNet.Web.Controllers
             return View(requests);
         }
 
-        // 11. XỬ LÝ PHÊ DUYỆT YÊU CẦU (Admin)
-        [Authorize(Roles = "Admin")]
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ApproveProfileUpdate(int id, bool isApproved)
-        {
-            var request = await _context.ProfileUpdateRequests
-                .Include(r => r.Employee)
-                .FirstOrDefaultAsync(r => r.Id == id);
-                
-            if (request != null && request.Status == "Pending")
+        // 11. TẢI ẢNH ĐẠI DIỆN
+[HttpPost]
+public async Task<IActionResult> UploadAvatar(IFormFile avatarFile, [FromServices] IWebHostEnvironment env)
+{
+    // 1. Kiểm tra xem người dùng đã chọn file chưa
+    if (avatarFile == null || avatarFile.Length == 0)
+    {
+        TempData["ErrorMessage"] = "Vui lòng chọn một file ảnh.";
+        return RedirectToAction("MyProfile");
+    }
+
+    // 2. Tìm nhân viên đang đăng nhập (Giả sử dựa theo Claim Email hoặc Name)
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(userEmail))
             {
-                request.Status = isApproved ? "Approved" : "Rejected";
-                
-                if (isApproved && request.Employee != null)
-                {
-                    request.Employee.PhoneNumber = request.NewPhoneNumber;
-                    request.Employee.DateOfBirth = request.NewDateOfBirth;
-                }
-                await _context.SaveChangesAsync();
-                TempData["SuccessMessage"] = isApproved ? "Đã phê duyệt yêu cầu cập nhật hồ sơ." : "Đã từ chối yêu cầu cập nhật hồ sơ.";
+                userEmail = User.Identity?.Name;
             }
-            return RedirectToAction(nameof(PendingProfileUpdates));
-        }
+            
+            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == userEmail);
+
+    if (employee == null)
+    {
+        return NotFound("Không tìm thấy tài khoản nhân viên.");
+    }
+
+    // 3. Khởi tạo thư mục lưu file trong wwwroot/images/avatars
+    var uploadsFolder = Path.Combine(env.WebRootPath, "images", "avatars");
+    if (!Directory.Exists(uploadsFolder))
+    {
+        Directory.CreateDirectory(uploadsFolder);
+    }
+
+    // 4. Tạo tên file ngẫu nhiên để tránh trùng lặp
+    var uniqueFileName = Guid.NewGuid().ToString() + "_" + avatarFile.FileName;
+    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+    // 5. Lưu file vào server
+    using (var fileStream = new FileStream(filePath, FileMode.Create))
+    {
+        await avatarFile.CopyToAsync(fileStream);
+    }
+
+    // 6. Cập nhật đường dẫn ảnh mới vào database
+    employee.AvatarUrl = $"/images/avatars/{uniqueFileName}";
+    _context.Update(employee);
+    await _context.SaveChangesAsync();
+
+    TempData["SuccessMessage"] = "Cập nhật ảnh đại diện thành công!";
+    return RedirectToAction("MyProfile");
+}
     }
 }

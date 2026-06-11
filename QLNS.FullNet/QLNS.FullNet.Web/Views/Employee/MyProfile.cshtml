@@ -16,9 +16,18 @@
             <div class="chart-card">
                 <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                     <div class="d-flex align-items-center">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 80px; height: 80px; font-size: 32px;">
-                            <i class="bi bi-person-fill"></i>
-                        </div>
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#avatarModal">
+                            @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                            {
+                                <img src="@Model.AvatarUrl" alt="Avatar" class="rounded-circle me-3 shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+                            }
+                            else
+                            {
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 80px; height: 80px; font-size: 32px;">
+                                    <i class="bi bi-person-fill"></i>
+                                </div>
+                            }
+                        </a>
                         <div>
                             <h3 class="mb-1 text-primary">@Model.FullName</h3>
                             <span class="badge bg-info text-dark shadow-sm">@(Model.Position?.Name ?? "Chưa có chức vụ")</span>
@@ -59,3 +68,46 @@
         </div>
     </div>
 </div>
+
+<!-- Avatar Upload Modal -->
+<div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="avatarModalLabel">Cập nhật ảnh đại diện</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="UploadAvatar" asp-controller="Employee" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <img id="avatarPreview" src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/images/default-avatar.png" : Model.AvatarUrl)" alt="Xem trước ảnh" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="avatarFile" class="form-label">Chọn ảnh mới (dưới 1MB):</label>
+                        <input class="form-control" type="file" id="avatarFile" name="avatarFile" accept="image/png, image/jpeg" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-upload me-1"></i> Tải lên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const avatarFileInput = document.getElementById('avatarFile');
+            const avatarPreview = document.getElementById('avatarPreview');
+
+            avatarFileInput.onchange = function (evt) {
+                const [file] = this.files;
+                if (file) {
+                    avatarPreview.src = URL.createObjectURL(file);
+                }
+            };
+        });
+    </script>
+}
