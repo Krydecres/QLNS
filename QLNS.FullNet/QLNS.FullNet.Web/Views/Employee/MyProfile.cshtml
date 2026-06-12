@@ -1,4 +1,5 @@
 @model QLNS.FullNet.Data.Entities.Employee
+
 @{
     ViewData["Title"] = "Hồ sơ cá nhân";
 }
@@ -11,28 +12,54 @@
         </div>
     </div>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+            <i class="bi bi-check-circle me-1"></i>
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+        </div>
+    }
+
     <div class="row mt-3">
         <div class="col-md-8">
             <div class="chart-card">
                 <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                     <div class="d-flex align-items-center">
-                        <a href="#" data-bs-toggle="modal" data-bs-target="#avatarModal">
+                        <a href="#" data-bs-toggle="modal" data-bs-target="#avatarModal" title="Bấm để đổi ảnh đại diện">
                             @if (!string.IsNullOrEmpty(Model.AvatarUrl))
                             {
-                                <img src="@Model.AvatarUrl" alt="Avatar" class="rounded-circle me-3 shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+                                <img src="@Model.AvatarUrl"
+                                     alt="Avatar"
+                                     class="rounded-circle me-3 shadow-sm"
+                                     style="width: 80px; height: 80px; object-fit: cover;">
                             }
                             else
                             {
-                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 80px; height: 80px; font-size: 32px;">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm"
+                                     style="width: 80px; height: 80px; font-size: 32px;">
                                     <i class="bi bi-person-fill"></i>
                                 </div>
                             }
                         </a>
+
                         <div>
                             <h3 class="mb-1 text-primary">@Model.FullName</h3>
-                            <span class="badge bg-info text-dark shadow-sm">@(Model.Position?.Name ?? "Chưa có chức vụ")</span>
+                            <span class="badge bg-info text-dark shadow-sm">
+                                @(Model.Position?.Name ?? "Chưa có chức vụ")
+                            </span>
                         </div>
                     </div>
+
                     <a asp-action="EditMyProfile" asp-controller="Employee" class="btn btn-outline-primary shadow-sm">
                         <i class="bi bi-pencil-square me-1"></i> Chỉnh sửa
                     </a>
@@ -41,29 +68,49 @@
                 <table class="table table-borderless">
                     <tbody>
                         <tr>
-                            <th width="30%" class="text-muted"><i class="bi bi-person-vcard me-2"></i>Mã nhân viên:</th>
+                            <th width="30%" class="text-muted">
+                                <i class="bi bi-person-vcard me-2"></i>Mã nhân viên:
+                            </th>
                             <td class="fw-bold">NV-@Model.Id</td>
                         </tr>
+
                         <tr>
-                            <th class="text-muted"><i class="bi bi-envelope me-2"></i>Email liên hệ:</th>
+                            <th class="text-muted">
+                                <i class="bi bi-envelope me-2"></i>Email liên hệ:
+                            </th>
                             <td class="fw-bold">@Model.Email</td>
                         </tr>
+
                         <tr>
-                            <th class="text-muted"><i class="bi bi-telephone me-2"></i>Số điện thoại:</th>
+                            <th class="text-muted">
+                                <i class="bi bi-telephone me-2"></i>Số điện thoại:
+                            </th>
                             <td class="fw-bold">@(Model.PhoneNumber ?? "Chưa cập nhật")</td>
                         </tr>
+
                         <tr>
-                            <th class="text-muted"><i class="bi bi-calendar2-date me-2"></i>Ngày sinh:</th>
+                            <th class="text-muted">
+                                <i class="bi bi-calendar2-date me-2"></i>Ngày sinh:
+                            </th>
                             <td class="fw-bold">@(Model.DateOfBirth?.ToString("dd/MM/yyyy") ?? "Chưa cập nhật")</td>
                         </tr>
+
                         <tr>
-                            <th class="text-muted"><i class="bi bi-diagram-3 me-2"></i>Phòng ban:</th>
+                            <th class="text-muted">
+                                <i class="bi bi-diagram-3 me-2"></i>Phòng ban:
+                            </th>
                             <td>
-                                <span class="badge-status badge-leave">@(Model.Department?.Name ?? "Chưa xếp phòng")</span>
+                                <span class="badge-status badge-leave">
+                                    @(Model.Department?.Name ?? "Chưa xếp phòng")
+                                </span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
+
+                <small class="text-muted">
+                    Gợi ý: Bấm vào ảnh đại diện để cập nhật avatar mới.
+                </small>
             </div>
         </div>
     </div>
@@ -73,23 +120,66 @@
 <div class="modal fade" id="avatarModal" tabindex="-1" aria-labelledby="avatarModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="avatarModalLabel">Cập nhật ảnh đại diện</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
             <form asp-action="UploadAvatar" asp-controller="Employee" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="avatarModalLabel">Cập nhật ảnh đại diện</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+
                 <div class="modal-body">
                     <div class="text-center mb-3">
-                        <img id="avatarPreview" src="@(string.IsNullOrEmpty(Model.AvatarUrl) ? "/images/default-avatar.png" : Model.AvatarUrl)" alt="Xem trước ảnh" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;" />
+                        @if (!string.IsNullOrEmpty(Model.AvatarUrl))
+                        {
+                            <img id="avatarPreview"
+                                 src="@Model.AvatarUrl"
+                                 alt="Xem trước ảnh"
+                                 class="rounded-circle shadow-sm"
+                                 style="width: 150px; height: 150px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div id="defaultAvatarPreview"
+                                 class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm"
+                                 style="width: 150px; height: 150px; font-size: 60px;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+
+                            <img id="avatarPreview"
+                                 src=""
+                                 alt="Xem trước ảnh"
+                                 class="rounded-circle shadow-sm d-none"
+                                 style="width: 150px; height: 150px; object-fit: cover;" />
+                        }
                     </div>
+
                     <div class="mb-3">
-                        <label for="avatarFile" class="form-label">Chọn ảnh mới (dưới 1MB):</label>
-                        <input class="form-control" type="file" id="avatarFile" name="avatarFile" accept="image/png, image/jpeg" required>
+                        <label for="avatarFile" class="form-label">
+                            Chọn ảnh mới JPG, PNG hoặc WEBP dưới 2MB:
+                        </label>
+
+                        <input class="form-control"
+                               type="file"
+                               id="avatarFile"
+                               name="avatarFile"
+                               accept="image/png, image/jpeg, image/webp"
+                               required>
+
+                        <small class="text-muted">
+                            Ảnh sẽ được upload lên Cloudinary và hệ thống chỉ lưu đường dẫn ảnh.
+                        </small>
                     </div>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-upload me-1"></i> Tải lên</button>
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">
+                        Hủy
+                    </button>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-upload me-1"></i> Tải lên
+                    </button>
                 </div>
             </form>
         </div>
@@ -101,11 +191,35 @@
         document.addEventListener('DOMContentLoaded', function () {
             const avatarFileInput = document.getElementById('avatarFile');
             const avatarPreview = document.getElementById('avatarPreview');
+            const defaultAvatarPreview = document.getElementById('defaultAvatarPreview');
 
-            avatarFileInput.onchange = function (evt) {
-                const [file] = this.files;
-                if (file) {
-                    avatarPreview.src = URL.createObjectURL(file);
+            avatarFileInput.onchange = function () {
+                const file = this.files[0];
+
+                if (!file) {
+                    return;
+                }
+
+                const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+                const maxSize = 2 * 1024 * 1024;
+
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Chỉ cho phép chọn ảnh JPG, PNG hoặc WEBP.');
+                    this.value = '';
+                    return;
+                }
+
+                if (file.size > maxSize) {
+                    alert('Dung lượng ảnh không được vượt quá 2MB.');
+                    this.value = '';
+                    return;
+                }
+
+                avatarPreview.src = URL.createObjectURL(file);
+                avatarPreview.classList.remove('d-none');
+
+                if (defaultAvatarPreview) {
+                    defaultAvatarPreview.classList.add('d-none');
                 }
             };
         });

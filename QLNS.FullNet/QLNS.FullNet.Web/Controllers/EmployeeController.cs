@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using QLNS.FullNet.Data; // Thay đổi theo namespace AppDbContext của bạn
 using QLNS.FullNet.Data.Entities;
 using System.Security.Claims;
+using QLNS.FullNet.Web.Services;
 
 namespace QLNS.FullNet.Web.Controllers
 {
@@ -12,10 +13,12 @@ namespace QLNS.FullNet.Web.Controllers
     public class EmployeeController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public EmployeeController(AppDbContext context)
+        public EmployeeController(AppDbContext context, ICloudinaryService cloudinaryService)
         {
             _context = context;
+            _cloudinaryService = cloudinaryService;
         }
 
         // 1. HIỂN THỊ DANH SÁCH NHÂN VIÊN
@@ -244,54 +247,59 @@ namespace QLNS.FullNet.Web.Controllers
             return View(requests);
         }
 
-        // 11. TẢI ẢNH ĐẠI DIỆN
+        // 11. TẢI ẢNH ĐẠI DIỆN LÊN CLOUDINARY
+[Authorize(Roles = "Employee")]
 [HttpPost]
-public async Task<IActionResult> UploadAvatar(IFormFile avatarFile, [FromServices] IWebHostEnvironment env)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> UploadAvatar(IFormFile avatarFile)
 {
-    // 1. Kiểm tra xem người dùng đã chọn file chưa
     if (avatarFile == null || avatarFile.Length == 0)
     {
         TempData["ErrorMessage"] = "Vui lòng chọn một file ảnh.";
         return RedirectToAction("MyProfile");
     }
 
-    // 2. Tìm nhân viên đang đăng nhập (Giả sử dựa theo Claim Email hoặc Name)
-            var userEmail = User.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrEmpty(userEmail))
-            {
-                userEmail = User.Identity?.Name;
-            }
-            
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == userEmail);
+    var userEmail = User.FindFirstValue(ClaimTypes.Email);
+
+    if (string.IsNullOrEmpty(userEmail))
+    {
+        userEmail = User.Identity?.Name;
+    }
+
+    if (string.IsNullOrEmpty(userEmail))
+    {
+        return RedirectToAction("Login", "Auth");
+    }
+
+    var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Email == userEmail);
 
     if (employee == null)
     {
-        return NotFound("Không tìm thấy tài khoản nhân viên.");
+        return NotFound("Không tìm thấy hồ sơ nhân viên.");
     }
 
-    // 3. Khởi tạo thư mục lưu file trong wwwroot/images/avatars
-    var uploadsFolder = Path.Combine(env.WebRootPath, "images", "avatars");
-    if (!Directory.Exists(uploadsFolder))
+    try
     {
-        Directory.CreateDirectory(uploadsFolder);
+        var avatarUrl = await _cloudinaryService.UploadImageAsync(avatarFile, "qlns/avatars");
+
+        if (string.IsNullOrEmpty(avatarUrl))
+        {
+            TempData["ErrorMessage"] = "Upload ảnh thất bại.";
+            return RedirectToAction("MyProfile");
+        }
+
+        employee.AvatarUrl = avatarUrl;
+
+        _context.Update(employee);
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Cập nhật ảnh đại diện thành công.";
     }
-
-    // 4. Tạo tên file ngẫu nhiên để tránh trùng lặp
-    var uniqueFileName = Guid.NewGuid().ToString() + "_" + avatarFile.FileName;
-    var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-    // 5. Lưu file vào server
-    using (var fileStream = new FileStream(filePath, FileMode.Create))
+    catch (Exception ex)
     {
-        await avatarFile.CopyToAsync(fileStream);
+        TempData["ErrorMessage"] = "Lỗi upload ảnh: " + ex.Message;
     }
 
-    // 6. Cập nhật đường dẫn ảnh mới vào database
-    employee.AvatarUrl = $"/images/avatars/{uniqueFileName}";
-    _context.Update(employee);
-    await _context.SaveChangesAsync();
-
-    TempData["SuccessMessage"] = "Cập nhật ảnh đại diện thành công!";
     return RedirectToAction("MyProfile");
 }
     }

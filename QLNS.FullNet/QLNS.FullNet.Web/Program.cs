@@ -36,6 +36,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<QLNS.FullNet.Web.Services.ISalaryCalculationService, QLNS.FullNet.Web.Services.SalaryCalculationService>();
 builder.Services.AddScoped<QLNS.FullNet.Web.Services.IEmailService, QLNS.FullNet.Web.Services.SmtpEmailService>();
+builder.Services.AddScoped<QLNS.FullNet.Web.Services.ICloudinaryService, QLNS.FullNet.Web.Services.CloudinaryService>();
 
 // Đăng ký background service tự động chấm vắng mặt lúc 17:00
 builder.Services.AddHostedService<AbsenceMarkingService>();
