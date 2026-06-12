@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,9 +11,10 @@ namespace QLNS.FullNet.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Date",
-                table: "Holidays");
+            // Fix bug: Date column never existed
+            // migrationBuilder.DropColumn(
+            //     name: "Date",
+            //     table: "Holidays");
 
             migrationBuilder.AddColumn<int>(
                 name: "Day",

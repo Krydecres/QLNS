@@ -84,14 +84,33 @@ public class HomeController : Controller
         for (int i = 6; i >= 0; i--)
         {
             var day = today.AddDays(-i);
+
+            // Lấy tất cả bản ghi chấm công trong ngày
             var records = await _context.Timekeepings
                 .Where(t => t.Date.Date == day)
                 .ToListAsync();
 
+            // Lấy danh sách nhân viên có đơn nghỉ phép được duyệt trong ngày đó
+            var leaveEmployeeIds = await _context.LeaveRequests
+                .Where(r => r.StartDate.Date <= day && r.EndDate.Date >= day
+                            && r.Status == LeaveRequestStatus.Approved)
+                .Select(r => r.EmployeeId)
+                .ToListAsync();
+
+            int present = records.Count(t => t.Status == "Có mặt");
+            // Vắng có phép: bản ghi trong ngày đó mà nhân viên có đơn phép, hoặc không check-in nhưng có đơn phép
+            int onLeave = records.Count(t => t.Status != "Có mặt" && leaveEmployeeIds.Contains(t.EmployeeId));
+            // Cộng thêm những người không có bản ghi chấm công nhưng có đơn phép
+            var checkedIds = records.Select(t => t.EmployeeId).ToHashSet();
+            int leaveNoRecord = leaveEmployeeIds.Count(id => !checkedIds.Contains(id));
+            onLeave += leaveNoRecord;
+            // Vắng không phép: bản ghi "Vắng mặt" mà không có đơn phép
+            int absent = records.Count(t => t.Status != "Có mặt" && !leaveEmployeeIds.Contains(t.EmployeeId));
+
             vm.AttendanceLabels.Add(day.ToString("dd/MM"));
-            vm.AttendancePresentData.Add(records.Count(t => t.Status == "Có mặt"));
-            vm.AttendanceLeaveData.Add(records.Count(t => t.Status == "Vắng có phép"));
-            vm.AttendanceAbsentData.Add(records.Count(t => t.Status == "Vắng không phép"));
+            vm.AttendancePresentData.Add(present);
+            vm.AttendanceLeaveData.Add(onLeave);
+            vm.AttendanceAbsentData.Add(absent);
         }
 
         // ── Nhân sự theo phòng ban ────────────────────────────────
@@ -146,6 +165,7 @@ public class HomeController : Controller
         if (employee != null)
         {
             var now = DateTime.Now;
+            var today = now.Date;
             var firstDayOfMonth = new DateTime(now.Year, now.Month, 1);
 
             // Chấm công tháng này
@@ -155,13 +175,51 @@ public class HomeController : Controller
 
             vm.DaysWorked = timekeepingsThisMonth.Count(t => t.Status == "Có mặt");
 
+            // Tính số ngày nghỉ phép đã được duyệt trong tháng tính đến hiện tại
+            var approvedLeaves = await _context.LeaveRequests
+                .Where(r => r.EmployeeId == employee.Id && r.Status == LeaveRequestStatus.Approved
+                            && r.StartDate.Year == now.Year && r.StartDate.Month <= now.Month
+                            && r.EndDate.Year == now.Year && r.EndDate.Month >= now.Month)
+                .ToListAsync();
+
+            var workedDates = timekeepingsThisMonth.Where(t => t.Status == "Có mặt").Select(t => t.Date.Date).ToHashSet();
+            int approvedLeaveDaysCount = 0;
+            int daysToCheck = now.Month == today.Month ? today.Day : DateTime.DaysInMonth(now.Year, now.Month);
+
+            for (int i = 1; i <= daysToCheck; i++)
+            {
+                var currentDate = new DateTime(now.Year, now.Month, i);
+                if (workedDates.Contains(currentDate.Date)) continue;
+
+                if (approvedLeaves.Any(lr => currentDate.Date >= lr.StartDate.Date && currentDate.Date <= lr.EndDate.Date))
+                {
+                    approvedLeaveDaysCount++;
+                }
+            }
+
+            vm.ApprovedLeaveDays = approvedLeaveDaysCount;
+
             vm.RecentTimekeepings = await _context.Timekeepings
+                .Include(t => t.Shift)
                 .Where(t => t.EmployeeId == employee.Id)
                 .OrderByDescending(t => t.Date)
                 .Take(5)
                 .ToListAsync();
 
-            // Đơn từ
+            // Bản ghi chấm công hôm nay (để hiển thị nút Check-in/Check-out)
+            vm.TodayTimekeeping = await _context.Timekeepings
+                .Where(t => t.EmployeeId == employee.Id && t.Date.Date == today)
+                .OrderByDescending(t => t.CheckInTime)
+                .FirstOrDefaultAsync();
+
+            // Đơn nghỉ phép (5 đơn gần nhất)
+            vm.LeaveRequests = await _context.LeaveRequests
+                .Where(r => r.EmployeeId == employee.Id)
+                .OrderByDescending(r => r.CreatedAt)
+                .Take(5)
+                .ToListAsync();
+
+            // Đơn cập nhật hồ sơ
             vm.ProfileRequests = await _context.ProfileUpdateRequests
                 .Where(r => r.EmployeeId == employee.Id)
                 .OrderByDescending(r => r.CreatedAt)

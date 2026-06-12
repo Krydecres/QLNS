@@ -24,48 +24,54 @@
                 Quản lý nhân sự và chấm công — @now.ToString("dddd, dd/MM/yyyy")
             </p>
         </div>
-        <div class="dashboard-actions">
+        <div class="dashboard-actions d-flex gap-2 flex-wrap">
             <span class="badge-shift">
                 <i class="bi bi-sun"></i> @now.ToString("HH:mm") — Đang hoạt động
             </span>
+            @if (Model.PendingLeaveRequests > 0)
+            {
+                <a asp-controller="LeaveRequest" asp-action="Approval" class="badge-shift text-decoration-none" style="background:#fef9c3;border-color:#fde68a;color:#92400e;">
+                    <i class="bi bi-bell-fill"></i> @Model.PendingLeaveRequests đơn chờ duyệt
+                </a>
+            }
         </div>
     </div>
 
     <!-- Stat Cards Row 1: Nhân sự & Chấm công -->
     <div class="stat-grid mt-3">
-        <div class="stat-card">
+        <a asp-controller="Employee" asp-action="Index" class="stat-card text-decoration-none" style="color:inherit;">
             <div class="stat-icon icon-blue"><i class="bi bi-people"></i></div>
             <div class="stat-label">Tổng nhân viên</div>
             <div class="stat-value">@Model.TotalEmployees</div>
             <div class="stat-note">@Model.TotalDepartments phòng ban · @Model.TotalPositions chức vụ</div>
-        </div>
+        </a>
 
-        <div class="stat-card">
+        <a asp-controller="Timekeeping" asp-action="Index" class="stat-card text-decoration-none" style="color:inherit;">
             <div class="stat-icon icon-green"><i class="bi bi-patch-check"></i></div>
             <div class="stat-label">Có mặt hôm nay</div>
             <div class="stat-value">@Model.PresentToday</div>
             <div class="stat-note text-success">@Model.PresentRate% có mặt</div>
-        </div>
+        </a>
 
-        <div class="stat-card stat-card--warn">
+        <a asp-controller="Timekeeping" asp-action="Index" class="stat-card stat-card--warn text-decoration-none" style="color:inherit;">
             <div class="stat-icon icon-yellow"><i class="bi bi-person-x"></i></div>
             <div class="stat-label">Chưa chấm công</div>
             <div class="stat-value">@Model.NotCheckedToday</div>
             <div class="stat-note text-warning">
                 @Model.AbsentToday vắng có phép
             </div>
-        </div>
+        </a>
 
-        <div class="stat-card @(Model.PendingLeaveRequests > 0 ? "stat-card--warn" : "")">
+        <a asp-controller="LeaveRequest" asp-action="Approval" class="stat-card @(Model.PendingLeaveRequests > 0 ? "stat-card--warn" : "") text-decoration-none" style="color:inherit;">
             <div class="stat-icon icon-teal"><i class="bi bi-calendar-check"></i></div>
             <div class="stat-label">Đơn nghỉ phép chờ duyệt</div>
             <div class="stat-value">@Model.PendingLeaveRequests</div>
             <div class="stat-note @(Model.PendingLeaveRequests > 0 ? "text-warning" : "text-muted")">
                 @(Model.PendingLeaveRequests > 0 ? "Cần xử lý" : "Đã xử lý hết")
             </div>
-        </div>
+        </a>
 
-        <div class="stat-card">
+        <a asp-controller="Salaries" asp-action="Index" class="stat-card text-decoration-none" style="color:inherit;">
             <div class="stat-icon icon-green"><i class="bi bi-cash-coin"></i></div>
             <div class="stat-label">Tổng lương tháng @now.Month</div>
             <div class="stat-value" style="font-size:1.15rem">
@@ -83,16 +89,16 @@
                     <span class="text-muted">@Model.SalaryCalculatedCount / @Model.TotalEmployees NV đã tính</span>
                 }
             </div>
-        </div>
+        </a>
 
-        <div class="stat-card @(Model.PendingProfileUpdates > 0 ? "stat-card--warn" : "")">
+        <a asp-controller="Employee" asp-action="Index" class="stat-card @(Model.PendingProfileUpdates > 0 ? "stat-card--warn" : "") text-decoration-none" style="color:inherit;">
             <div class="stat-icon icon-purple"><i class="bi bi-person-lines-fill"></i></div>
             <div class="stat-label">Cập nhật hồ sơ chờ duyệt</div>
             <div class="stat-value">@Model.PendingProfileUpdates</div>
             <div class="stat-note @(Model.PendingProfileUpdates > 0 ? "text-warning" : "text-muted")">
                 @(Model.PendingProfileUpdates > 0 ? "Cần xem xét" : "Không có yêu cầu")
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Charts Row 1 -->
@@ -162,9 +168,14 @@
                 <h2 class="chart-title mb-0">Nhân viên chưa chấm công hôm nay</h2>
                 <p class="chart-sub mb-0">Danh sách cần xác nhận trạng thái — @now.ToString("dd/MM/yyyy")</p>
             </div>
-            <a asp-controller="Timekeeping" asp-action="Index" class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-clock-history me-1"></i>Dữ liệu chấm công
-            </a>
+            <div class="d-flex gap-2">
+                <a asp-controller="Timekeeping" asp-action="ManualEntry" class="btn btn-sm btn-outline-success">
+                    <i class="bi bi-pencil-square me-1"></i>Nhập thủ công
+                </a>
+                <a asp-controller="Timekeeping" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-clock-history me-1"></i>Dữ liệu chấm công
+                </a>
+            </div>
         </div>
         @if (Model.AbsentEmployees.Any())
         {
@@ -175,6 +186,7 @@
                         <th>Họ tên</th>
                         <th>Phòng ban</th>
                         <th>Trạng thái</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -193,6 +205,16 @@
                                 {
                                     <span class="badge-status badge-absent">Chưa chấm công</span>
                                 }
+                            </td>
+                            <td>
+                                <form asp-controller="Timekeeping" asp-action="CheckIn" method="post" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="employeeId" value="@emp.Id" />
+                                    <button type="submit" class="btn btn-outline-success py-0 px-2" style="font-size:11px;"
+                                            title="Chấm công có mặt cho @emp.FullName">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i>Check-in
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     }

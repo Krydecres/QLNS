@@ -4,9 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using QLNS.FullNet.Data;
 using QLNS.FullNet.Data.Entities;
 using QLNS.FullNet.Web.Services;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace QLNS.FullNet.Web.Controllers
 {
+    [Authorize]
     public class SalariesController : Controller
     {
         private readonly AppDbContext _context;
@@ -29,9 +32,21 @@ namespace QLNS.FullNet.Web.Controllers
             ViewBag.SelectedMonth = selectedMonth;
             ViewBag.SelectedYear = selectedYear;
 
-            var salaries = await _context.Salaries
+            var query = _context.Salaries
                 .Include(s => s.Employee)
-                .Where(s => s.Month == selectedMonth && s.Year == selectedYear)
+                .Where(s => s.Month == selectedMonth && s.Year == selectedYear);
+
+            if (User.IsInRole("Employee"))
+            {
+                var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? User.Identity?.Name;
+                var emp = await _context.Employees.FirstOrDefaultAsync(e => e.Email == userEmail);
+                if (emp != null)
+                {
+                    query = query.Where(s => s.EmployeeId == emp.Id);
+                }
+            }
+
+            var salaries = await query
                 .AsNoTracking()
                 .ToListAsync();
 

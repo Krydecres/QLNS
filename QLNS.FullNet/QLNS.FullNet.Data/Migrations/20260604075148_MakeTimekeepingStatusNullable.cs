@@ -12,15 +12,13 @@ namespace QLNS.FullNet.Data.Migrations
         {
             // Đổi cột Status từ NOT NULL (defaultValue "") thành nullable
             // để tương thích với dữ liệu cũ có thể có NULL
-            migrationBuilder.AlterColumn<string>(
+            // Fix: Status column was never added, so AddColumn instead of AlterColumn
+            migrationBuilder.AddColumn<string>(
                 name: "Status",
                 table: "Timekeepings",
                 type: "nvarchar(50)",
                 maxLength: 50,
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(50)",
-                oldMaxLength: 50);
+                nullable: true);
         }
 
         /// <inheritdoc />

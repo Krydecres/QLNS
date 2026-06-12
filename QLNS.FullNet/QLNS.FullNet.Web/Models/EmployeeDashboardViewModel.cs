@@ -8,10 +8,17 @@ namespace QLNS.FullNet.Web.Models
 
         // Chấm công
         public int DaysWorked { get; set; }
+        public int ApprovedLeaveDays { get; set; }
         public int WorkingDaysInMonth { get; set; } = 22;
         public List<Timekeeping> RecentTimekeepings { get; set; } = new();
 
-        // Đơn từ / Yêu cầu
+        // Bản ghi chấm công hôm nay (để hiển thị nút Check-in / Check-out)
+        public Timekeeping? TodayTimekeeping { get; set; }
+
+        // Đơn nghỉ phép
+        public List<LeaveRequest> LeaveRequests { get; set; } = new();
+
+        // Đơn cập nhật hồ sơ
         public List<ProfileUpdateRequest> ProfileRequests { get; set; } = new();
 
         // Lương tháng hiện tại
@@ -25,8 +32,8 @@ namespace QLNS.FullNet.Web.Models
 
         // Lương ngày hiện tại (ước tính)
         public decimal EstimatedSalaryToDate =>
-            CurrentSalary != null && WorkingDaysInMonth > 0
-                ? Math.Round(CurrentSalary.TotalSalary / WorkingDaysInMonth * DaysWorked, 0)
+            Employee != null
+                ? Math.Round((DaysWorked + ApprovedLeaveDays) * (Employee.Position?.DailyWage ?? 0) + Employee.Allowance, 0)
                 : 0;
     }
 }
