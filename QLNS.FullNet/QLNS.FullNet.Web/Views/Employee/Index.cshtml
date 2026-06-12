@@ -1,5 +1,6 @@
 @using QLNS.FullNet.Data.Entities
 @model IEnumerable<Employee>
+
 @{
     ViewData["Title"] = "Danh sách nhân viên";
 }
@@ -21,7 +22,8 @@
         <table class="data-table table table-hover align-middle mb-0">
             <thead class="table-light">
                 <tr>
-                    <th width="10%">Mã NV</th>
+                    <th width="8%">Mã NV</th>
+                    <th width="8%" class="text-center">Ảnh</th>
                     <th>Họ và tên</th>
                     <th>Email</th>
                     <th>Số điện thoại</th>
@@ -34,7 +36,9 @@
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu nhân viên.</td>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            Chưa có dữ liệu nhân viên.
+                        </td>
                     </tr>
                 }
                 else
@@ -43,19 +47,58 @@
                     {
                         <tr>
                             <td>NV-@item.Id</td>
+
+                            <td class="text-center">
+                                @if (!string.IsNullOrEmpty(item.AvatarUrl))
+                                {
+                                    <img src="@item.AvatarUrl"
+                                         alt="Avatar"
+                                         class="rounded-circle shadow-sm"
+                                         style="width: 45px; height: 45px; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    <div class="bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm"
+                                         style="width: 45px; height: 45px; font-size: 20px;">
+                                        <i class="bi bi-person-fill"></i>
+                                    </div>
+                                }
+                            </td>
+
                             <td class="fw-bold text-primary">@item.FullName</td>
                             <td>@item.Email</td>
                             <td>@item.PhoneNumber</td>
+
                             <td>
-                                <span class="badge-status badge-leave">@(item.Department?.Name ?? "Chưa xếp phòng")</span>
+                                <span class="badge-status badge-leave">
+                                    @(item.Department?.Name ?? "Chưa xếp phòng")
+                                </span>
                             </td>
+
                             <td>
-                                <span class="badge bg-info text-dark">@(item.Position?.Name ?? "Chưa có")</span>
+                                <span class="badge bg-info text-dark">
+                                    @(item.Position?.Name ?? "Chưa có")
+                                </span>
                             </td>
+
                             <td class="text-center">
-                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary me-1" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i> Sửa</a>
-                                <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân viên @item.FullName?');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="bi bi-trash"></i> Xóa</button>
+                                <a asp-action="Edit"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-sm btn-outline-primary me-1"
+                                   title="Chỉnh sửa">
+                                    <i class="bi bi-pencil-square"></i> Sửa
+                                </a>
+
+                                <form asp-action="Delete"
+                                      asp-route-id="@item.Id"
+                                      method="post"
+                                      style="display:inline;"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa nhân viên @item.FullName?');">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger"
+                                            title="Xóa">
+                                        <i class="bi bi-trash"></i> Xóa
+                                    </button>
                                 </form>
                             </td>
                         </tr>
