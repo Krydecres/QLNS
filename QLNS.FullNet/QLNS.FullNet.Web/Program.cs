@@ -34,6 +34,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<QLNS.FullNet.Web.Services.ISalaryCalculationService, QLNS.FullNet.Web.Services.SalaryCalculationService>();
 builder.Services.AddScoped<QLNS.FullNet.Web.Services.IEmailService, QLNS.FullNet.Web.Services.SmtpEmailService>();
 builder.Services.AddScoped<QLNS.FullNet.Web.Services.ICloudinaryService, QLNS.FullNet.Web.Services.CloudinaryService>();
@@ -42,6 +44,12 @@ builder.Services.AddScoped<QLNS.FullNet.Web.Services.ICloudinaryService, QLNS.Fu
 builder.Services.AddHostedService<AbsenceMarkingService>();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 // --- Cấu hình định dạng Ngày/Tháng/Năm thống nhất toàn hệ thống (vi-VN) ---
 var supportedCultures = new[] { new System.Globalization.CultureInfo("vi-VN") };
@@ -98,6 +106,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+app.MapControllers();
 
 app.MapControllerRoute(
     name: "default",
