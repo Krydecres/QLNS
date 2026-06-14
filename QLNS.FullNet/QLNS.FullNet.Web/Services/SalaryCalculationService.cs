@@ -46,6 +46,10 @@ namespace QLNS.FullNet.Web.Services
                 workedSalary += positionDailyWage * multiplier;
             }
 
+            var holidays = await _context.Holidays
+                .Where(h => h.Month == month)
+                .ToListAsync();
+
             // Lấy tất cả các ngày trong tháng
             int daysInMonth = DateTime.DaysInMonth(year, month);
             decimal leaveSalary = 0;
@@ -54,8 +58,16 @@ namespace QLNS.FullNet.Web.Services
             {
                 var currentDate = new DateTime(year, month, i);
 
-                // Nếu ngày đó đã đi làm thì không tính lương nghỉ phép nữa
+                // Nếu ngày đó đã đi làm (có check-in) thì hệ thống đã cộng lương (bao gồm nhân hệ số ca) ở vòng lặp trên rồi, nên bỏ qua
                 if (workedDates.Contains(currentDate.Date)) continue;
+
+                // Kiểm tra xem ngày này có phải là ngày lễ không
+                bool isHoliday = holidays.Any(h => h.Day == i);
+                if (isHoliday)
+                {
+                    leaveSalary += positionDailyWage * 1.0m; // Ngày lễ mặc định hưởng 100% lương
+                    continue; // Đã cộng lương nghỉ lễ thì không xét duyệt nghỉ phép nữa
+                }
 
                 // Kiểm tra xem ngày này có nằm trong đơn nghỉ phép đã duyệt không
                 bool isApprovedLeave = leaveRequests.Any(lr => currentDate.Date >= lr.StartDate.Date && currentDate.Date <= lr.EndDate.Date);
