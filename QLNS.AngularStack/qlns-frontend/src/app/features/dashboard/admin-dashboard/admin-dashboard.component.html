@@ -1,77 +1,189 @@
 <div class="dashboard">
 
-    <div class="dashboard-header">
-        <div>
-            <h1 class="dashboard-title">Tổng quan hệ thống</h1>
-            <p class="dashboard-subtitle">
-                Quản lý nhân sự và chấm công
-            </p>
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">Dashboard Admin</h1>
+      <p class="dashboard-subtitle">
+        Tổng quan nhân sự, chấm công, nghỉ phép và lương trong hệ thống
+      </p>
+    </div>
+
+    <div class="dashboard-actions" *ngIf="dashboard">
+      <span class="badge-shift">
+        <i class="bi bi-arrow-clockwise"></i>
+        Cập nhật: {{ dashboard.updatedAt | date:'dd/MM/yyyy HH:mm' }}
+      </span>
+    </div>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-box">
+    Đang tải dữ liệu dashboard...
+  </div>
+
+  <div *ngIf="errorMessage && !isLoading" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <ng-container *ngIf="dashboard && !isLoading">
+
+    <div class="stat-grid mt-3">
+      <div class="stat-card">
+        <div class="stat-icon icon-blue">
+          <i class="bi bi-people"></i>
         </div>
-        <div class="dashboard-actions">
-            <span class="badge-shift">
-                <i class="bi bi-sun"></i> 10:00 — Đang hoạt động
-            </span>
+        <div class="stat-label">Tổng nhân viên</div>
+        <div class="stat-value">{{ dashboard.totalEmployees }}</div>
+        <div class="stat-note">
+          {{ dashboard.totalDepartments }} phòng ban · {{ dashboard.totalPositions }} chức vụ
         </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-green">
+          <i class="bi bi-patch-check"></i>
+        </div>
+        <div class="stat-label">Có mặt hôm nay</div>
+        <div class="stat-value">{{ dashboard.presentToday }}</div>
+        <div class="stat-note text-success">
+          {{ dashboard.attendanceRate }}% nhân viên đã chấm công
+        </div>
+      </div>
+
+      <div class="stat-card stat-card--warn">
+        <div class="stat-icon icon-yellow">
+          <i class="bi bi-person-x"></i>
+        </div>
+        <div class="stat-label">Chưa chấm công</div>
+        <div class="stat-value">{{ dashboard.notCheckedInToday }}</div>
+        <div class="stat-note">
+          {{ dashboard.approvedLeaveToday }} nhân viên nghỉ phép đã duyệt
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-teal">
+          <i class="bi bi-envelope-check"></i>
+        </div>
+        <div class="stat-label">Đơn nghỉ phép chờ duyệt</div>
+        <div class="stat-value">{{ dashboard.pendingLeaveRequests }}</div>
+        <div class="stat-note text-warning">
+          Cần Admin xử lý
+        </div>
+      </div>
     </div>
 
     <div class="stat-grid mt-3">
-        <div class="stat-card">
-            <div class="stat-icon icon-blue"><i class="bi bi-people"></i></div>
-            <div class="stat-label">Tổng nhân viên</div>
-            <div class="stat-value">120</div>
-            <div class="stat-note">5 phòng ban · 12 chức vụ</div>
+      <div class="stat-card">
+        <div class="stat-icon icon-purple">
+          <i class="bi bi-cash-stack"></i>
         </div>
+        <div class="stat-label">
+          Tổng lương tháng {{ dashboard.currentMonth }}/{{ dashboard.currentYear }}
+        </div>
+        <div class="stat-value money-value">
+          {{ dashboard.totalSalaryThisMonth | number:'1.0-0' }} đ
+        </div>
+        <div class="stat-note">
+          Dữ liệu lấy từ bảng Salaries
+        </div>
+      </div>
 
-        <div class="stat-card">
-            <div class="stat-icon icon-green"><i class="bi bi-patch-check"></i></div>
-            <div class="stat-label">Có mặt hôm nay</div>
-            <div class="stat-value">110</div>
-            <div class="stat-note text-success">91% có mặt</div>
+      <div class="stat-card">
+        <div class="stat-icon icon-blue">
+          <i class="bi bi-diagram-3"></i>
         </div>
+        <div class="stat-label">Phòng ban</div>
+        <div class="stat-value">{{ dashboard.totalDepartments }}</div>
+        <div class="stat-note">
+          Tổng số phòng ban hiện có
+        </div>
+      </div>
 
-        <div class="stat-card stat-card--warn">
-            <div class="stat-icon icon-yellow"><i class="bi bi-person-x"></i></div>
-            <div class="stat-label">Chưa chấm công</div>
-            <div class="stat-value">10</div>
-            <div class="stat-note text-warning">
-                0 vắng có phép
-            </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-green">
+          <i class="bi bi-award"></i>
         </div>
+        <div class="stat-label">Chức vụ</div>
+        <div class="stat-value">{{ dashboard.totalPositions }}</div>
+        <div class="stat-note">
+          Tổng số chức vụ hiện có
+        </div>
+      </div>
 
-        <div class="stat-card">
-            <div class="stat-icon icon-teal"><i class="bi bi-calendar-check"></i></div>
-            <div class="stat-label">Đơn nghỉ phép chờ duyệt</div>
-            <div class="stat-value">3</div>
-            <div class="stat-note text-warning">
-                Cần xử lý
-            </div>
+      <div class="stat-card">
+        <div class="stat-icon icon-yellow">
+          <i class="bi bi-calendar2-minus"></i>
         </div>
+        <div class="stat-label">Tình trạng đơn nghỉ</div>
+        <div class="leave-mini">
+          <span>Chờ: {{ dashboard.leaveSummary.pending }}</span>
+          <span>Duyệt: {{ dashboard.leaveSummary.approved }}</span>
+          <span>Từ chối: {{ dashboard.leaveSummary.rejected }}</span>
+        </div>
+      </div>
     </div>
 
     <div class="chart-grid mt-4">
-        <div class="chart-card chart-card--wide d-flex justify-content-center align-items-center bg-light">
-            <div class="text-center text-muted">
-                <i class="bi bi-bar-chart" style="font-size: 3rem;"></i>
-                <p>Biểu đồ Chấm công (Dummy)</p>
-            </div>
+      <div class="chart-card chart-card--wide">
+        <div class="chart-header">
+          <div>
+            <h2 class="chart-title">Biểu đồ chấm công 7 ngày gần nhất</h2>
+            <p class="chart-sub">
+              Số nhân viên có chấm công theo từng ngày
+            </p>
+          </div>
+
+          <button type="button" class="btn-refresh" (click)="loadDashboard()">
+            <i class="bi bi-arrow-clockwise"></i>
+            Tải lại
+          </button>
         </div>
-        <div class="chart-card">
-            <h2 class="chart-title">Số liệu nhanh</h2>
-            <div class="list-group list-group-flush mt-2">
-                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
-                    <span class="text-muted"><i class="bi bi-people me-2 text-primary"></i>Tổng nhân viên</span>
-                    <strong>120</strong>
-                </div>
-                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
-                    <span class="text-muted"><i class="bi bi-check2-circle me-2 text-success"></i>Có mặt hôm nay</span>
-                    <strong class="text-success">110</strong>
-                </div>
-                <div class="list-group-item px-0 d-flex justify-content-between align-items-center border-0 py-2">
-                    <span class="text-muted"><i class="bi bi-hourglass me-2 text-warning"></i>Đơn chờ duyệt</span>
-                    <strong class="text-warning">3</strong>
-                </div>
+
+        <div class="bar-chart" *ngIf="getRecentAttendance().length > 0">
+          <div class="bar-item" *ngFor="let item of getRecentAttendance()">
+            <div class="bar-value">{{ item.count }}</div>
+            <div class="bar-track">
+              <div
+                class="bar-fill"
+                [style.height.%]="getAttendanceHeight(item)">
+              </div>
             </div>
+            <div class="bar-label">{{ item.date }}</div>
+          </div>
         </div>
+
+        <div class="empty-box" *ngIf="getRecentAttendance().length === 0">
+          Chưa có dữ liệu chấm công.
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h2 class="chart-title">Nhân viên theo phòng ban</h2>
+        <p class="chart-sub">
+          Thống kê số lượng nhân viên ở từng phòng ban
+        </p>
+
+        <div class="department-list" *ngIf="getEmployeesByDepartment().length > 0">
+          <div class="department-row" *ngFor="let item of getEmployeesByDepartment()">
+            <div class="department-info">
+              <span>{{ item.departmentName }}</span>
+              <strong>{{ item.count }}</strong>
+            </div>
+
+            <div class="progress-track">
+              <div
+                class="progress-fill"
+                [style.width.%]="getDepartmentPercent(item)">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="empty-box" *ngIf="getEmployeesByDepartment().length === 0">
+          Chưa có dữ liệu phòng ban.
+        </div>
+      </div>
     </div>
 
+  </ng-container>
 </div>

@@ -1,1 +1,157 @@
-/* AdminDashboardComponent styles */
+.loading-box,
+.empty-box {
+  background: #fff;
+  border: 1px solid #d4eade;
+  border-radius: 12px;
+  padding: 24px;
+  color: #6b9c82;
+  text-align: center;
+}
+
+.alert {
+  padding: 12px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+
+.alert-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.money-value {
+  font-size: 22px;
+  color: #1D6A4A;
+}
+
+.leave-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #3d6b54;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.btn-refresh {
+  border: 1px solid #c3ddd0;
+  background: #e8f4ed;
+  color: #1D6A4A;
+  border-radius: 20px;
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn-refresh:hover {
+  background: #d4eade;
+}
+
+.bar-chart {
+  height: 260px;
+  display: flex;
+  align-items: end;
+  gap: 14px;
+  padding: 20px 6px 0;
+}
+
+.bar-item {
+  flex: 1;
+  min-width: 42px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.bar-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1a2e25;
+  margin-bottom: 6px;
+}
+
+.bar-track {
+  flex: 1;
+  width: 100%;
+  max-width: 46px;
+  background: #e8f4ed;
+  border-radius: 12px 12px 4px 4px;
+  display: flex;
+  align-items: end;
+  overflow: hidden;
+}
+
+.bar-fill {
+  width: 100%;
+  background: #1D6A4A;
+  border-radius: 12px 12px 4px 4px;
+  transition: height 0.2s ease;
+}
+
+.bar-label {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #6b9c82;
+}
+
+.department-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.department-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.department-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: #3d6b54;
+}
+
+.department-info strong {
+  color: #1a2e25;
+}
+
+.progress-track {
+  height: 9px;
+  background: #e8f4ed;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #2D9F6F;
+  border-radius: 999px;
+}
+
+@media (max-width: 700px) {
+  .chart-header {
+    flex-direction: column;
+  }
+
+  .bar-chart {
+    gap: 8px;
+    overflow-x: auto;
+  }
+
+  .bar-item {
+    min-width: 50px;
+  }
+}
