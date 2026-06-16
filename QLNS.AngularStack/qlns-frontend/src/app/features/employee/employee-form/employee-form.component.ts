@@ -20,6 +20,7 @@ export class EmployeeFormComponent implements OnInit {
   employeeId!: number;
   departments: Department[] = [];
   positions: Position[] = [];
+  selectedAvatarFile: File | null = null;
   private cdr = inject(ChangeDetectorRef);
 
   constructor(
@@ -90,6 +91,13 @@ export class EmployeeFormComponent implements OnInit {
     });
   }
 
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedAvatarFile = file;
+    }
+  }
+
   onSubmit(): void {
     if (this.employeeForm.invalid) {
       this.employeeForm.markAllAsTouched();
@@ -110,16 +118,36 @@ export class EmployeeFormComponent implements OnInit {
     if (this.isEditMode) {
       this.employeeService.updateEmployee(this.employeeId, employeeData as any).subscribe({
         next: () => {
-          alert('Cập nhật nhân viên thành công.');
-          this.router.navigate(['/employees']);
+          if (this.selectedAvatarFile) {
+            this.employeeService.uploadAvatar(this.employeeId, this.selectedAvatarFile).subscribe({
+              next: () => {
+                alert('Cập nhật nhân viên và ảnh đại diện thành công.');
+                this.router.navigate(['/employees']);
+              },
+              error: (err) => console.error(err)
+            });
+          } else {
+            alert('Cập nhật nhân viên thành công.');
+            this.router.navigate(['/employees']);
+          }
         },
         error: (err) => console.error(err)
       });
     } else {
       this.employeeService.createEmployee(employeeData as any).subscribe({
-        next: () => {
-          alert('Thêm mới nhân viên thành công.');
-          this.router.navigate(['/employees']);
+        next: (createdEmployee) => {
+          if (this.selectedAvatarFile && createdEmployee.id) {
+            this.employeeService.uploadAvatar(createdEmployee.id, this.selectedAvatarFile).subscribe({
+              next: () => {
+                alert('Thêm mới nhân viên và ảnh đại diện thành công.');
+                this.router.navigate(['/employees']);
+              },
+              error: (err) => console.error(err)
+            });
+          } else {
+            alert('Thêm mới nhân viên thành công.');
+            this.router.navigate(['/employees']);
+          }
         },
         error: (err) => console.error(err)
       });

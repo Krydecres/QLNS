@@ -52,4 +52,27 @@ export class SalaryService {
       responseType: 'blob'
     });
   }
+
+  bulkSendEmail(month: number, year: number): Observable<{ message: string }> {
+    const params = new HttpParams()
+      .set('month', month)
+      .set('year', year);
+
+    return this.http.post<{ message: string }>(
+      `${this.apiUrl}/bulk-send-email`,
+      {},
+      { params }
+    );
+  }
+
+  clearSalaries(month: number, year: number): Observable<{ message: string }> {
+    const params = new HttpParams()
+      .set('month', month)
+      .set('year', year);
+
+    return this.http.delete<{ message: string }>(
+      `${this.apiUrl}/clear`,
+      { params }
+    );
+  }
 }

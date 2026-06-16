@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -18,6 +18,7 @@ import {
 })
 export class EmployeeShift implements OnInit {
   private employeeShiftService = inject(EmployeeShiftService);
+  private cdr = inject(ChangeDetectorRef);
 
   employeeShifts: EmployeeShiftItem[] = [];
   employees: EmployeeOption[] = [];
@@ -46,6 +47,7 @@ export class EmployeeShift implements OnInit {
       next: (data) => {
         this.employees = data.employees;
         this.shifts = data.shifts;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Không thể tải danh sách nhân viên và ca làm.';
@@ -69,6 +71,7 @@ export class EmployeeShift implements OnInit {
         next: (data) => {
           this.employeeShifts = data;
           this.isLoading = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           this.errorMessage = 'Không thể tải danh sách phân ca.';

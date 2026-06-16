@@ -12,13 +12,16 @@ public class SalariesController : ControllerBase
 {
     private readonly AppDbContext _context;
     private readonly ISalaryCalculationService _salaryCalculationService;
+    private readonly IEmailService _emailService;
 
     public SalariesController(
         AppDbContext context,
-        ISalaryCalculationService salaryCalculationService)
+        ISalaryCalculationService salaryCalculationService,
+        IEmailService emailService)
     {
         _context = context;
         _salaryCalculationService = salaryCalculationService;
+        _emailService = emailService;
     }
 
     [HttpGet]
@@ -69,6 +72,29 @@ public class SalariesController : ControllerBase
         await _salaryCalculationService.CalculateForAllAsync(month, year);
 
         return Ok(new { message = "Tính lương thành công." });
+    }
+
+    [HttpDelete("clear")]
+    public async Task<IActionResult> ClearSalaries(
+        [FromQuery] int month,
+        [FromQuery] int year)
+    {
+        if (month < 1 || month > 12)
+        {
+            return BadRequest(new { message = "Tháng phải từ 1 đến 12." });
+        }
+
+        var salaries = await _context.Salaries
+            .Where(s => s.Month == month && s.Year == year)
+            .ToListAsync();
+
+        if (salaries.Any())
+        {
+            _context.Salaries.RemoveRange(salaries);
+            await _context.SaveChangesAsync();
+        }
+
+        return Ok(new { message = "Xóa dữ liệu bảng lương thành công." });
     }
 
     [HttpPost("calculate/{employeeId}")]
@@ -214,5 +240,59 @@ public class SalariesController : ControllerBase
             content,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             fileName);
+    }
+
+    [HttpPost("bulk-send-email")]
+    public async Task<IActionResult> BulkSendEmail(
+        [FromQuery] int month,
+        [FromQuery] int year)
+    {
+        if (month < 1 || month > 12)
+        {
+            return BadRequest(new { message = "Tháng phải từ 1 đến 12." });
+        }
+
+        var salaries = await _context.Salaries
+            .Include(s => s.Employee)
+            .Where(s => s.Month == month && s.Year == year)
+            .ToListAsync();
+
+        if (salaries.Count == 0)
+        {
+            return BadRequest(new { message = "Không có dữ liệu lương trong tháng này để gửi." });
+        }
+
+        int successCount = 0;
+        foreach (var s in salaries)
+        {
+            if (s.Employee != null && !string.IsNullOrEmpty(s.Employee.Email))
+            {
+                var subject = $"Thông báo lương tháng {month}/{year}";
+                var body = $@"
+                    <h3>Xin chào {s.Employee.FullName},</h3>
+                    <p>Dưới đây là kết quả tính lương tháng {month}/{year} của bạn:</p>
+                    <ul>
+                        <li>Lương cơ bản: {s.BaseSalary:N0} VNĐ</li>
+                        <li>Phụ cấp: {s.Allowance:N0} VNĐ</li>
+                        <li>Khấu trừ: {s.Deduction:N0} VNĐ</li>
+                        <li><strong>Tổng lương nhận: {s.TotalSalary:N0} VNĐ</strong></li>
+                    </ul>
+                    <p>Trân trọng,</p>
+                    <p>Phòng Nhân sự</p>";
+
+                try
+                {
+                    await _emailService.SendEmailAsync(s.Employee.Email, subject, body);
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    // Log error if needed
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+
+        return Ok(new { message = $"Đã gửi thành công {successCount}/{salaries.Count} email." });
     }
 }

@@ -3,9 +3,40 @@
     <div>
       <h1 class="dashboard-title">Lịch ca làm của tôi</h1>
       <p class="dashboard-subtitle">
-        Xem các ca làm việc đã được phân công
+        Xem các ca làm việc đã được phân công và tự đăng ký ca làm
       </p>
     </div>
+    <div class="dashboard-actions">
+      <button class="btn btn-primary" (click)="toggleRegisterForm()">
+        <i class="bi bi-plus-lg"></i> {{ isRegistering ? 'Hủy đăng ký' : 'Đăng ký ca làm' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="filter-card mt-3" *ngIf="isRegistering">
+    <h3 class="mb-3">Đăng ký ca làm mới</h3>
+    <form class="filter-form" (ngSubmit)="registerShift()">
+      <div class="form-group">
+        <label>Ca làm việc <span class="text-danger">*</span></label>
+        <select name="shiftId" class="form-select" [(ngModel)]="selectedShiftId" required>
+          <option value="0" disabled>-- Chọn ca làm --</option>
+          <option *ngFor="let shift of shiftsOptions" [value]="shift.id">
+            {{ shift.name }} ({{ shift.startTime }} - {{ shift.endTime }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Ngày làm việc <span class="text-danger">*</span></label>
+        <input type="date" name="registerDate" class="form-control" [(ngModel)]="registerDate" required>
+      </div>
+
+      <div class="button-group align-items-end">
+        <button type="submit" class="btn btn-success" [disabled]="isLoading">
+          <i class="bi bi-check-lg"></i> Xác nhận đăng ký
+        </button>
+      </div>
+    </form>
   </div>
 
   <div *ngIf="errorMessage" class="alert alert-danger mt-3">

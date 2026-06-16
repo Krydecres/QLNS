@@ -18,6 +18,7 @@ export interface Employee {
     positionId?: number;
     department?: Department;
     position?: Position;
+    avatarUrl?: string;
 }
 
 export interface ProfileUpdateRequest {

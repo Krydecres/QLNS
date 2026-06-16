@@ -16,6 +16,7 @@
             <thead class="table-light">
                 <tr>
                     <th width="10%">Mã NV</th>
+                    <th width="8%">Avatar</th>
                     <th>Họ và tên</th>
                     <th>Email</th>
                     <th>Số điện thoại</th>
@@ -27,6 +28,9 @@
             <tbody>
                 <tr *ngFor="let item of employees">
                     <td>NV-{{ item.id }}</td>
+                    <td>
+                        <img [src]="item.avatarUrl || 'assets/images/default-avatar.png'" alt="Avatar" class="rounded-circle" width="40" height="40" style="object-fit: cover; border: 1px solid #ddd;">
+                    </td>
                     <td class="fw-bold text-primary">{{ item.fullName }}</td>
                     <td>{{ item.email }}</td>
                     <td>{{ item.phoneNumber }}</td>
@@ -42,7 +46,7 @@
                     </td>
                 </tr>
                 <tr *ngIf="employees.length === 0">
-                    <td colspan="7" class="text-center text-muted py-4">Chưa có dữ liệu nhân viên.</td>
+                    <td colspan="8" class="text-center text-muted py-4">Chưa có dữ liệu nhân viên.</td>
                 </tr>
             </tbody>
         </table>

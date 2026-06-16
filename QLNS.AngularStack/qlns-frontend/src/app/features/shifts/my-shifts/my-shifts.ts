@@ -6,7 +6,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import {
   EmployeeShiftService,
   MyShiftItem,
-  MyShiftsResponse
+  MyShiftsResponse,
+  ShiftOption
 } from '../services/employee-shift.service';
 
 @Component({
@@ -28,8 +29,23 @@ export class MyShifts implements OnInit {
   isLoading = false;
   errorMessage = '';
 
+  shiftsOptions: ShiftOption[] = [];
+  isRegistering = false;
+  registerDate = this.getTodayString();
+  selectedShiftId = 0;
+
   ngOnInit(): void {
     this.loadMyShifts();
+    this.loadOptions();
+  }
+
+  loadOptions(): void {
+    this.employeeShiftService.getOptions().subscribe({
+      next: (data) => {
+        this.shiftsOptions = data.shifts;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   loadMyShifts(): void {
@@ -76,6 +92,48 @@ export class MyShifts implements OnInit {
     this.loadMyShifts();
   }
 
+  toggleRegisterForm(): void {
+    this.isRegistering = !this.isRegistering;
+    this.errorMessage = '';
+  }
+
+  registerShift(): void {
+    if (!this.data?.employee?.id) {
+       this.errorMessage = 'Không tìm thấy thông tin nhân viên.';
+       return;
+    }
+    if (!this.selectedShiftId) {
+       this.errorMessage = 'Vui lòng chọn ca làm.';
+       return;
+    }
+    if (!this.registerDate) {
+       this.errorMessage = 'Vui lòng chọn ngày làm việc.';
+       return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+    const request = {
+       employeeId: this.data.employee.id,
+       shiftId: this.selectedShiftId,
+       workDate: this.registerDate,
+       isActive: true
+    };
+
+    this.employeeShiftService.createEmployeeShift(request).subscribe({
+       next: (res) => {
+          this.isRegistering = false;
+          alert(res.message || 'Đăng ký ca làm thành công.');
+          this.loadMyShifts();
+       },
+       error: (err) => {
+          this.errorMessage = err.error?.message || 'Đăng ký ca làm thất bại.';
+          this.isLoading = false;
+          this.cdr.detectChanges();
+       }
+    });
+  }
+
   get shifts(): MyShiftItem[] {
     return this.data?.shifts || [];
   }
@@ -96,5 +154,9 @@ export class MyShifts implements OnInit {
     return new Date(now.getFullYear(), now.getMonth() + 1, 0)
       .toISOString()
       .slice(0, 10);
+  }
+
+  getTodayString(): string {
+    return new Date().toISOString().slice(0, 10);
   }
 }

@@ -18,6 +18,7 @@ export class MyProfileComponent implements OnInit {
   private cdr = inject(ChangeDetectorRef);
   isEditing = false;
   updateForm!: FormGroup;
+  selectedAvatarFile: File | null = null;
 
   constructor(
     private employeeService: EmployeeService,
@@ -73,5 +74,24 @@ export class MyProfileComponent implements OnInit {
       },
       error: (err) => console.error(err)
     });
+  }
+
+  onAvatarSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file && this.employee) {
+      this.employeeService.uploadAvatar(this.employee.id, file).subscribe({
+        next: (res) => {
+          if (this.employee) {
+            this.employee.avatarUrl = res.url;
+            this.cdr.detectChanges();
+          }
+          alert('Cập nhật ảnh đại diện thành công.');
+        },
+        error: (err) => {
+          console.error(err);
+          alert('Cập nhật ảnh đại diện thất bại.');
+        }
+      });
+    }
   }
 }

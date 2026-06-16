@@ -51,6 +51,10 @@
                             <option *ngFor="let p of positions" [value]="p.id">{{ p.name }}</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label for="avatarFile" class="form-label fw-bold">Ảnh đại diện (Tùy chọn)</label>
+                        <input type="file" id="avatarFile" class="form-control" (change)="onFileSelected($event)" accept="image/*" />
+                    </div>
                     
                     <div class="d-flex gap-2 mt-4">
                         <button type="submit" class="btn btn-primary" [disabled]="employeeForm.invalid">

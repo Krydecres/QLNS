@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShiftItem, ShiftRequest, ShiftService } from '../services/shift.service';
@@ -12,6 +12,7 @@ import { ShiftItem, ShiftRequest, ShiftService } from '../services/shift.service
 })
 export class ShiftList implements OnInit {
   private shiftService = inject(ShiftService);
+  private cdr = inject(ChangeDetectorRef);
 
   shifts: ShiftItem[] = [];
   search = '';
@@ -37,10 +38,12 @@ export class ShiftList implements OnInit {
       next: (data) => {
         this.shifts = data;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Không thể tải danh sách ca làm.';
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

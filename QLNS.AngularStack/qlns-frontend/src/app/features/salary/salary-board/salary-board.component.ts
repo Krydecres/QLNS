@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SalaryItem, SalaryService } from '../services/salary.service';
@@ -12,6 +12,7 @@ import { SalaryItem, SalaryService } from '../services/salary.service';
 })
 export class SalaryBoardComponent implements OnInit {
   private salaryService = inject(SalaryService);
+  private cdr = inject(ChangeDetectorRef);
 
   salaries: SalaryItem[] = [];
   selectedSalary: SalaryItem | null = null;
@@ -36,6 +37,7 @@ export class SalaryBoardComponent implements OnInit {
       next: (data) => {
         this.salaries = data;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Không thể tải dữ liệu bảng lương.';
@@ -65,6 +67,31 @@ export class SalaryBoardComponent implements OnInit {
       error: (err) => {
         this.errorMessage = err.error?.message || 'Tính lương thất bại.';
         this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  clearSalaries(): void {
+    const confirmed = confirm(
+      `Bạn có chắc muốn xóa toàn bộ dữ liệu bảng lương tháng ${this.selectedMonth}/${this.selectedYear}?`
+    );
+
+    if (!confirmed) return;
+
+    this.isLoading = true;
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    this.salaryService.clearSalaries(this.selectedMonth, this.selectedYear).subscribe({
+      next: (res) => {
+        this.successMessage = res.message || 'Xóa dữ liệu thành công.';
+        this.loadSalaries();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Xóa dữ liệu thất bại.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -87,10 +114,39 @@ export class SalaryBoardComponent implements OnInit {
 
         this.successMessage = 'Xuất bảng lương Excel thành công.';
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Xuất bảng lương Excel thất bại.';
         this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  bulkSendEmail(): void {
+    const confirmed = confirm(
+      `Bạn có chắc muốn gửi email bảng lương tháng ${this.selectedMonth}/${this.selectedYear} cho toàn bộ nhân viên?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    this.salaryService.bulkSendEmail(this.selectedMonth, this.selectedYear).subscribe({
+      next: (res) => {
+        this.successMessage = res.message || 'Gửi email thành công.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Gửi email thất bại.';
+        this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }

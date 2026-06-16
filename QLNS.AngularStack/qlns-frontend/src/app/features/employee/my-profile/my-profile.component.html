@@ -11,8 +11,17 @@
             <div class="chart-card">
                 <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
                     <div class="d-flex align-items-center">
-                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 80px; height: 80px; font-size: 32px;">
-                            <i class="bi bi-person-fill"></i>
+                        <div class="position-relative me-3" style="width: 80px; height: 80px;">
+                            <img *ngIf="employee.avatarUrl" [src]="employee.avatarUrl" class="rounded-circle shadow-sm" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid white;" alt="Avatar" />
+                            <div *ngIf="!employee.avatarUrl" class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 80px; height: 80px; font-size: 32px; border: 3px solid white;">
+                                <i class="bi bi-person-fill"></i>
+                            </div>
+                            
+                            <!-- Overlay Upload Icon -->
+                            <label for="avatarInput" class="position-absolute bottom-0 end-0 bg-light rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; cursor: pointer; border: 1px solid #ccc;">
+                                <i class="bi bi-camera-fill text-secondary" style="font-size: 12px;"></i>
+                            </label>
+                            <input type="file" id="avatarInput" class="d-none" accept="image/*" (change)="onAvatarSelected($event)">
                         </div>
                         <div>
                             <h3 class="mb-1 text-primary">{{ employee.fullName }}</h3>

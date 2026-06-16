@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { UserList } from './features/admin/users/user-list/user-list';
 import { ShiftList } from './features/shifts/shift-list/shift-list';
+import { HolidayListComponent } from './features/admin/holiday/holiday-list/holiday-list.component';
+import { HolidayFormComponent } from './features/admin/holiday/holiday-form/holiday-form.component';
 
 import { LayoutComponent } from './core/layout/layout.component';
 import { HomeComponent } from './features/home/home.component';
@@ -23,6 +25,8 @@ import { PositionListComponent } from './features/position/position-list/positio
 import { PositionFormComponent } from './features/position/position-form/position-form.component';
 import { PositionDetailsComponent } from './features/position/position-details/position-details.component';
 
+import { SalarySettingsComponent } from './features/salary/salary-settings/salary-settings.component';
+
 import { EmployeeListComponent } from './features/employee/employee-list/employee-list.component';
 import { EmployeeFormComponent } from './features/employee/employee-form/employee-form.component';
 import { PendingUpdatesComponent } from './features/employee/pending-updates/pending-updates.component';
@@ -32,6 +36,11 @@ import { SalaryBoardComponent } from './features/salary/salary-board/salary-boar
 
 import { EmployeeShift } from './features/shifts/employee-shift/employee-shift';
 import { MyShifts } from './features/shifts/my-shifts/my-shifts';
+
+import { LeaveApprovalComponent } from './features/leave/leave-approval/leave-approval.component';
+import { LeaveFormComponent } from './features/leave/leave-form/leave-form.component';
+import { MyLeavesComponent } from './features/leave/my-leaves/my-leaves.component';
+import { MyDaysOffComponent } from './features/leave/my-days-off/my-days-off.component';
 
 export const routes: Routes = [
   {
@@ -201,10 +210,58 @@ export const routes: Routes = [
         data: { roles: ['Employee'] }
       },
       {
-  path: 'salaries',
-  component: SalaryBoardComponent,
+        path: 'salaries',
+        component: SalaryBoardComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+        path: 'salary-settings',
+        component: SalarySettingsComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      {
+  path: 'holidays',
+  component: HolidayListComponent,
+  canActivate: [authGuard],
+  data: { roles: ['Admin', 'Employee'] }
+},
+{
+  path: 'holidays/create',
+  component: HolidayFormComponent,
   canActivate: [authGuard],
   data: { roles: ['Admin'] }
+},
+{
+  path: 'holidays/edit/:id',
+  component: HolidayFormComponent,
+  canActivate: [authGuard],
+  data: { roles: ['Admin'] }
+},
+{
+  path: 'leave/approval',
+  component: LeaveApprovalComponent,
+  canActivate: [authGuard],
+  data: { roles: ['Admin'] }
+},
+{
+  path: 'leave/create',
+  component: LeaveFormComponent,
+  canActivate: [authGuard],
+  data: { roles: ['Employee'] }
+},
+{
+  path: 'leave/my-leaves',
+  component: MyLeavesComponent,
+  canActivate: [authGuard],
+  data: { roles: ['Employee'] }
+},
+{
+  path: 'leave/my-days-off',
+  component: MyDaysOffComponent,
+  canActivate: [authGuard],
+  data: { roles: ['Employee'] }
 }
     ]
   }

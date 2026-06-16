@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QLNS.FullNet.Data;
 using QLNS.FullNet.Data.Entities;
+using QLNS.Api.Services;
 
 namespace QLNS.Api.Controllers;
 
@@ -10,10 +11,12 @@ namespace QLNS.Api.Controllers;
 public class EmployeesController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly ICloudinaryService _cloudinaryService;
 
-    public EmployeesController(AppDbContext context)
+    public EmployeesController(AppDbContext context, ICloudinaryService cloudinaryService)
     {
         _context = context;
+        _cloudinaryService = cloudinaryService;
     }
 
     // GET: api/Employees
@@ -227,5 +230,23 @@ public class EmployeesController : ControllerBase
         await _context.SaveChangesAsync();
 
         return Ok(new { message = isApproved ? "Đã phê duyệt yêu cầu." : "Đã từ chối yêu cầu." });
+    }
+
+    // POST: api/Employees/{id}/avatar
+    [HttpPost("{id}/avatar")]
+    public async Task<IActionResult> UploadAvatar(int id, IFormFile file)
+    {
+        var employee = await _context.Employees.FindAsync(id);
+        if (employee == null) return NotFound("Employee not found");
+
+        if (file == null || file.Length == 0) return BadRequest("File is empty");
+
+        var url = await _cloudinaryService.UploadImageAsync(file);
+        if (string.IsNullOrEmpty(url)) return BadRequest("Failed to upload image");
+
+        employee.AvatarUrl = url;
+        await _context.SaveChangesAsync();
+
+        return Ok(new { url });
     }
 }

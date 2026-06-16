@@ -1,0 +1,96 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">Cấu hình tham số tính lương</h1>
+      <p class="dashboard-subtitle">Quản lý lương ngày công theo chức vụ và hệ số lương theo ca làm</p>
+    </div>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success mt-3">
+    <i class="bi bi-check-circle me-2"></i> {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+    <i class="bi bi-exclamation-triangle me-2"></i> {{ errorMessage }}
+  </div>
+
+  <div class="row mt-4">
+    <!-- Cấu hình lương ngày công -->
+    <div class="col-md-6 mb-4">
+      <div class="chart-card h-100">
+        <h5 class="mb-4 text-primary"><i class="bi bi-briefcase me-2"></i>Lương ngày công (Theo chức vụ)</h5>
+        
+        <div *ngIf="isLoading" class="text-center py-3">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Chức vụ</th>
+                <th class="text-end">Lương ngày công (VNĐ)</th>
+                <th class="text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of positions">
+                <td class="fw-bold">{{ p.name }}</td>
+                <td class="text-end text-success fw-bold">{{ p.dailyWage | number:'1.0-0' }}</td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-outline-primary" (click)="updateDailyWage(p)">
+                    <i class="bi bi-pencil"></i> Sửa
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="positions.length === 0">
+                <td colspan="3" class="text-center py-3 text-muted">Chưa có chức vụ nào.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cấu hình hệ số lương -->
+    <div class="col-md-6 mb-4">
+      <div class="chart-card h-100">
+        <h5 class="mb-4 text-info"><i class="bi bi-clock-history me-2"></i>Hệ số tăng ca (Theo ca làm)</h5>
+        
+        <div *ngIf="isLoading" class="text-center py-3">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>
+
+        <div class="table-responsive" *ngIf="!isLoading">
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Ca làm</th>
+                <th>Khung giờ</th>
+                <th class="text-center">Hệ số</th>
+                <th class="text-center">Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of shifts">
+                <td class="fw-bold">{{ s.name }}</td>
+                <td>{{ s.startTime | slice:0:5 }} - {{ s.endTime | slice:0:5 }}</td>
+                <td class="text-center">
+                  <span class="badge bg-info text-dark" style="font-size: 0.9rem;">x {{ s.wageMultiplier }}</span>
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-outline-info" (click)="updateWageMultiplier(s)">
+                    <i class="bi bi-pencil"></i> Sửa
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="shifts.length === 0">
+                <td colspan="4" class="text-center py-3 text-muted">Chưa có ca làm nào.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

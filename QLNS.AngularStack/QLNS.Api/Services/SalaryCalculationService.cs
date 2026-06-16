@@ -120,9 +120,13 @@ public class SalaryCalculationService : ISalaryCalculationService
 
     public async Task<List<Salary>> CalculateForAllAsync(int month, int year)
     {
-        var employeeIds = await _context.Employees
-            .AsNoTracking()
-            .Select(e => e.Id)
+        var startDate = new DateTime(year, month, 1);
+        var endDate = startDate.AddMonths(1).AddDays(-1);
+
+        var employeeIds = await _context.EmployeeShifts
+            .Where(es => es.WorkDate >= startDate && es.WorkDate <= endDate)
+            .Select(es => es.EmployeeId)
+            .Distinct()
             .ToListAsync();
 
         var result = new List<Salary>();

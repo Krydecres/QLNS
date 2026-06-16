@@ -50,4 +50,10 @@ export class EmployeeService {
   approveUpdate(id: number, isApproved: boolean): Observable<any> {
     return this.http.post(`${this.apiUrl}/approve-update/${id}?isApproved=${isApproved}`, {});
   }
+
+  uploadAvatar(id: number, file: File): Observable<{url: string}> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{url: string}>(`${this.apiUrl}/${id}/avatar`, formData);
+  }
 }

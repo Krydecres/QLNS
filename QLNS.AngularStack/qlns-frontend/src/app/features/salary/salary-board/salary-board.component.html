@@ -41,6 +41,16 @@
           Tính lại lương
         </button>
 
+        <button type="button" class="btn btn-danger text-white" (click)="clearSalaries()">
+          <i class="bi bi-trash"></i>
+          Xóa dữ liệu
+        </button>
+
+        <button type="button" class="btn btn-warning text-white" (click)="bulkSendEmail()">
+          <i class="bi bi-envelope"></i>
+          Gửi Email Hàng Loạt
+        </button>
+
         <button type="button" class="btn btn-success" (click)="exportExcel()">
           <i class="bi bi-file-earmark-excel"></i>
           Xuất Excel

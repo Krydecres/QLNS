@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UserAccount, UserService } from '../user.service';
@@ -11,6 +11,7 @@ import { UserAccount, UserService } from '../user.service';
 })
 export class UserList implements OnInit {
   private userService = inject(UserService);
+  private cdr = inject(ChangeDetectorRef);
 
   users: UserAccount[] = [];
   isLoading = false;
@@ -30,10 +31,12 @@ export class UserList implements OnInit {
       next: (users: UserAccount[]) => {
         this.users = users;
         this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorMessage = 'Không thể tải danh sách tài khoản.';
         this.isLoading = false;
+        this.cdr.detectChanges();
       }
     });
   }
