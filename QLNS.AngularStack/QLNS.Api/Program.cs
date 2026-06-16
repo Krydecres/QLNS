@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using QLNS.FullNet.Data;
+using QLNS.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
     });
 builder.Services.AddOpenApi();
+builder.Services.AddScoped<ISalaryCalculationService, SalaryCalculationService>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
