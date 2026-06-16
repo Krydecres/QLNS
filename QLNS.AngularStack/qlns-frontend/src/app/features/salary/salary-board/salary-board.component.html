@@ -1,0 +1,178 @@
+<div class="salary-page">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">Bảng lương</h1>
+      <p class="dashboard-subtitle">
+        Hiển thị bảng lương tổng hợp và chi tiết theo tháng/năm
+      </p>
+    </div>
+  </div>
+
+  <div class="filter-card">
+    <form class="filter-form" (ngSubmit)="loadSalaries()">
+      <div class="form-group">
+        <label>Tháng</label>
+        <select name="month" class="form-select" [(ngModel)]="selectedMonth">
+          <option *ngFor="let month of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="month">
+            Tháng {{ month }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Năm</label>
+        <input
+          type="number"
+          name="year"
+          class="form-control"
+          [(ngModel)]="selectedYear"
+          min="2000"
+          max="2100">
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-search"></i>
+          Xem bảng lương
+        </button>
+
+        <button type="button" class="btn btn-success" (click)="calculateSalaries()">
+          <i class="bi bi-calculator"></i>
+          Tính lại lương
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success mt-3">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+    {{ errorMessage }}
+  </div>
+
+  <div class="stat-grid mt-3">
+    <div class="stat-card">
+      <div class="stat-label">Số nhân viên có bảng lương</div>
+      <div class="stat-value">{{ totalEmployees }}</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Tổng lương công</div>
+      <div class="stat-value">{{ totalBaseSalary | number:'1.0-0' }} đ</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Tổng phụ cấp</div>
+      <div class="stat-value">{{ totalAllowance | number:'1.0-0' }} đ</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Tổng phải trả</div>
+      <div class="stat-value text-success">{{ totalSalary | number:'1.0-0' }} đ</div>
+    </div>
+  </div>
+
+  <div class="chart-card mt-3">
+    <div class="table-header">
+      <div>
+        <h2 class="chart-title">Danh sách lương tháng {{ selectedMonth }}/{{ selectedYear }}</h2>
+        <p class="chart-sub">Dữ liệu được lấy từ bảng Salaries sau khi tính lương</p>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-box">
+      Đang tải dữ liệu bảng lương...
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Mã NV</th>
+            <th>Họ tên</th>
+            <th>Chức vụ</th>
+            <th>Lương công</th>
+            <th>Phụ cấp</th>
+            <th>Khấu trừ</th>
+            <th>Tổng lương</th>
+            <th class="text-center">Chi tiết</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of salaries">
+            <td>#{{ item.employeeId }}</td>
+            <td class="fw-bold">{{ item.employeeName }}</td>
+            <td>{{ item.positionName || 'Chưa có' }}</td>
+            <td>{{ item.baseSalary | number:'1.0-0' }} đ</td>
+            <td>{{ item.allowance | number:'1.0-0' }} đ</td>
+            <td>{{ item.deduction | number:'1.0-0' }} đ</td>
+            <td class="salary-total">{{ item.totalSalary | number:'1.0-0' }} đ</td>
+            <td class="text-center">
+              <button type="button" class="btn btn-sm btn-outline-primary" (click)="openDetail(item)">
+                Xem
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="salaries.length === 0">
+            <td colspan="8" class="empty-row">
+              Chưa có dữ liệu bảng lương. Hãy bấm "Tính lại lương" để tạo bảng lương cho tháng này.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" *ngIf="selectedSalary">
+    <div class="salary-modal">
+      <div class="modal-header">
+        <div>
+          <h3>Chi tiết lương</h3>
+          <p>{{ selectedSalary.employeeName }} - tháng {{ selectedSalary.month }}/{{ selectedSalary.year }}</p>
+        </div>
+
+        <button type="button" class="btn-close-custom" (click)="closeDetail()">×</button>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span>Mã nhân viên</span>
+          <strong>#{{ selectedSalary.employeeId }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Chức vụ</span>
+          <strong>{{ selectedSalary.positionName || 'Chưa có' }}</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Lương công</span>
+          <strong>{{ selectedSalary.baseSalary | number:'1.0-0' }} đ</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Phụ cấp</span>
+          <strong>{{ selectedSalary.allowance | number:'1.0-0' }} đ</strong>
+        </div>
+
+        <div class="detail-item">
+          <span>Khấu trừ</span>
+          <strong>{{ selectedSalary.deduction | number:'1.0-0' }} đ</strong>
+        </div>
+
+        <div class="detail-item total">
+          <span>Tổng lương</span>
+          <strong>{{ selectedSalary.totalSalary | number:'1.0-0' }} đ</strong>
+        </div>
+      </div>
+
+      <div class="modal-note">
+        Công thức hiện tại: Tổng lương = Lương công + Phụ cấp - Khấu trừ.
+      </div>
+    </div>
+  </div>
+</div>

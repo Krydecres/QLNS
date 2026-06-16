@@ -27,6 +27,7 @@ import { EmployeeFormComponent } from './features/employee/employee-form/employe
 import { PendingUpdatesComponent } from './features/employee/pending-updates/pending-updates.component';
 import { MyProfileComponent } from './features/employee/my-profile/my-profile.component';
 import { MyDepartmentComponent } from './features/employee/my-department/my-department.component';
+import { SalaryBoardComponent } from './features/salary/salary-board/salary-board.component';
 
 export const routes: Routes = [
   {
@@ -172,7 +173,13 @@ export const routes: Routes = [
         component: MyDepartmentComponent,
         canActivate: [authGuard],
         data: { roles: ['Employee'] }
-      }
+      },
+      {
+  path: 'salaries',
+  component: SalaryBoardComponent,
+  canActivate: [authGuard],
+  data: { roles: ['Admin'] }
+}
     ]
   }
 ];
