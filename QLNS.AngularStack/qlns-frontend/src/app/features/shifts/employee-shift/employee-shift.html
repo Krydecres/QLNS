@@ -1,1 +1,251 @@
-<p>employee-shift works!</p>
+<div class="employee-shift-page">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">Gán ca cho nhân viên</h1>
+      <p class="dashboard-subtitle">
+        Thực hiện xếp lịch và phân bổ nhân sự vào các ca làm việc
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success mt-3">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+    {{ errorMessage }}
+  </div>
+
+  <div class="stat-grid mt-3">
+    <div class="stat-card">
+      <div class="stat-label">Tổng lịch phân ca</div>
+      <div class="stat-value">{{ employeeShifts.length }}</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Đang áp dụng</div>
+      <div class="stat-value text-success">{{ activeCount }}</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Ngưng áp dụng</div>
+      <div class="stat-value text-warning">{{ inactiveCount }}</div>
+    </div>
+  </div>
+
+  <div class="form-card mt-3">
+    <h2 class="card-title">
+      {{ editingId ? 'Cập nhật lịch phân ca' : 'Gán ca mới' }}
+    </h2>
+
+    <form class="employee-shift-form" (ngSubmit)="saveEmployeeShift()">
+      <div class="form-group">
+        <label>Nhân viên</label>
+        <select
+          name="employeeId"
+          class="form-select"
+          [(ngModel)]="form.employeeId">
+          <option [ngValue]="0">-- Chọn nhân viên --</option>
+          <option *ngFor="let employee of employees" [ngValue]="employee.id">
+            {{ employee.fullName }} - {{ employee.email }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Ca làm</label>
+        <select
+          name="shiftId"
+          class="form-select"
+          [(ngModel)]="form.shiftId">
+          <option [ngValue]="0">-- Chọn ca làm --</option>
+          <option *ngFor="let shift of shifts" [ngValue]="shift.id">
+            {{ shift.name }} ({{ shift.startTime }} - {{ shift.endTime }})
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Ngày làm việc</label>
+        <input
+          type="date"
+          name="workDate"
+          class="form-control"
+          [(ngModel)]="form.workDate">
+      </div>
+
+      <div class="form-group">
+        <label>Trạng thái</label>
+        <select
+          name="isActive"
+          class="form-select"
+          [(ngModel)]="form.isActive">
+          <option [ngValue]="true">Đang áp dụng</option>
+          <option [ngValue]="false">Ngưng áp dụng</option>
+        </select>
+      </div>
+
+      <div class="form-group form-group-wide">
+        <label>Ghi chú</label>
+        <input
+          type="text"
+          name="note"
+          class="form-control"
+          [(ngModel)]="form.note"
+          placeholder="Ví dụ: Phân ca bổ sung">
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-save"></i>
+          {{ editingId ? 'Cập nhật' : 'Gán ca' }}
+        </button>
+
+        <button
+          *ngIf="editingId"
+          type="button"
+          class="btn btn-secondary"
+          (click)="resetForm()">
+          Hủy sửa
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="filter-card mt-3">
+    <form class="filter-form" (ngSubmit)="loadEmployeeShifts()">
+      <div class="form-group">
+        <label>Từ ngày</label>
+        <input
+          type="date"
+          name="startDate"
+          class="form-control"
+          [(ngModel)]="startDate">
+      </div>
+
+      <div class="form-group">
+        <label>Đến ngày</label>
+        <input
+          type="date"
+          name="endDate"
+          class="form-control"
+          [(ngModel)]="endDate">
+      </div>
+
+      <div class="form-group">
+        <label>Nhân viên</label>
+        <select
+          name="selectedEmployeeId"
+          class="form-select"
+          [(ngModel)]="selectedEmployeeId">
+          <option [ngValue]="0">Tất cả nhân viên</option>
+          <option *ngFor="let employee of employees" [ngValue]="employee.id">
+            {{ employee.fullName }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Ca làm</label>
+        <select
+          name="selectedShiftId"
+          class="form-select"
+          [(ngModel)]="selectedShiftId">
+          <option [ngValue]="0">Tất cả ca làm</option>
+          <option *ngFor="let shift of shifts" [ngValue]="shift.id">
+            {{ shift.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-search"></i>
+          Lọc
+        </button>
+
+        <button type="button" class="btn btn-secondary" (click)="clearFilter()">
+          Làm mới
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="chart-card mt-3">
+    <div class="table-header">
+      <div>
+        <h2 class="chart-title">Danh sách phân ca</h2>
+        <p class="chart-sub">
+          Dữ liệu được lấy từ bảng EmployeeShifts
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-box">
+      Đang tải danh sách phân ca...
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nhân viên</th>
+            <th>Phòng ban</th>
+            <th>Chức vụ</th>
+            <th>Ca làm</th>
+            <th>Ngày làm</th>
+            <th>Ghi chú</th>
+            <th>Trạng thái</th>
+            <th class="text-center">Thao tác</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of employeeShifts">
+            <td>#{{ item.id }}</td>
+            <td>
+              <strong>{{ item.employeeName }}</strong>
+              <div class="sub-text">{{ item.email }}</div>
+            </td>
+            <td>{{ item.departmentName || 'Chưa có' }}</td>
+            <td>{{ item.positionName || 'Chưa có' }}</td>
+            <td>
+              <strong>{{ item.shiftName }}</strong>
+              <div class="sub-text">{{ item.startTime }} - {{ item.endTime }}</div>
+            </td>
+            <td>{{ item.workDate }}</td>
+            <td>{{ item.note || '-' }}</td>
+            <td>
+              <span class="status-badge" [class.inactive]="!item.isActive">
+                {{ item.isActive ? 'Đang áp dụng' : 'Ngưng áp dụng' }}
+              </span>
+            </td>
+            <td class="text-center">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                (click)="editEmployeeShift(item)">
+                Sửa
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                (click)="deleteEmployeeShift(item)"
+                [disabled]="!item.isActive">
+                Ngưng
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="employeeShifts.length === 0">
+            <td colspan="9" class="empty-row">
+              Chưa có dữ liệu phân ca.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

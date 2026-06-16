@@ -30,6 +30,8 @@ import { MyProfileComponent } from './features/employee/my-profile/my-profile.co
 import { MyDepartmentComponent } from './features/employee/my-department/my-department.component';
 import { SalaryBoardComponent } from './features/salary/salary-board/salary-board.component';
 
+import { EmployeeShift } from './features/shifts/employee-shift/employee-shift';
+
 export const routes: Routes = [
   {
     path: '',
@@ -80,6 +82,13 @@ export const routes: Routes = [
       {
         path: 'shifts',
         component: ShiftList,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      // Employee Shift Management - Admin
+      {
+        path: 'employee-shifts',
+        component: EmployeeShift,
         canActivate: [authGuard],
         data: { roles: ['Admin'] }
       },
