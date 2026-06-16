@@ -1,1 +1,227 @@
-<p>shift-list works!</p>
+<div class="shift-page">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">Quản lý ca làm việc</h1>
+      <p class="dashboard-subtitle">
+        Khởi tạo danh mục và quy định thời gian các ca làm việc
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success mt-3">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+    {{ errorMessage }}
+  </div>
+
+  <div class="stat-grid mt-3">
+    <div class="stat-card">
+      <div class="stat-label">Tổng số ca làm</div>
+      <div class="stat-value">{{ shifts.length }}</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Đang sử dụng</div>
+      <div class="stat-value text-success">{{ activeCount }}</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Ngưng sử dụng</div>
+      <div class="stat-value text-warning">{{ inactiveCount }}</div>
+    </div>
+  </div>
+
+  <div class="form-card mt-3">
+    <h2 class="card-title">
+      {{ editingId ? 'Cập nhật ca làm' : 'Thêm ca làm mới' }}
+    </h2>
+
+    <form class="shift-form" (ngSubmit)="saveShift()">
+      <div class="form-group">
+        <label>Tên ca làm</label>
+        <input
+          type="text"
+          name="name"
+          class="form-control"
+          [(ngModel)]="form.name"
+          placeholder="Ví dụ: Ca sáng">
+      </div>
+
+      <div class="form-group">
+        <label>Giờ bắt đầu</label>
+        <input
+          type="time"
+          name="startTime"
+          class="form-control"
+          [(ngModel)]="form.startTime">
+      </div>
+
+      <div class="form-group">
+        <label>Giờ kết thúc</label>
+        <input
+          type="time"
+          name="endTime"
+          class="form-control"
+          [(ngModel)]="form.endTime">
+      </div>
+
+      <div class="form-group">
+        <label>Phút nghỉ</label>
+        <input
+          type="number"
+          name="breakMinutes"
+          class="form-control"
+          [(ngModel)]="form.breakMinutes"
+          min="0"
+          max="240">
+      </div>
+
+      <div class="form-group">
+        <label>Hệ số lương</label>
+        <input
+          type="number"
+          name="wageMultiplier"
+          class="form-control"
+          [(ngModel)]="form.wageMultiplier"
+          min="0.1"
+          step="0.1">
+      </div>
+
+      <div class="form-group">
+        <label>Trạng thái</label>
+        <select
+          name="isActive"
+          class="form-select"
+          [(ngModel)]="form.isActive">
+          <option [ngValue]="true">Đang sử dụng</option>
+          <option [ngValue]="false">Ngưng sử dụng</option>
+        </select>
+      </div>
+
+      <div class="form-group form-group-wide">
+        <label>Mô tả</label>
+        <input
+          type="text"
+          name="description"
+          class="form-control"
+          [(ngModel)]="form.description"
+          placeholder="Ghi chú thêm về ca làm">
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-save"></i>
+          {{ editingId ? 'Cập nhật' : 'Thêm mới' }}
+        </button>
+
+        <button
+          *ngIf="editingId"
+          type="button"
+          class="btn btn-secondary"
+          (click)="cancelEdit()">
+          Hủy sửa
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="filter-card mt-3">
+    <form class="filter-form" (ngSubmit)="loadShifts()">
+      <div class="form-group">
+        <label>Tìm kiếm</label>
+        <input
+          type="text"
+          name="search"
+          class="form-control"
+          [(ngModel)]="search"
+          placeholder="Nhập tên ca hoặc mô tả">
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-search"></i>
+          Tìm kiếm
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="search=''; loadShifts()">
+          Làm mới
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="chart-card mt-3">
+    <div class="table-header">
+      <div>
+        <h2 class="chart-title">Danh sách ca làm</h2>
+        <p class="chart-sub">
+          Dữ liệu được lấy từ bảng Shifts trong database
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-box">
+      Đang tải danh sách ca làm...
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên ca</th>
+            <th>Thời gian</th>
+            <th>Phút nghỉ</th>
+            <th>Hệ số lương</th>
+            <th>Mô tả</th>
+            <th>Trạng thái</th>
+            <th class="text-center">Thao tác</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of shifts">
+            <td>#{{ item.id }}</td>
+            <td class="fw-bold">{{ item.name }}</td>
+            <td>{{ item.startTime }} - {{ item.endTime }}</td>
+            <td>{{ item.breakMinutes }} phút</td>
+            <td>x{{ item.wageMultiplier }}</td>
+            <td>{{ item.description || '-' }}</td>
+            <td>
+              <span class="status-badge" [class.inactive]="!item.isActive">
+                {{ item.isActive ? 'Đang sử dụng' : 'Ngưng sử dụng' }}
+              </span>
+            </td>
+            <td class="text-center">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-primary"
+                (click)="editShift(item)">
+                Sửa
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                (click)="deleteShift(item)"
+                [disabled]="!item.isActive">
+                Ngưng
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="shifts.length === 0">
+            <td colspan="8" class="empty-row">
+              Chưa có dữ liệu ca làm.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

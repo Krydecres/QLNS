@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { UserList } from './features/admin/users/user-list/user-list';
+import { ShiftList } from './features/shifts/shift-list/shift-list';
 
 import { LayoutComponent } from './core/layout/layout.component';
 import { HomeComponent } from './features/home/home.component';
@@ -71,6 +72,14 @@ export const routes: Routes = [
       {
         path: 'timekeeping/manual-entry',
         component: ManualEntryComponent,
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] }
+      },
+      
+      // Shift Management - Admin
+      {
+        path: 'shifts',
+        component: ShiftList,
         canActivate: [authGuard],
         data: { roles: ['Admin'] }
       },
