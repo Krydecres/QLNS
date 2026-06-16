@@ -41,4 +41,15 @@ export class SalaryService {
       { params }
     );
   }
+
+  exportExcel(month: number, year: number): Observable<Blob> {
+    const params = new HttpParams()
+      .set('month', month)
+      .set('year', year);
+
+    return this.http.get(`${this.apiUrl}/export`, {
+      params,
+      responseType: 'blob'
+    });
+  }
 }

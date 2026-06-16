@@ -13,7 +13,7 @@
       <div class="form-group">
         <label>Tháng</label>
         <select name="month" class="form-select" [(ngModel)]="selectedMonth">
-          <option *ngFor="let month of [1,2,3,4,5,6,7,8,9,10,11,12]" [value]="month">
+          <option *ngFor="let month of [1,2,3,4,5,6,7,8,9,10,11,12]" [ngValue]="month">
             Tháng {{ month }}
           </option>
         </select>
@@ -39,6 +39,11 @@
         <button type="button" class="btn btn-success" (click)="calculateSalaries()">
           <i class="bi bi-calculator"></i>
           Tính lại lương
+        </button>
+
+        <button type="button" class="btn btn-success" (click)="exportExcel()">
+          <i class="bi bi-file-earmark-excel"></i>
+          Xuất Excel
         </button>
       </div>
     </form>

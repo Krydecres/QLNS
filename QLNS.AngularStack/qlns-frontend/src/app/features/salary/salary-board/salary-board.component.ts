@@ -69,6 +69,32 @@ export class SalaryBoardComponent implements OnInit {
     });
   }
 
+  exportExcel(): void {
+    this.isLoading = true;
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    this.salaryService.exportExcel(this.selectedMonth, this.selectedYear).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+
+        a.href = url;
+        a.download = `BangLuong_${this.selectedMonth}_${this.selectedYear}.xlsx`;
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+
+        this.successMessage = 'Xuất bảng lương Excel thành công.';
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Xuất bảng lương Excel thất bại.';
+        this.isLoading = false;
+      }
+    });
+  }
+
   openDetail(item: SalaryItem): void {
     this.selectedSalary = item;
   }
