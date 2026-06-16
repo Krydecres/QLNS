@@ -31,6 +31,7 @@ import { MyDepartmentComponent } from './features/employee/my-department/my-depa
 import { SalaryBoardComponent } from './features/salary/salary-board/salary-board.component';
 
 import { EmployeeShift } from './features/shifts/employee-shift/employee-shift';
+import { MyShifts } from './features/shifts/my-shifts/my-shifts';
 
 export const routes: Routes = [
   {
@@ -91,6 +92,13 @@ export const routes: Routes = [
         component: EmployeeShift,
         canActivate: [authGuard],
         data: { roles: ['Admin'] }
+      },
+      // My Shifts - Employee
+      {
+        path: 'my-shifts',
+        component: MyShifts,
+        canActivate: [authGuard],
+        data: { roles: ['Employee'] }
       },
 
       // Timekeeping - Employee

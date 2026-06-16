@@ -79,6 +79,96 @@ public class EmployeeShiftsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("my-shifts/{username}")]
+public async Task<IActionResult> GetMyShifts(
+    string username,
+    [FromQuery] DateTime? startDate,
+    [FromQuery] DateTime? endDate)
+{
+    if (string.IsNullOrWhiteSpace(username))
+    {
+        return BadRequest(new { message = "Không tìm thấy tài khoản đăng nhập." });
+    }
+
+    var appUser = await _context.AppUsers
+        .AsNoTracking()
+        .FirstOrDefaultAsync(u => u.Username == username);
+
+    var employeeEmail = appUser?.Email ?? username;
+
+    var employee = await _context.Employees
+        .Include(e => e.Department)
+        .Include(e => e.Position)
+        .AsNoTracking()
+        .FirstOrDefaultAsync(e =>
+            e.Email == employeeEmail ||
+            e.Email == username);
+
+    if (employee == null)
+    {
+        return NotFound(new
+        {
+            message = "Không tìm thấy hồ sơ nhân viên tương ứng với tài khoản đăng nhập."
+        });
+    }
+
+    var query = _context.EmployeeShifts
+        .Include(es => es.Shift)
+        .AsNoTracking()
+        .Where(es => es.EmployeeId == employee.Id)
+        .AsQueryable();
+
+    if (startDate.HasValue)
+    {
+        query = query.Where(es => es.WorkDate >= startDate.Value.Date);
+    }
+
+    if (endDate.HasValue)
+    {
+        var nextDate = endDate.Value.Date.AddDays(1);
+        query = query.Where(es => es.WorkDate < nextDate);
+    }
+
+    var employeeShifts = await query
+        .OrderBy(es => es.WorkDate)
+        .ThenBy(es => es.Shift!.StartTime)
+        .ToListAsync();
+
+    var shiftResults = employeeShifts.Select(es => new
+    {
+        es.Id,
+        es.ShiftId,
+        ShiftName = es.Shift == null ? "" : es.Shift.Name,
+        StartTime = es.Shift == null ? "" : es.Shift.StartTime.ToString(@"hh\:mm"),
+        EndTime = es.Shift == null ? "" : es.Shift.EndTime.ToString(@"hh\:mm"),
+        BreakMinutes = es.Shift == null ? 0 : es.Shift.BreakMinutes,
+        WageMultiplier = es.Shift == null ? 1 : es.Shift.WageMultiplier,
+        WorkDate = es.WorkDate.ToString("yyyy-MM-dd"),
+        DayOfWeek = GetVietnameseDayOfWeek(es.WorkDate.DayOfWeek),
+        es.Note,
+        es.IsActive
+    }).ToList();
+
+    return Ok(new
+    {
+        Employee = new
+        {
+            employee.Id,
+            employee.FullName,
+            employee.Email,
+            employee.PhoneNumber,
+            employee.AvatarUrl,
+            DepartmentName = employee.Department == null ? "" : employee.Department.Name,
+            PositionName = employee.Position == null ? "" : employee.Position.Name
+        },
+        StartDate = startDate.HasValue ? startDate.Value.ToString("yyyy-MM-dd") : null,
+        EndDate = endDate.HasValue ? endDate.Value.ToString("yyyy-MM-dd") : null,
+        TotalShifts = shiftResults.Count,
+        ActiveShifts = shiftResults.Count(s => s.IsActive),
+        Shifts = shiftResults
+    });
+}
+
     [HttpGet("options")]
     public async Task<IActionResult> GetOptions()
     {
@@ -285,6 +375,20 @@ public class EmployeeShiftsController : ControllerBase
             es.Shift.StartTime < selectedShift.EndTime);
     }
 
+private static string GetVietnameseDayOfWeek(DayOfWeek dayOfWeek)
+{
+    return dayOfWeek switch
+    {
+        DayOfWeek.Monday => "Thứ 2",
+        DayOfWeek.Tuesday => "Thứ 3",
+        DayOfWeek.Wednesday => "Thứ 4",
+        DayOfWeek.Thursday => "Thứ 5",
+        DayOfWeek.Friday => "Thứ 6",
+        DayOfWeek.Saturday => "Thứ 7",
+        DayOfWeek.Sunday => "Chủ nhật",
+        _ => ""
+    };
+}
     public class EmployeeShiftDto
     {
         public int EmployeeId { get; set; }

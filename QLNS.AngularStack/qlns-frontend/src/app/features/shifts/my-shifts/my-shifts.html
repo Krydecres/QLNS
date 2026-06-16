@@ -1,0 +1,147 @@
+<div class="my-shifts-page">
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">Lịch ca làm của tôi</h1>
+      <p class="dashboard-subtitle">
+        Xem các ca làm việc đã được phân công
+      </p>
+    </div>
+  </div>
+
+  <div *ngIf="errorMessage" class="alert alert-danger mt-3">
+    {{ errorMessage }}
+  </div>
+
+  <div class="profile-card mt-3" *ngIf="data?.employee">
+    <div class="avatar-box">
+      <img
+        *ngIf="data?.employee?.avatarUrl"
+        [src]="data?.employee?.avatarUrl"
+        alt="Avatar"
+        class="avatar-img">
+
+      <div *ngIf="!data?.employee?.avatarUrl" class="avatar-placeholder">
+        {{ data?.employee?.fullName?.charAt(0) || 'N' }}
+      </div>
+    </div>
+
+    <div class="profile-info">
+      <h2>{{ data?.employee?.fullName }}</h2>
+      <p>{{ data?.employee?.email }}</p>
+
+      <div class="profile-tags">
+        <span>{{ data?.employee?.departmentName || 'Chưa có phòng ban' }}</span>
+        <span>{{ data?.employee?.positionName || 'Chưa có chức vụ' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-card mt-3">
+    <form class="filter-form" (ngSubmit)="loadMyShifts()">
+      <div class="form-group">
+        <label>Từ ngày</label>
+        <input
+          type="date"
+          name="startDate"
+          class="form-control"
+          [(ngModel)]="startDate">
+      </div>
+
+      <div class="form-group">
+        <label>Đến ngày</label>
+        <input
+          type="date"
+          name="endDate"
+          class="form-control"
+          [(ngModel)]="endDate">
+      </div>
+
+      <div class="button-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-search"></i>
+          Xem lịch
+        </button>
+
+        <button type="button" class="btn btn-secondary" (click)="resetThisMonth()">
+          Tháng này
+        </button>
+
+        <button type="button" class="btn btn-secondary" (click)="clearFilter()">
+          Tất cả
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="stat-grid mt-3">
+    <div class="stat-card">
+      <div class="stat-label">Tổng số ca</div>
+      <div class="stat-value">{{ data?.totalShifts || 0 }}</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Đang áp dụng</div>
+      <div class="stat-value text-success">{{ data?.activeShifts || 0 }}</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Ngưng áp dụng</div>
+      <div class="stat-value text-warning">{{ inactiveShifts }}</div>
+    </div>
+  </div>
+
+  <div class="chart-card mt-3">
+    <div class="table-header">
+      <div>
+        <h2 class="chart-title">Danh sách ca làm</h2>
+        <p class="chart-sub">
+          Dữ liệu được lấy từ lịch phân ca của nhân viên đang đăng nhập
+        </p>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-box">
+      Đang tải lịch ca làm...
+    </div>
+
+    <div class="table-responsive" *ngIf="!isLoading">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Ngày</th>
+            <th>Thứ</th>
+            <th>Ca làm</th>
+            <th>Thời gian</th>
+            <th>Phút nghỉ</th>
+            <th>Hệ số lương</th>
+            <th>Ghi chú</th>
+            <th>Trạng thái</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let item of shifts">
+            <td>{{ item.workDate }}</td>
+            <td>{{ item.dayOfWeek }}</td>
+            <td class="fw-bold">{{ item.shiftName }}</td>
+            <td>{{ item.startTime }} - {{ item.endTime }}</td>
+            <td>{{ item.breakMinutes }} phút</td>
+            <td>x{{ item.wageMultiplier }}</td>
+            <td>{{ item.note || '-' }}</td>
+            <td>
+              <span class="status-badge" [class.inactive]="!item.isActive">
+                {{ item.isActive ? 'Đang áp dụng' : 'Ngưng áp dụng' }}
+              </span>
+            </td>
+          </tr>
+
+          <tr *ngIf="shifts.length === 0">
+            <td colspan="8" class="empty-row">
+              Bạn chưa có ca làm nào trong khoảng thời gian này.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

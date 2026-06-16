@@ -1,0 +1,159 @@
+.my-shifts-page {
+  max-width: 1200px;
+}
+
+.profile-card,
+.filter-card {
+  background: #fff;
+  border: 1px solid #d4eade;
+  border-radius: 12px;
+  padding: 18px;
+}
+
+.profile-card {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.avatar-box {
+  width: 74px;
+  height: 74px;
+  flex: 0 0 74px;
+}
+
+.avatar-img,
+.avatar-placeholder {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+}
+
+.avatar-img {
+  object-fit: cover;
+}
+
+.avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8f4ed;
+  color: #1D6A4A;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.profile-info h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #1a2e25;
+}
+
+.profile-info p {
+  margin: 4px 0 8px;
+  color: #6c757d;
+}
+
+.profile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-tags span {
+  background: #e8f4ed;
+  color: #1D6A4A;
+  padding: 5px 10px;
+  border-radius: 18px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.filter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: end;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #3d6b54;
+}
+
+.form-control {
+  min-width: 170px;
+  padding: 8px 10px;
+  border: 1px solid #cfe3d8;
+  border-radius: 8px;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.loading-box,
+.empty-row {
+  text-align: center;
+  padding: 28px;
+  color: #6b9c82;
+}
+
+.status-badge {
+  display: inline-block;
+  background: #e8f4ed;
+  color: #1D6A4A;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.inactive {
+  background: #fff3cd;
+  color: #9a6700;
+}
+
+.mt-3 {
+  margin-top: 16px;
+}
+
+.fw-bold {
+  font-weight: 700;
+}
+
+@media (max-width: 700px) {
+  .profile-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+}

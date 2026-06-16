@@ -48,6 +48,39 @@ export interface EmployeeShiftOptions {
   shifts: ShiftOption[];
 }
 
+export interface MyShiftEmployee {
+  id: number;
+  fullName: string;
+  email: string;
+  phoneNumber?: string;
+  avatarUrl?: string;
+  departmentName: string;
+  positionName: string;
+}
+
+export interface MyShiftItem {
+  id: number;
+  shiftId: number;
+  shiftName: string;
+  startTime: string;
+  endTime: string;
+  breakMinutes: number;
+  wageMultiplier: number;
+  workDate: string;
+  dayOfWeek: string;
+  note?: string;
+  isActive: boolean;
+}
+
+export interface MyShiftsResponse {
+  employee: MyShiftEmployee;
+  startDate?: string;
+  endDate?: string;
+  totalShifts: number;
+  activeShifts: number;
+  shifts: MyShiftItem[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -86,4 +119,19 @@ export class EmployeeShiftService {
   deleteEmployeeShift(id: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
+  getMyShifts(
+  username: string,
+  startDate?: string,
+  endDate?: string
+): Observable<MyShiftsResponse> {
+  let params = new HttpParams();
+
+  if (startDate) params = params.set('startDate', startDate);
+  if (endDate) params = params.set('endDate', endDate);
+
+  return this.http.get<MyShiftsResponse>(
+    `${this.apiUrl}/my-shifts/${encodeURIComponent(username)}`,
+    { params }
+  );
+}
 }
