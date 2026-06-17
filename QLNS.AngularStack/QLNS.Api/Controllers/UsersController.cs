@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QLNS.FullNet.Data;
+using QLNS.Api.Data;
+using QLNS.Api.DTOs.Users;
 using QLNS.FullNet.Data.Entities;
 
 namespace QLNS.Api.Controllers;
@@ -85,23 +86,4 @@ public class UsersController : ControllerBase
 
         return Ok(new { message = "Reset mật khẩu thành công." });
     }
-}
-
-public class UserResponseDto
-{
-    public int Id { get; set; }
-    public string Username { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
-}
-
-public class UpdateRoleDto
-{
-    public string Role { get; set; } = string.Empty;
-}
-
-public class ResetPasswordDto
-{
-    public string NewPassword { get; set; } = string.Empty;
 }

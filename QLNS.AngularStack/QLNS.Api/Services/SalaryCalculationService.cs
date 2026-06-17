@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using QLNS.FullNet.Data;
+using QLNS.Api.Data;
 using QLNS.FullNet.Data.Entities;
 
 namespace QLNS.Api.Services;

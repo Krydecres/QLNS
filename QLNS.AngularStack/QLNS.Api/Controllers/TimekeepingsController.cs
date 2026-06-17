@@ -1,13 +1,9 @@
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QLNS.FullNet.Data;
+using QLNS.Api.Data;
+using QLNS.Api.DTOs.Timekeeping;
 using QLNS.FullNet.Data.Entities;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 
 namespace QLNS.Api.Controllers
 {
@@ -22,29 +18,7 @@ namespace QLNS.Api.Controllers
             _context = context;
         }
 
-        public class TimekeepingDto
-        {
-            public int Id { get; set; }
-            public string Username { get; set; } = string.Empty;
-            public string FullName { get; set; } = string.Empty;
-            public string Email { get; set; } = string.Empty;
-            public DateTime Date { get; set; }
-            public string? CheckInTime { get; set; }
-            public string? CheckOutTime { get; set; }
-            public string? Status { get; set; }
-            public string? Note { get; set; }
-        }
-
-        public class UserDto
-        {
-            public string Username { get; set; } = string.Empty;
-            public string FullName { get; set; } = string.Empty;
-        }
-
-        public class CheckInDto
-        {
-            public string? Username { get; set; } // If admin checking in for someone
-        }
+        // DTOs da chuyen sang DTOs/Timekeeping/ManualEntryDto.cs
 
         // =======================================================
         // 1. GET ALL (Cho Admin)
@@ -183,7 +157,7 @@ namespace QLNS.Api.Controllers
         {
             var users = await _context.AppUsers
                 .Where(u => u.Role == "Employee" || u.Role == "Admin") // Filter if needed
-                .Select(u => new UserDto
+                .Select(u => new UserSummaryDto
                 {
                     Username = u.Username,
                     FullName = u.FullName

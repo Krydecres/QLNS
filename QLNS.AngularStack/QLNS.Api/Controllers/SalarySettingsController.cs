@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QLNS.FullNet.Data;
+using QLNS.Api.Data;
 
 namespace QLNS.Api.Controllers;
 

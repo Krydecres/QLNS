@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QLNS.FullNet.Data;
+using QLNS.Api.Data;
+using QLNS.Api.DTOs.LeaveRequest;
 using QLNS.FullNet.Data.Entities;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace QLNS.Api.Controllers
 {
@@ -51,18 +49,13 @@ namespace QLNS.Api.Controllers
             return Ok(leaves);
         }
 
-        public class LeaveRequestCreateDto
-        {
-            public DateTime StartDate { get; set; }
-            public DateTime EndDate { get; set; }
-            public string Reason { get; set; } = string.Empty;
-        }
+        // DTO da chuyen sang DTOs/LeaveRequest/CreateLeaveRequestDto.cs
 
         // =======================================================
         // 2. TẠO MỚI ĐƠN XIN NGHỈ (Employee)
         // =======================================================
         [HttpPost("my-leaves/{username}")]
-        public async Task<IActionResult> CreateLeaveRequest(string username, [FromBody] LeaveRequestCreateDto model)
+        public async Task<IActionResult> CreateLeaveRequest(string username, [FromBody] CreateLeaveRequestDto model)
         {
             var appUser = await _context.AppUsers.FirstOrDefaultAsync(u => u.Username == username);
             if (appUser == null) return NotFound(new { message = "Không tìm thấy người dùng." });
@@ -119,12 +112,7 @@ namespace QLNS.Api.Controllers
             return Ok(requests);
         }
 
-        public class ProcessRequestDto
-        {
-            public LeaveRequestStatus Status { get; set; }
-            public string? Note { get; set; }
-            public string AdminUsername { get; set; } = string.Empty;
-        }
+        // DTO da chuyen sang DTOs/LeaveRequest/CreateLeaveRequestDto.cs
 
         // =======================================================
         // 4. DUYỆT / TỪ CHỐI ĐƠN (Admin)
@@ -161,25 +149,7 @@ namespace QLNS.Api.Controllers
         // =======================================================
         // 5. NGÀY NGHỈ CỦA TÔI (Employee)
         // =======================================================
-        public class DayOffItemDto
-        {
-            public string Type { get; set; } = string.Empty;
-            public DateTime Date { get; set; }
-            public DateTime? EndDate { get; set; }
-            public string Title { get; set; } = string.Empty;
-            public string? Description { get; set; }
-            public string BadgeClass { get; set; } = string.Empty;
-            public string Icon { get; set; } = string.Empty;
-        }
-
-        public class MyDaysOffResponseDto
-        {
-            public System.Collections.Generic.List<DayOffItemDto> UpcomingDays { get; set; } = new System.Collections.Generic.List<DayOffItemDto>();
-            public System.Collections.Generic.List<DayOffItemDto> PastDays { get; set; } = new System.Collections.Generic.List<DayOffItemDto>();
-            public int CurrentYear { get; set; }
-            public int TotalHolidays { get; set; }
-            public int TotalLeaves { get; set; }
-        }
+        // DTO da chuyen sang DTOs/LeaveRequest/CreateLeaveRequestDto.cs
 
         [HttpGet("my-days-off/{username}")]
         public async Task<IActionResult> GetMyDaysOff(string username, [FromQuery] int? year)

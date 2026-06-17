@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QLNS.FullNet.Data;
+using QLNS.Api.Data;
+using QLNS.Api.DTOs.Auth;
 using QLNS.FullNet.Data.Entities;
-using System.Text.Json;
 
 namespace QLNS.Api.Controllers
 {
@@ -16,21 +16,6 @@ namespace QLNS.Api.Controllers
         public AuthController(AppDbContext context)
         {
             _context = context;
-        }
-
-        public class LoginDto
-        {
-            public string Username { get; set; } = string.Empty;
-            public string Password { get; set; } = string.Empty;
-        }
-
-        public class UserDto
-        {
-            public string Username { get; set; } = string.Empty;
-            public string Password { get; set; } = string.Empty;
-            public string Role { get; set; } = string.Empty;
-            public string FullName { get; set; } = string.Empty;
-            public string Email { get; set; } = string.Empty;
         }
 
         [HttpPost("login")]
@@ -47,14 +32,19 @@ namespace QLNS.Api.Controllers
 
             if (result == PasswordVerificationResult.Success || result == PasswordVerificationResult.SuccessRehashNeeded)
             {
-                return Ok(new { username = user.Username, role = user.Role, fullName = user.FullName });
+                return Ok(new AuthResponseDto
+                {
+                    Username = user.Username,
+                    Role = user.Role,
+                    FullName = user.FullName
+                });
             }
 
             return Unauthorized(new { message = "Sai tài khoản hoặc mật khẩu." });
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] UserDto userDto)
+        public async Task<IActionResult> Register([FromBody] RegisterDto userDto)
         {
             var userExists = await _context.AppUsers.AnyAsync(u => u.Username == userDto.Username);
             if (userExists)

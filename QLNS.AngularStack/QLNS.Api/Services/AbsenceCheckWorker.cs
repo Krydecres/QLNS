@@ -1,4 +1,4 @@
-using QLNS.FullNet.Data;
+using QLNS.Api.Data;
 using QLNS.FullNet.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 

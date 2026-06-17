@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using QLNS.FullNet.Data;
+using QLNS.Api.Data;
+using QLNS.Api.DTOs.EmployeeShift;
 using QLNS.FullNet.Data.Entities;
 
 namespace QLNS.Api.Controllers;
@@ -389,12 +390,5 @@ private static string GetVietnameseDayOfWeek(DayOfWeek dayOfWeek)
         _ => ""
     };
 }
-    public class EmployeeShiftDto
-    {
-        public int EmployeeId { get; set; }
-        public int ShiftId { get; set; }
-        public DateTime WorkDate { get; set; } = DateTime.Today;
-        public string? Note { get; set; }
-        public bool IsActive { get; set; } = true;
-    }
+    // EmployeeShiftDto da chuyen sang DTOs/EmployeeShift/EmployeeShiftDto.cs
 }
