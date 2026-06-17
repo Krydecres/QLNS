@@ -11,6 +11,7 @@ export interface TimekeepingDto {
   checkOutTime?: string;
   status?: string;
   note?: string;
+  shiftName?: string; // Ten ca lam viec
 }
 
 export interface UserDto {

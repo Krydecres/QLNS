@@ -51,4 +51,8 @@ export class ShiftService {
   deleteShift(id: number): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}`);
   }
+
+  permanentDeleteShift(id: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${id}/permanent`);
+  }
 }

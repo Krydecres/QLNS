@@ -134,7 +134,7 @@ public class ShiftsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteShift(int id)
+    public async Task<IActionResult> DeactivateShift(int id)
     {
         var shift = await _context.Shifts.FindAsync(id);
 
@@ -144,11 +144,47 @@ public class ShiftsController : ControllerBase
         }
 
         shift.IsActive = false;
-
         await _context.SaveChangesAsync();
 
         return Ok(new { message = "Đã ngưng sử dụng ca làm." });
     }
+
+    [HttpDelete("{id}/permanent")]
+    public async Task<IActionResult> DeleteShiftPermanent(int id)
+    {
+        var shift = await _context.Shifts.FindAsync(id);
+
+        if (shift == null)
+        {
+            return NotFound(new { message = "Không tìm thấy ca làm." });
+        }
+
+        // Xóa cascade: xóa tất cả dữ liệu liên quan trước khi xóa ca
+
+        // 1. Xóa các bản ghi Timekeeping thuộc ca này
+        var timekeepings = await _context.Timekeepings
+            .Where(t => t.ShiftId == id)
+            .ToListAsync();
+        _context.Timekeepings.RemoveRange(timekeepings);
+
+        // 2. Xóa các bản ghi EmployeeShift (phân công ca) thuộc ca này
+        var employeeShifts = await _context.EmployeeShifts
+            .Where(es => es.ShiftId == id)
+            .ToListAsync();
+        _context.EmployeeShifts.RemoveRange(employeeShifts);
+
+        // 3. Xóa ca làm
+        _context.Shifts.Remove(shift);
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            message = $"Đã xóa ca làm '{shift.Name}' cùng {timekeepings.Count} bản ghi chấm công và {employeeShifts.Count} phân công liên quan."
+        });
+    }
+
+
 
     private IActionResult? ValidateShiftDto(
         ShiftDto model,

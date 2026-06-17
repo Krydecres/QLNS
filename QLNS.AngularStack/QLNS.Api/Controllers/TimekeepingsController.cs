@@ -28,6 +28,7 @@ namespace QLNS.Api.Controllers
         {
             var query = _context.Timekeepings
                 .Include(t => t.Employee)
+                .Include(t => t.Shift)
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -45,14 +46,15 @@ namespace QLNS.Api.Controllers
             var result = timekeepings.Select(t => new TimekeepingDto
             {
                 Id = t.Id,
-                Username = "", // Not strictly needed here, or can be fetched if needed
+                Username = "",
                 FullName = t.Employee?.FullName ?? "N/A",
                 Email = t.Employee?.Email ?? "",
                 Date = t.Date,
                 CheckInTime = t.CheckInTime?.ToString(@"hh\:mm"),
                 CheckOutTime = t.CheckOutTime?.ToString(@"hh\:mm"),
                 Status = t.Status,
-                Note = t.Note
+                Note = t.Note,
+                ShiftName = t.Shift?.Name
             }).ToList();
 
             return Ok(result);
@@ -73,6 +75,7 @@ namespace QLNS.Api.Controllers
             if (employee == null) return NotFound(new { message = "Employee profile not found" });
 
             var query = _context.Timekeepings
+                .Include(t => t.Shift)
                 .Where(t => t.EmployeeId == employee.Id)
                 .AsNoTracking()
                 .AsQueryable();
@@ -86,7 +89,7 @@ namespace QLNS.Api.Controllers
                 query = query.Where(t => t.Date <= endOfDay);
             }
 
-            var timekeepings = await query.OrderByDescending(t => t.Date).ToListAsync();
+            var timekeepings = await query.OrderByDescending(t => t.Date).ThenBy(t => t.ShiftId).ToListAsync();
 
             var result = timekeepings.Select(t => new TimekeepingDto
             {
@@ -97,7 +100,8 @@ namespace QLNS.Api.Controllers
                 CheckInTime = t.CheckInTime?.ToString(@"hh\:mm"),
                 CheckOutTime = t.CheckOutTime?.ToString(@"hh\:mm"),
                 Status = t.Status,
-                Note = t.Note
+                Note = t.Note,
+                ShiftName = t.Shift?.Name
             }).ToList();
 
             return Ok(result);
@@ -180,7 +184,7 @@ namespace QLNS.Api.Controllers
                 e.Email == appUser.Username);
             if (employee == null) return NotFound(new { message = "Employee profile not found" });
 
-            var today = DateTime.Today;
+            var today = DateTime.Now.Date;
 
             var activeShifts = await _context.EmployeeShifts
                 .Include(es => es.Shift)
@@ -238,7 +242,7 @@ namespace QLNS.Api.Controllers
                 e.Email == appUser.Username);
             if (employee == null) return NotFound(new { message = "Employee profile not found" });
 
-            var today = DateTime.Today;
+            var today = DateTime.Now.Date;
 
             var activeShifts = await _context.EmployeeShifts
                 .Include(es => es.Shift)

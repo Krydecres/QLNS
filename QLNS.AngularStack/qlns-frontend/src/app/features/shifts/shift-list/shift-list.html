@@ -202,15 +202,24 @@
                 type="button"
                 class="btn btn-sm btn-outline-primary"
                 (click)="editShift(item)">
-                Sửa
+                <i class="bi bi-pencil"></i> Sửa
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-warning"
+                (click)="deleteShift(item)"
+                [disabled]="!item.isActive"
+                title="Ngưng sử dụng ca này">
+                <i class="bi bi-pause-circle"></i> Ngưng
               </button>
 
               <button
                 type="button"
                 class="btn btn-sm btn-outline-danger"
-                (click)="deleteShift(item)"
-                [disabled]="!item.isActive">
-                Ngưng
+                (click)="permanentDeleteShift(item)"
+                title="Xóa vĩnh viễn ca này khỏi hệ thống">
+                <i class="bi bi-trash3"></i> Xóa
               </button>
             </td>
           </tr>

@@ -15,7 +15,9 @@ public class TimekeepingDto
     public string? CheckOutTime { get; set; }
     public string? Status { get; set; }
     public string? Note { get; set; }
+    public string? ShiftName { get; set; } // Tên ca làm việc
 }
+
 
 /// <summary>
 /// Thông tin tóm tắt User để hiển thị trong dropdown chọn nhân viên.

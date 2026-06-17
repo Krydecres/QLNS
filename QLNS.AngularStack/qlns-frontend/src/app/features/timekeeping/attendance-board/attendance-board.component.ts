@@ -13,7 +13,8 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class AttendanceBoardComponent implements OnInit {
   timekeepings: TimekeepingDto[] = [];
-  todayRecord: TimekeepingDto | undefined;
+  todayRecords: TimekeepingDto[] = [];       // Tất cả bản ghi hôm nay
+  activeRecord: TimekeepingDto | undefined;  // Ca hiện tại đang check-in (chưa checkout)
   todayDate: string = new Date().toLocaleDateString('vi-VN');
   
   startDate: string = '';
@@ -36,10 +37,10 @@ export class AttendanceBoardComponent implements OnInit {
       this.timekeepingService.getMyAttendance(username, this.startDate, this.endDate).subscribe({
         next: (res) => {
           this.timekeepings = res;
-          // Find today's record based on server local time string usually 'YYYY-MM-DD'
-          // We will just filter using the Date string
-          const todayStr = new Date().toLocaleDateString('en-CA'); // Gets YYYY-MM-DD in local timezone
-          this.todayRecord = this.timekeepings.find(t => t.date.startsWith(todayStr));
+          const todayStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+          this.todayRecords = this.timekeepings.filter(t => t.date.startsWith(todayStr));
+          // Ca đang hoạt động = ca hôm nay đã check-in nhưng CHƯA check-out
+          this.activeRecord = this.todayRecords.find(t => t.checkInTime && !t.checkOutTime);
           this.cdr.detectChanges();
         },
         error: (err) => console.error(err)

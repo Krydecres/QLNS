@@ -56,6 +56,7 @@
             <th width="10%" class="ps-4">ID</th>
             <th>Tên Nhân Viên</th>
             <th>Ngày Chấm Công</th>
+            <th>Ca Làm</th>
             <th>Giờ Vào</th>
             <th>Giờ Ra</th>
             <th width="20%" class="text-center pe-4">Trạng Thái</th>
@@ -66,6 +67,11 @@
             <td class="ps-4 text-muted">#{{ item.id }}</td>
             <td class="fw-bold text-primary">{{ item.fullName }}</td>
             <td>{{ item.date | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-2 py-1">
+                {{ item.shiftName || '—' }}
+              </span>
+            </td>
             <td><span class="badge bg-light text-dark border">{{ item.checkInTime || '-' }}</span></td>
             <td><span class="badge bg-light text-dark border">{{ item.checkOutTime || '-' }}</span></td>
             <td class="text-center pe-4">
@@ -75,7 +81,7 @@
             </td>
           </tr>
           <tr *ngIf="timekeepings.length === 0">
-            <td colspan="6" class="text-center text-muted py-5">
+            <td colspan="7" class="text-center text-muted py-5">
               <i class="bi bi-inbox fs-2 d-block mb-2 text-light"></i>
               Chưa có dữ liệu chấm công.
             </td>

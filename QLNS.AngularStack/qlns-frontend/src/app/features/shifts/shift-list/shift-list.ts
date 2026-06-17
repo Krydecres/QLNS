@@ -137,6 +137,27 @@ export class ShiftList implements OnInit {
     });
   }
 
+  permanentDeleteShift(item: ShiftItem): void {
+    const confirmed = confirm(
+      `⚠️ XÓA VĨNH VIỄN ca "${item.name}"?\n\nHành động này KHÔNG THỂ hoàn tác. Ca làm sẽ bị xóa hoàn toàn khỏi hệ thống.`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.shiftService.permanentDeleteShift(item.id).subscribe({
+      next: (res) => {
+        this.successMessage = res.message || 'Đã xóa ca làm thành công.';
+        this.loadShifts();
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Không thể xóa ca làm.';
+      }
+    });
+  }
+
+
   resetForm(): void {
     this.editingId = null;
     this.form = this.getDefaultForm();
