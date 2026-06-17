@@ -134,6 +134,25 @@ export class MyShifts implements OnInit {
     });
   }
 
+  deleteShift(id: number): void {
+    if (confirm('Bạn có chắc chắn muốn hủy đăng ký ca làm này không?')) {
+      this.isLoading = true;
+      this.employeeShiftService.deleteEmployeeShift(id).pipe(finalize(() => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      })).subscribe({
+        next: (res) => {
+          alert(res.message || 'Hủy ca làm thành công.');
+          this.loadMyShifts();
+        },
+        error: (err) => {
+          this.errorMessage = err.error?.message || 'Hủy ca làm thất bại.';
+          this.cdr.detectChanges();
+        }
+      });
+    }
+  }
+
   get shifts(): MyShiftItem[] {
     return this.data?.shifts || [];
   }

@@ -18,18 +18,18 @@
       <h5 class="card-title fw-semibold text-dark">Hôm nay: {{ todayDate }}</h5>
 
       <div class="mt-3 d-flex gap-3">
-        <button *ngIf="!todayRecord || !todayRecord.checkInTime" (click)="checkIn()" class="btn btn-primary btn-lg shadow-sm">
-          <i class="bi bi-box-arrow-in-right me-1"></i> Check-in
+        <button *ngIf="!todayRecord || todayRecord.checkOutTime" (click)="checkIn()" class="btn btn-primary btn-lg shadow-sm">
+          <i class="bi bi-box-arrow-in-right me-1"></i> Check-in ca mới
         </button>
-        <button *ngIf="todayRecord && todayRecord.checkInTime" class="btn btn-secondary btn-lg shadow-sm" disabled>
-          <i class="bi bi-check-lg me-1"></i> Đã Check-in ({{ todayRecord.checkInTime }})
+        <button *ngIf="todayRecord && todayRecord.checkInTime && !todayRecord.checkOutTime" class="btn btn-secondary btn-lg shadow-sm" disabled>
+          <i class="bi bi-check-lg me-1"></i> Đã Check-in ca hiện tại ({{ todayRecord.checkInTime }})
         </button>
 
         <button *ngIf="todayRecord && todayRecord.checkInTime && !todayRecord.checkOutTime" (click)="checkOut()" class="btn btn-warning btn-lg shadow-sm text-dark fw-medium">
-          <i class="bi bi-box-arrow-right me-1"></i> Check-out
+          <i class="bi bi-box-arrow-right me-1"></i> Check-out ca hiện tại
         </button>
         <button *ngIf="todayRecord && todayRecord.checkOutTime" class="btn btn-secondary btn-lg shadow-sm" disabled>
-          <i class="bi bi-check2-all me-1"></i> Đã Check-out ({{ todayRecord.checkOutTime }})
+          <i class="bi bi-check2-all me-1"></i> Đã Check-out ca trước ({{ todayRecord.checkOutTime }})
         </button>
       </div>
     </div>

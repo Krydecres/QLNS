@@ -147,6 +147,7 @@
             <th>Hệ số lương</th>
             <th>Ghi chú</th>
             <th>Trạng thái</th>
+            <th>Thao tác</th>
           </tr>
         </thead>
 
@@ -164,10 +165,15 @@
                 {{ item.isActive ? 'Đang áp dụng' : 'Ngưng áp dụng' }}
               </span>
             </td>
+            <td>
+              <button *ngIf="item.isActive" class="btn btn-sm btn-outline-danger" (click)="deleteShift(item.id)" title="Hủy đăng ký ca này">
+                <i class="bi bi-trash"></i> Xóa
+              </button>
+            </td>
           </tr>
 
           <tr *ngIf="shifts.length === 0">
-            <td colspan="8" class="empty-row">
+            <td colspan="9" class="empty-row">
               Bạn chưa có ca làm nào trong khoảng thời gian này.
             </td>
           </tr>

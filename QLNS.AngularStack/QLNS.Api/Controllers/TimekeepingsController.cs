@@ -207,17 +207,40 @@ namespace QLNS.Api.Controllers
             if (employee == null) return NotFound(new { message = "Employee profile not found" });
 
             var today = DateTime.Today;
+
+            var activeShifts = await _context.EmployeeShifts
+                .Include(es => es.Shift)
+                .Where(es => es.EmployeeId == employee.Id && es.IsActive && es.WorkDate.Date == today)
+                .ToListAsync();
+
+            if (!activeShifts.Any())
+            {
+                return BadRequest(new { message = "Hôm nay bạn không có ca làm việc nào được phân công." });
+            }
+
+            var currentTime = DateTime.Now.TimeOfDay;
+            var currentShift = activeShifts.FirstOrDefault(es => 
+                es.Shift != null && 
+                currentTime >= es.Shift.StartTime && 
+                currentTime <= es.Shift.EndTime);
+
+            if (currentShift == null)
+            {
+                return BadRequest(new { message = "Hiện tại không nằm trong thời gian ca làm việc của bạn nên không thể Check In." });
+            }
+
             var record = await _context.Timekeepings
-                .FirstOrDefaultAsync(t => t.EmployeeId == employee.Id && t.Date.Date == today);
+                .FirstOrDefaultAsync(t => t.EmployeeId == employee.Id && t.Date.Date == today && t.ShiftId == currentShift.ShiftId);
 
             if (record != null)
             {
-                return BadRequest(new { message = $"Nhân viên '{employee.FullName}' đã được chấm công hôm nay rồi." });
+                return BadRequest(new { message = $"Ca làm '{currentShift.Shift!.Name}' đã được Check-in rồi." });
             }
 
             _context.Timekeepings.Add(new Timekeeping
             {
                 EmployeeId = employee.Id,
+                ShiftId = currentShift.ShiftId,
                 Date = DateTime.Now,
                 CheckInTime = DateTime.Now.TimeOfDay,
                 Status = "Có mặt"
@@ -242,8 +265,30 @@ namespace QLNS.Api.Controllers
             if (employee == null) return NotFound(new { message = "Employee profile not found" });
 
             var today = DateTime.Today;
+
+            var activeShifts = await _context.EmployeeShifts
+                .Include(es => es.Shift)
+                .Where(es => es.EmployeeId == employee.Id && es.IsActive && es.WorkDate.Date == today)
+                .ToListAsync();
+
+            if (!activeShifts.Any())
+            {
+                return BadRequest(new { message = "Hôm nay bạn không có ca làm việc nào được phân công." });
+            }
+
+            var currentTime = DateTime.Now.TimeOfDay;
+            var currentShift = activeShifts.FirstOrDefault(es => 
+                es.Shift != null && 
+                currentTime >= es.Shift.StartTime && 
+                currentTime <= es.Shift.EndTime);
+
+            if (currentShift == null)
+            {
+                return BadRequest(new { message = "Hiện tại không nằm trong thời gian ca làm việc của bạn nên không thể Check Out." });
+            }
+
             var record = await _context.Timekeepings
-                .FirstOrDefaultAsync(t => t.EmployeeId == employee.Id && t.Date.Date == today);
+                .FirstOrDefaultAsync(t => t.EmployeeId == employee.Id && t.Date.Date == today && t.ShiftId == currentShift.ShiftId);
 
             if (record != null && record.CheckInTime != null)
             {
