@@ -62,6 +62,12 @@ public class EmployeesController : ControllerBase
             return NotFound();
         }
 
+        // Giữ lại ảnh cũ nếu frontend không gửi lên ảnh mới
+        if (string.IsNullOrEmpty(employee.AvatarUrl) && !string.IsNullOrEmpty(existingEmployee.AvatarUrl))
+        {
+            employee.AvatarUrl = existingEmployee.AvatarUrl;
+        }
+
         _context.Entry(employee).State = EntityState.Modified;
 
         try
